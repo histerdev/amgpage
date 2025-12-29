@@ -1,0 +1,192 @@
+---
+// Header.astro
+---
+<div class="bg-black text-white overflow-hidden py-2 border-b border-white/10">
+    <div class="animate-marquee flex whitespace-nowrap">
+        <div class="flex items-center">
+            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
+                🔥 OFERTA PRECIO-COSTO EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
+            </span>
+            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
+                🚀 CALIDAD PREMIUM GARANTIZADA — FOTOS REALES ANTES DEL ENVÍO 🚀
+            </span>
+        </div>
+        <div class="flex items-center">
+            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
+                🔥 OFERTA PRECIO-COSTO EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
+            </span>
+            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
+                🚀 CALIDAD PREMIUM GARANTIZADA — FOTOS REALES ANTES DEL ENVÍO 🚀
+            </span>
+        </div>
+    </div>
+</div>
+
+<header class="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-4 md:gap-10">
+        
+        <div class="flex-shrink-0">
+            <a href="/">
+                <img src="/logo-amg.png" alt="AMG" class="h-8 md:h-16 w-auto object-contain">
+            </a>
+        </div>
+
+        <div class="flex-grow max-w-xl hidden md:block">
+            <div class="relative group">
+                <input 
+                    type="text" 
+                    placeholder="Buscar en AMG Sneakers..." 
+                    class="w-full bg-gray-100 border-none rounded-full py-3 px-6 pr-12 text-sm focus:bg-white focus:ring-2 focus:ring-black transition-all outline-none"
+                />
+                <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-black transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-8">
+            <div class="relative" id="user-menu-wrapper">
+                <button id="user-menu-button" class="flex items-center gap-3 group outline-none cursor-pointer border-none bg-transparent">
+                    <div class="text-right leading-tight hidden sm:block pointer-events-none">
+                        <p id="user-greeting" class="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Hola,</p>
+                        <p id="user-name-display" class="text-[14px] font-[900] uppercase italic tracking-tighter group-hover:text-[#2ecc71] transition-colors">
+                            Mi Cuenta
+                        </p>
+                    </div>
+                    <div class="p-2 bg-gray-100 rounded-full group-hover:bg-gray-200 transition-all pointer-events-none">
+                        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                </button>
+
+                <div id="dropdown-menu" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100]">
+                    
+                    <div id="admin-only-option" class="hidden p-2 bg-red-50/50">
+                        <a href="/admin" class="block px-4 py-3 text-[11px] font-black uppercase italic bg-white text-red-600 border border-red-100 shadow-sm rounded-xl hover:bg-red-600 hover:text-white transition-all text-center">
+                            ⚡ Panel Admin
+                        </a>
+                    </div>
+
+                    <div id="menu-guest" class="p-2">
+                        <a href="/login" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl transition-colors text-center">Iniciar Sesión</a>
+                        <a href="/registro" class="block px-4 py-3 text-[12px] font-black uppercase italic bg-black text-white rounded-xl hover:bg-[#2ecc71] transition-colors mt-1 text-center">Registrarse</a>
+                    </div>
+
+                    <div id="menu-user" class="hidden p-2">
+                        <a href="/perfil" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl">Mi Perfil</a>
+                        <a href="/pedidos" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl">Mis Pedidos</a>
+                        <hr class="my-2 border-gray-100">
+                        <button id="btn-logout" class="w-full text-left px-4 py-3 text-[12px] font-black uppercase italic text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative p-2.5 bg-gray-100 rounded-full hover:bg-black hover:text-white transition-all group cursor-pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <span class="absolute -top-1 -right-1 bg-[#2ecc71] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black border-2 border-white">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border-t border-gray-100 hidden md:block">
+        <div class="max-w-7xl mx-auto px-6 h-12 flex items-center gap-8">
+            <a href="/coleccion" class="text-[11px] font-extrabold uppercase tracking-widest text-black hover:text-[#2ecc71] transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                Menú Colección
+            </a>
+            <div class="h-4 w-[1px] bg-gray-200"></div>
+            <a href="/sobre-nosotros" class="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors">Sobre Nosotros</a>
+            <a href="/terminos-y-condiciones" class="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors">Términos</a>
+        </div>
+    </div>
+</header>
+
+<style>
+    @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+        animation: marquee 25s linear infinite;
+    }
+</style>
+
+<script>
+    import { supabase } from '../lib/supabase';
+
+    // 1. Elementos del DOM
+    const btn = document.getElementById('user-menu-button');
+    const dropdown = document.getElementById('dropdown-menu');
+    const guestMenu = document.getElementById('menu-guest');
+    const userMenu = document.getElementById('menu-user');
+    const adminOption = document.getElementById('admin-only-option');
+    const nameDisplay = document.getElementById('user-name-display');
+    const greetingDisplay = document.getElementById('user-greeting');
+
+    // 2. Control del Dropdown
+    btn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown?.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+        dropdown?.classList.add('hidden');
+    });
+
+    // 3. Lógica de Usuario
+    async function updateUserData() {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+            // Usuario logueado
+            guestMenu?.classList.add('hidden');
+            userMenu?.classList.remove('hidden');
+
+            // Chequeo de Admin
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile?.role === 'admin') {
+                adminOption?.classList.remove('hidden');
+            } else {
+                adminOption?.classList.add('hidden');
+            }
+
+            const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || "USUARIO";
+            if (nameDisplay) nameDisplay.innerText = name.split(' ')[0].toUpperCase();
+            if (greetingDisplay) greetingDisplay.innerText = "BIENVENIDO,";
+        } else {
+            // Invitado
+            guestMenu?.classList.remove('hidden');
+            userMenu?.classList.add('hidden');
+            adminOption?.classList.add('hidden');
+            if (nameDisplay) nameDisplay.innerText = "MI CUENTA";
+            if (greetingDisplay) greetingDisplay.innerText = "HOLA,";
+        }
+    }
+
+    // 4. Logout (Delegación de eventos)
+    document.addEventListener('click', async (e) => {
+        const target = e.target as HTMLElement;
+        if (target.id === 'btn-logout') {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+    });
+
+    // Ejecución inicial
+    updateUserData();
+    
+    // Escuchar cambios de sesión
+    supabase.auth.onAuthStateChange(() => {
+        updateUserData();
+    });
+</script>

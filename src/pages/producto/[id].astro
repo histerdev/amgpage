@@ -1,0 +1,204 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import { productos } from '../../data/products';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return productos.map((product) => ({
+    params: { id: product.id.toString() },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+const initialPrice = new Intl.NumberFormat('es-CL').format(product.prices.PK);
+---
+
+<Layout title={`${product.name} | AMG Sneakers`}>
+  <Header />
+
+  <main class="relative bg-white overflow-x-hidden">
+    <section class="min-h-[90vh] pt-32 pb-20 relative z-20 bg-white">
+      <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        
+        <div class="reveal-item reveal-left">
+          <div class="bg-[#f9f9f9] rounded-[40px] overflow-hidden aspect-square flex items-center justify-center border border-gray-100">
+            <img src={product.image} alt={product.name} class="w-full h-full object-contain p-6" />
+          </div>
+        </div>
+
+        <div class="reveal-item reveal-right space-y-8 text-black">
+          <div>
+            <span class="text-red-600 font-black uppercase tracking-[0.2em] text-[10px]">
+                {product.tags?.join(" / ")}
+            </span>
+            <h1 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-none mt-2">
+              {product.name}
+            </h1>
+            <p class="text-3xl font-light mt-4 italic text-gray-500">
+              $ <span id="display-price">{initialPrice}</span> CLP
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Seleccionar Calidad:</p>
+            <div class="flex gap-3">
+              <button 
+                data-quality="PK" 
+                data-price={product.prices.PK}
+                class="q-btn flex-1 bg-black text-white py-4 rounded-xl font-black text-[11px] uppercase border-2 border-black transition-all italic"
+              >
+                PK Batch (Top)
+              </button>
+              <button 
+                data-quality="G5" 
+                data-price={product.prices.G5}
+                class="q-btn flex-1 bg-white text-gray-400 py-4 rounded-xl font-black text-[11px] uppercase border-2 border-gray-100 hover:border-black hover:text-black transition-all italic"
+              >
+                G5 (Standard)
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+              <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Talla (EU):</p>
+              <div class="grid grid-cols-5 gap-2">
+                  {product.tallas.map(talla => (
+                      <button data-size={talla} class="s-btn border-2 border-gray-100 py-3 rounded-xl font-[900] text-xs transition-all italic bg-white text-black hover:border-black">
+                          {talla}
+                      </button>
+                  ))}
+              </div>
+          </div>
+
+          <button id="add-to-cart" class="w-full bg-black text-white py-6 rounded-2xl font-[900] uppercase tracking-[0.3em] text-[11px] shadow-2xl hover:bg-[#2ecc71] transition-all">
+            Continuar Pedido
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div id="dynamic-overlay" class="fixed inset-0 z-10 pointer-events-none opacity-0 transition-opacity duration-1000 bg-gradient-to-b from-transparent via-black/95 to-black"></div>
+
+    <section id="dark-trigger" class="bg-black py-40 px-6 relative z-10 -mt-1">
+      <div class="max-w-5xl mx-auto text-center space-y-12 relative z-30">
+        <div class="reveal-item reveal-dark">
+          <h2 class="text-6xl md:text-[130px] font-[900] uppercase italic tracking-tighter leading-[0.8] text-white">
+            ¿POR QUÉ <br/> <span class="text-[#2ecc71]">TAN BARATO?</span>
+          </h2>
+        </div>
+        <p class="reveal-item reveal-dark text-xl text-white/60 max-w-2xl mx-auto font-medium">
+          Misma calidad que las tiendas de retail, pero sin el costo de la marca oficial. Directo de fábrica a tu casa.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script define:vars={{ product }}>
+    let selectedSize = null;
+    let selectedQuality = "PK";
+    let currentPrice = product.prices.PK;
+
+    const priceDisplay = document.getElementById('display-price');
+    const qualityBtns = document.querySelectorAll('.q-btn');
+    const sizeBtns = document.querySelectorAll('.s-btn');
+    const overlay = document.getElementById('dynamic-overlay');
+
+    // 1. CAMBIO DE PRECIO
+    qualityBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        qualityBtns.forEach(b => {
+          b.classList.remove('bg-black', 'text-white', 'border-black');
+          b.classList.add('bg-white', 'text-gray-400', 'border-gray-100');
+        });
+        btn.classList.remove('bg-white', 'text-gray-400', 'border-gray-100');
+        btn.classList.add('bg-black', 'text-white', 'border-black');
+
+        selectedQuality = btn.dataset.quality;
+        currentPrice = btn.dataset.price;
+        priceDisplay.innerText = new Intl.NumberFormat('es-CL').format(currentPrice);
+      });
+    });
+
+    // 2. TALLAS
+    sizeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sizeBtns.forEach(b => {
+          b.classList.remove('bg-black', 'text-white', 'border-black');
+          b.classList.add('bg-white', 'text-black', 'border-gray-100');
+        });
+        btn.classList.add('bg-black', 'text-white', 'border-black');
+        btn.classList.remove('bg-white', 'text-black', 'border-gray-100');
+        selectedSize = btn.dataset.size;
+      });
+    });
+
+    // 3. ANIMACIONES Y OVERLAY (Intersection Observer)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // Activar animaciones de entrada
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          
+          // Lógica específica para el fondo negro
+          if (entry.target.id === 'dark-trigger') {
+            overlay?.classList.add('overlay-active');
+          }
+        } else {
+          // Quitar overlay si volvemos arriba
+          if (entry.target.id === 'dark-trigger' && entry.boundingClientRect.top > 0) {
+            overlay?.classList.remove('overlay-active');
+          }
+        }
+      });
+    }, { threshold: 0.1 });
+
+    // Observar todos los elementos con animaciones
+    document.querySelectorAll('.reveal-item, #dark-trigger').forEach(el => observer.observe(el));
+
+    // 4. CARRITO
+    document.getElementById('add-to-cart')?.addEventListener('click', () => {
+      if(!selectedSize) return alert("POR FAVOR SELECCIONA TU TALLA");
+      const order = {
+        name: product.name,
+        price: currentPrice,
+        quality: selectedQuality,
+        size: selectedSize,
+        image: product.image
+      };
+      localStorage.setItem('last_order', JSON.stringify(order));
+      window.location.href = '/checkout';
+    });
+  </script>
+</Layout>
+
+<style>
+  /* Base de animaciones */
+  .reveal-item { 
+    opacity: 0; 
+    transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); 
+  }
+  
+  .reveal-left { transform: translateX(-50px); }
+  .reveal-right { transform: translateX(50px); }
+  .reveal-dark { transform: translateY(50px); }
+
+  /* Estado Activo (Cuando entra en pantalla) */
+  .active { 
+    opacity: 1 !important; 
+    transform: translate(0) !important; 
+  }
+
+  .overlay-active { 
+    opacity: 1 !important; 
+  }
+
+  * { font-family: 'Inter', sans-serif; }
+</style>

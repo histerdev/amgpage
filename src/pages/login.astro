@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Entrar | AMG">
+  <main class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="max-w-md w-full bg-white p-10 rounded-[32px] shadow-2xl text-center">
+      <h2 class="text-4xl font-[900] italic uppercase tracking-tighter mb-8">Iniciar Sesión</h2>
+      <form id="login-form" class="space-y-4 text-left">
+        <input type="email" name="email" placeholder="Tu Email" required class="w-full p-4 bg-gray-50 rounded-xl outline-none">
+        <input type="password" name="password" placeholder="Contraseña" required class="w-full p-4 bg-gray-50 rounded-xl outline-none">
+        <button type="submit" class="w-full bg-black text-white py-5 rounded-xl font-black uppercase italic hover:bg-[#2ecc71] transition-all">Entrar</button>
+      </form>
+      <p class="mt-6 text-gray-400 font-bold text-xs uppercase tracking-widest">¿No tienes cuenta? <a href="/registro" class="text-black border-b-2 border-black">Regístrate</a></p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+    });
+    if (error) alert("Datos incorrectos");
+    else window.location.href = '/';
+  });
+</script>

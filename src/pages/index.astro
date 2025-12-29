@@ -1,0 +1,136 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { productos } from '../data/products';
+
+const productosFamosos = productos.filter(prod => prod.tags?.includes("Famoso"));
+const destacados = productosFamosos.sort(() => Math.random() - 0.5).slice(0, 3);
+---
+
+<Layout title="AMG Sneakers | Oficial">
+    <Header />
+    
+    <main class="relative bg-white">
+        <section class="py-24 bg-white relative z-10">
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <div class="reveal-init">
+                    <h1 class="text-6xl md:text-8xl font-[900] uppercase italic tracking-tighter mb-4 font-['Inter',_sans-serif] text-black">
+                        LOS MÁS FAMOSOS
+                    </h1>
+                    <p class="text-gray-400 uppercase tracking-[0.4em] text-[11px] font-bold mb-20">
+                        SELECCIÓN EXCLUSIVA 2025
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
+                    {destacados.map((prod, index) => (
+                        <div class="reveal-init" style={`transition-delay: ${index * 150}ms`}>
+                            <ProductCard {...prod} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        <section id="section-dark" class="relative py-80 px-6 min-h-screen flex items-center bg-white transition-colors duration-1000 ease-in-out overflow-hidden">
+            
+            <div 
+                id="short-gradient"
+                class="absolute top-0 left-0 w-full h-[150px] pointer-events-none z-10 opacity-0 transition-opacity duration-700"
+                style="background: linear-gradient(to bottom, #ffffff, transparent);"
+            ></div>
+
+            <div id="content-to-reveal" class="max-w-5xl mx-auto text-center space-y-12 relative z-20 opacity-0 translate-y-10 transition-all duration-[1000ms] ease-out">
+                <h2 class="text-7xl md:text-[140px] font-[900] uppercase italic tracking-tighter leading-[0.8] text-white font-['Inter',_sans-serif]">
+                    ¿POR QUÉ <br/> 
+                    <span class="text-[#2ecc71] drop-shadow-[0_0_40px_rgba(46,204,113,0.5)]">TAN BARATO?</span>
+                </h2>
+                
+                <p class="text-xl md:text-3xl font-medium leading-relaxed text-gray-400 max-w-3xl mx-auto font-['Inter',_sans-serif]">
+                    Somos aficionados de las zapatillas cansados de los sobreprecios. Eliminamos intermediarios para conectarte directo con la fábrica. Calidad real, precio justo.
+                </p>
+
+                <div class="pt-12">
+                    <a href="/coleccion" class="inline-block bg-[#2ecc71] text-white px-20 py-7 rounded-full font-[900] uppercase text-xs tracking-[0.3em] hover:scale-105 transition-all shadow-2xl">
+                        Explorar Catálogo
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-black text-white pt-40 pb-12 px-8 border-t border-white/5 relative z-10">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[10px] font-black text-gray-700 uppercase tracking-[0.3em]">
+                <p>AMG SNEAKERS &bull; ALL RIGHTS RESERVED</p>
+                <p>Design by <span class="text-gray-400 italic">Hister</span></p>
+            </div>
+        </footer>
+    </main>
+</Layout>
+
+<style is:global>
+    /* Clases de activación */
+    .is-dark {
+        background-color: #000000 !important;
+    }
+    
+    .show-gradient {
+        opacity: 1 !important;
+    }
+
+    .reveal-init {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal-init.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .content-visible {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+</style>
+
+<script>
+    const sectionDark = document.getElementById('section-dark');
+    const contentToReveal = document.getElementById('content-to-reveal');
+    const shortGradient = document.getElementById('short-gradient');
+
+    const darkObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!sectionDark || !contentToReveal || !shortGradient) return;
+
+            if (entry.isIntersecting) {
+                // 1. Animación del fondo: Blanco -> Negro
+                sectionDark.classList.add('is-dark');
+                // 2. Mostrar degradado corto
+                shortGradient.classList.add('show-gradient');
+                // 3. Mostrar contenido
+                contentToReveal.classList.add('content-visible');
+            } else {
+                // Revertir si el usuario vuelve arriba
+                if (entry.boundingClientRect.top > 0) {
+                    sectionDark.classList.remove('is-dark');
+                    shortGradient.classList.remove('show-gradient');
+                    contentToReveal.classList.remove('content-visible');
+                }
+            }
+        });
+    }, { 
+        threshold: 0.2 // Se activa cuando entra el 20% de la sección
+    });
+
+    if (sectionDark) darkObserver.observe(sectionDark);
+
+    // Observer para productos
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('active');
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal-init').forEach(el => revealObserver.observe(el));
+</script>
