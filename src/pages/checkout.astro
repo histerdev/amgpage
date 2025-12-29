@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import RegionesYComunas from '../data/chile';
 ---
 
-<Layout title="Checkout | Datos de Envío">
+<Layout title="Checkout | Pago Seguro">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <Header />
@@ -54,17 +54,20 @@ import RegionesYComunas from '../data/chile';
 
                     <div class="pt-10">
                         <h3 class="text-xl font-[900] uppercase italic tracking-tighter mb-6">Método de Pago</h3>
-                        <div class="border-2 border-black p-5 rounded-2xl space-y-4 shadow-sm bg-white">
-                            <input type="text" placeholder="NÚMERO DE TARJETA" maxlength="19" class="w-full bg-transparent border-none outline-none font-mono text-sm tracking-[0.2em]" />
-                            <div class="flex gap-4 border-t border-gray-100 pt-4">
-                                <input type="text" placeholder="MM/YY" maxlength="5" class="w-1/2 bg-transparent border-none outline-none font-mono text-sm" />
-                                <input type="text" placeholder="CVV" maxlength="3" class="w-1/2 bg-transparent border-none outline-none font-mono text-sm" />
-                            </div>
+                        <div class="bg-blue-50 border-2 border-blue-200 p-6 rounded-2xl flex items-center gap-4 shadow-sm">
+                           <div class="bg-white p-2 rounded-lg shadow-sm">
+                                <img src="https://http2.mlstatic.com/frontend-assets/ml-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large.png" alt="Mercado Pago" class="h-6" />
+                           </div>
+                           <div>
+                               <p class="text-blue-900 font-black text-sm uppercase italic leading-none">Pago Seguro Procesado</p>
+                               <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider mt-1">Tarjetas de Crédito, Débito y Transferencias</p>
+                           </div>
                         </div>
+                        <p class="text-[9px] text-gray-400 mt-3 uppercase font-bold tracking-widest">* EL CARGO APARECERÁ A NOMBRE DE LA EMPRESA ASOCIADA.</p>
                     </div>
 
                     <button type="submit" id="pay-button" class="w-full bg-black text-white py-6 rounded-2xl font-[900] uppercase italic tracking-[0.2em] text-[13px] shadow-xl hover:bg-zinc-800 active:scale-[0.98] transition-all mt-8">
-                        Finalizar y Pagar
+                        Pagar con Mercado Pago
                     </button>
                 </form>
             </div>
@@ -127,21 +130,7 @@ import RegionesYComunas from '../data/chile';
         document.getElementById('sum-price')!.innerText = `$${new Intl.NumberFormat('es-CL').format(orderData.price)} CLP`;
     }
 
-    function validarRut(rut: string) {
-        const cleanRut = rut.replace(/\./g, '').replace(/-/g, '');
-        if (cleanRut.length < 8) return false;
-        const body = cleanRut.slice(0, -1);
-        const dv = cleanRut.slice(-1).toUpperCase();
-        let sum = 0; let mul = 2;
-        for (let i = body.length - 1; i >= 0; i--) {
-            sum += parseInt(body[i]) * mul;
-            mul = mul === 7 ? 2 : mul + 1;
-        }
-        const res = 11 - (sum % 11);
-        const dvCalc = res === 11 ? '0' : res === 10 ? 'K' : res.toString();
-        return dvCalc === dv;
-    }
-
+    // RUT FORMATTER
     rutInput?.addEventListener('input', (e) => {
         let target = e.target as HTMLInputElement;
         let value = target.value.replace(/[^0-9kK]/g, '');
@@ -151,14 +140,14 @@ import RegionesYComunas from '../data/chile';
         target.value = value;
     });
 
+    // REGIONS LOGIC
     regionSelect?.addEventListener('change', () => {
         const reg = RegionesYComunas.find(r => r.name === regionSelect.value);
         ciudadSelect.innerHTML = '<option value="" disabled selected>SELECCIONAR CIUDAD</option>';
         ciudadSelect.disabled = false;
         reg?.communes.sort().forEach(c => {
             const opt = document.createElement('option');
-            opt.value = c;
-            opt.textContent = c.toUpperCase();
+            opt.value = c; opt.textContent = c.toUpperCase();
             ciudadSelect.appendChild(opt);
         });
     });
@@ -169,19 +158,14 @@ import RegionesYComunas from '../data/chile';
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return window.location.href = '/login';
 
-        if (!validarRut(rutInput.value)) {
-            alert('RUT NO VÁLIDO');
-            return rutInput.focus();
-        }
-
         payBtn.disabled = true;
-        payBtn.innerText = "PROCESANDO PAGO...";
+        payBtn.innerText = "GENERANDO ORDEN DE PAGO...";
 
         const formData = new FormData(form);
         const nombreCompleto = `${formData.get('primer_nombre')} ${formData.get('segundo_nombre') || ''} ${formData.get('apellido_paterno')} ${formData.get('apellido_materno')}`.replace(/\s+/g, ' ').trim().toUpperCase();
 
         try {
-            // A. GUARDAR EN SUPABASE
+            // 1. GUARDAR EN SUPABASE (Estado: Pendiente de Pago)
             const { data: order, error: orderError } = await supabase
                 .from('orders')
                 .insert([{
@@ -194,7 +178,7 @@ import RegionesYComunas from '../data/chile';
                     phone: formData.get('telefono'),
                     email: formData.get('email'),
                     total_price: orderData.price,
-                    status: 'Esperando QC'
+                    status: 'Pendiente de Pago'
                 }])
                 .select().single();
 
@@ -209,36 +193,31 @@ import RegionesYComunas from '../data/chile';
                 image_url: orderData.image
             }]);
 
-            // B. NOTIFICACIÓN TELEGRAM CON INFO ADUANERA
-            const msg = 
-                `💰 *¡NUEVA VENTA FINALIZADA!* 💰\n\n` +
-                `📦 *PRODUCTO:* ${orderData.name}\n` +
-                `📏 *TALLA:* ${orderData.size} | *CALIDAD:* ${orderData.quality}\n` +
-                `💵 *TOTAL PAGADO:* $${new Intl.NumberFormat('es-CL').format(orderData.price)} CLP\n\n` +
-                `--------------------------------\n` +
-                `📑 *INFORMACIÓN ADUANERA / ENVÍO:* \n` +
-                `👤 *NOMBRE:* ${nombreCompleto}\n` +
-                `🆔 *RUT:* ${rutInput.value}\n` +
-                `📞 *TELÉFONO:* ${formData.get('telefono')}\n` +
-                `📧 *CORREO:* ${formData.get('email')}\n` +
-                `📍 *DIRECCIÓN:* ${formData.get('direccion')}\n` +
-                `🏙️ *CIUDAD:* ${formData.get('ciudad')}\n` +
-                `🗺️ *REGIÓN:* ${formData.get('region')}\n` +
-                `📮 *CÓDIGO POSTAL:* ${formData.get('postal') || 'N/A'}\n` +
-                `--------------------------------\n\n` +
-                `🚀 *Siguiente paso:* Procesa el pedido y cuando llegue el QC, sube el QC al panel para informar al cliente.`;
+            // 2. LLAMAR A TU API DE MERCADO PAGO
+            const response = await fetch('/api/create-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                    name: orderData.name,
+                    price: parseInt(orderData.price.toString().replace(/\D/g, '')), // Esto limpia puntos o signos $
+                    orderId: order.id
+                })
+            });
 
-            await sendAdminNotification(msg);
+            const { init_point, error } = await response.json();
+            if (error) throw new Error(error);
 
-            // C. FINALIZAR
-            localStorage.removeItem('last_order');
-            window.location.href = '/pago-exitoso';
+            // 3. NOTIFICACIÓN TELEGRAM (INTENTO)
+            await sendAdminNotification(`💳 *INTENTO DE PAGO*\n👤 Cliente: ${nombreCompleto}\n👟 Par: ${orderData.name}\nEsperando confirmación de Mercado Pago...`);
+
+            // 4. REDIRIGIR A MERCADO PAGO
+            window.location.href = init_point;
 
         } catch (err: any) {
             console.error(err);
             alert('ERROR: ' + err.message);
             payBtn.disabled = false;
-            payBtn.innerText = "Finalizar y Pagar";
+            payBtn.innerText = "Reintentar Pago";
         }
     });
 </script>
