@@ -19,45 +19,56 @@ export const POST: APIRoute = async ({ request }) => {
 
             if (payment.status === 'approved') {
                 const orderId = payment.external_reference;
-                
-                // LEEMOS DE METADATA (Lo que enviamos en el paso 1)
-                const meta = payment.metadata;
+                const meta = payment.metadata; // Datos del producto (talla/calidad)
 
-                // Actualizamos estado en Supabase
-                const { data: orderData } = await supabase
+                // 1. ACTUALIZAR Y EXTRAER TODO DE SUPABASE
+                const { data: orderData, error } = await supabase
                     .from('orders')
-                    .update({ status: 'PAGADO', payment_id: paymentId.toString() })
+                    .update({ 
+                        status: 'PAGADO', 
+                        payment_id: paymentId.toString() 
+                    })
                     .eq('id', orderId)
-                    .select()
+                    .select() // Traemos todas las columnas actualizadas
                     .single();
 
-                // Construimos el mensaje con la info de METADATA (Garantizado)
+                if (error) {
+                    console.error("Error al obtener datos de la orden:", error.message);
+                }
+
+                // 2. CONSTRUIR EL REPORTE ADUANERO COMPLETO
                 const mensajeTelegram = `
 ✅ *VENTA CONFIRMADA - AMG SHOES*
 --------------------------------
-🆔 *Orden:* \`${orderId}\`
-💰 *Pago ID:* \`${paymentId}\`
+🆔 *ID Orden:* \`${orderId}\`
+💰 *ID Pago:* \`${paymentId}\`
+💵 *Monto:* $${new Intl.NumberFormat('es-CL').format(orderData?.total_price || 0)} CLP
 
-👟 *PRODUCTO:*
+👟 *DETALLES DEL PRODUCTO:*
 • *Modelo:* ${meta.product_name || 'No capturado'}
 • *Talla:* ${meta.size || 'No capturada'}
 • *Calidad:* ${meta.quality || 'No capturada'}
 
-📦 *CLIENTE (ADUANA):*
-👤 *Nombre:* ${orderData?.customer_name || 'Ver en DB'}
-🆔 *RUT:* ${orderData?.rut || 'Ver en DB'}
-📍 *Dirección:* ${orderData?.address || 'Ver en DB'}
-🌆 *Ciudad:* ${orderData?.city || 'Ver en DB'}
+📦 *INFORMACIÓN COMPLETA PARA ADUANA / ENVÍO:*
+👤 *Nombre:* ${orderData?.customer_name || 'N/A'}
+🆔 *RUT:* ${orderData?.rut || 'N/A'}
+📧 *Correo:* ${orderData?.email || 'N/A'}
+📞 *Teléfono:* ${orderData?.phone || 'N/A'}
+📍 *Dirección:* ${orderData?.address || 'N/A'}
+🌆 *Comuna/Ciudad:* ${orderData?.city || 'N/A'}
+🗺️ *Región:* ${orderData?.region || 'N/A'}
 
 --------------------------------
-🚀 *ESTADO:* LISTO PARA DESPACHO
+⚡ *ESTADO:* LISTO PARA DESPACHO INTERNACIONAL
                 `;
 
                 await sendAdminNotification(mensajeTelegram);
+                console.log(`✅ Notificación aduanera completa enviada para la orden: ${orderId}`);
             }
         }
         return new Response(null, { status: 200 });
     } catch (err: any) {
+        console.error("Fallo crítico:", err.message);
         return new Response(null, { status: 200 });
     }
 };

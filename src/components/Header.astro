@@ -5,7 +5,7 @@
     <div class="animate-marquee flex whitespace-nowrap">
         <div class="flex items-center">
             <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
-                🔥 OFERTA PRECIO-COSTO EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
+                🔥 OFERTAS NUNCA ANTES VISTAS EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
             </span>
             <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
                 🚀 CALIDAD PREMIUM GARANTIZADA — FOTOS REALES ANTES DEL ENVÍO 🚀
@@ -13,7 +13,7 @@
         </div>
         <div class="flex items-center">
             <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
-                🔥 OFERTA PRECIO-COSTO EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
+                🔥 OFERTAS NUNCA ANTES VISTAS EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
             </span>
             <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
                 🚀 CALIDAD PREMIUM GARANTIZADA — FOTOS REALES ANTES DEL ENVÍO 🚀
@@ -115,7 +115,6 @@
         animation: marquee 25s linear infinite;
     }
 </style>
-
 <script>
     import { supabase } from '../lib/supabase';
 
@@ -128,14 +127,20 @@
     const nameDisplay = document.getElementById('user-name-display');
     const greetingDisplay = document.getElementById('user-greeting');
 
-    // 2. Control del Dropdown
+    // 2. Control del Dropdown (CORREGIDO)
     btn?.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
+        // Alternar la clase hidden
         dropdown?.classList.toggle('hidden');
     });
 
-    document.addEventListener('click', () => {
-        dropdown?.classList.add('hidden');
+    // Cerrar si se hace clic fuera del menú
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (!dropdown?.contains(target) && !btn?.contains(target)) {
+            dropdown?.classList.add('hidden');
+        }
     });
 
     // 3. Lógica de Usuario
@@ -143,7 +148,7 @@
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session) {
-            // Usuario logueado
+            // Usuario logueado: Mostramos menú de usuario y ocultamos el de invitado
             guestMenu?.classList.add('hidden');
             userMenu?.classList.remove('hidden');
 
@@ -164,7 +169,7 @@
             if (nameDisplay) nameDisplay.innerText = name.split(' ')[0].toUpperCase();
             if (greetingDisplay) greetingDisplay.innerText = "BIENVENIDO,";
         } else {
-            // Invitado
+            // Invitado: Mostramos login/registro y ocultamos perfil
             guestMenu?.classList.remove('hidden');
             userMenu?.classList.add('hidden');
             adminOption?.classList.add('hidden');
@@ -173,19 +178,18 @@
         }
     }
 
-    // 4. Logout (Delegación de eventos)
+    // 4. Logout
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
         if (target.id === 'btn-logout') {
             await supabase.auth.signOut();
-            window.location.reload();
+            window.location.href = '/'; // Redirigir al home tras salir
         }
     });
 
-    // Ejecución inicial
+    // Ejecución inicial y escucha de cambios
     updateUserData();
     
-    // Escuchar cambios de sesión
     supabase.auth.onAuthStateChange(() => {
         updateUserData();
     });

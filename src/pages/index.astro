@@ -4,128 +4,157 @@ import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
 
-const productosFamosos = productos.filter(prod => prod.tags?.includes("Famoso"));
-const destacados = productosFamosos.sort(() => Math.random() - 0.5).slice(0, 3);
+// Filtramos y limitamos a exactamente 2 modelos famosos para el Hero
+const destacadosHero = productos
+    .filter(p => p.tags?.includes("Famoso"))
+    .slice(0, 2)
+    .map(p => ({
+        id: p.id,
+        name: p.name,
+        prices: p.prices,
+        image: p.image, // Verificado: usa 'image' para que carguen
+        tags: p.tags || []
+    }));
 ---
 
-<Layout title="AMG Sneakers | Oficial">
+<Layout title="AMG Sneakers | Alta Gama al Valor Real">
     <Header />
     
-    <main class="relative bg-white">
-        <section class="py-24 bg-white relative z-10">
-            <div class="max-w-7xl mx-auto px-6 text-center">
-                <div class="reveal-init">
-                    <h1 class="text-6xl md:text-8xl font-[900] uppercase italic tracking-tighter mb-4 font-['Inter',_sans-serif] text-black">
-                        LOS MÁS FAMOSOS
-                    </h1>
-                    <p class="text-gray-400 uppercase tracking-[0.4em] text-[11px] font-bold mb-20">
-                        SELECCIÓN EXCLUSIVA 2025
-                    </p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
-                    {destacados.map((prod, index) => (
-                        <div class="reveal-init" style={`transition-delay: ${index * 150}ms`}>
-                            <ProductCard {...prod} />
+    <main class="bg-white overflow-x-hidden">
+        <section class="relative pt-12 pb-32 min-h-[90vh] flex items-center">
+            <div class="max-w-7xl mx-auto px-6 w-full">
+                <div class="grid lg:grid-cols-12 gap-12 items-center">
+                    
+                    <div class="lg:col-span-5 reveal-init z-30">
+                        <div class="inline-flex items-center gap-2 bg-zinc-100 px-4 py-2 rounded-full mb-6">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2ecc71] opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-[#2ecc71]"></span>
+                            </span>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-600">Gestión Activa Chile 2025</span>
                         </div>
-                    ))}
+                        
+                        <h1 class="text-6xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-[0.85] mb-8 text-slate-900">
+                            ¿POR QUÉ <br/> <span class="text-[#2ecc71]">COMPRAR CON AMG?</span>
+                        </h1>
+                        
+                        <div class="space-y-6 mb-10 max-w-md">
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black italic text-sm">01</div>
+                                <p class="text-zinc-500 text-xs leading-relaxed"><strong>Valor Real Directo.</strong> Sin márgenes de retail. Pagas por materiales de élite, no por marketing.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black italic text-sm">02</div>
+                                <p class="text-zinc-500 text-xs leading-relaxed"><strong>Inspección QC.</strong> Fotos y videos de tu par antes del envío. Tú autorizas el despacho.</p>
+                            </div>
+                        </div>
+
+                        <a href="/coleccion" class="inline-block bg-black text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#2ecc71] transition-all">
+                            Explorar Catálogo
+                        </a>
+                    </div>
+
+                    <div class="lg:col-span-7 relative h-[500px] md:h-[600px] w-full reveal-init" style="transition-delay: 200ms">
+                        
+                        <div class="absolute top-10 left-0 w-64 md:w-80 z-10 -rotate-6 opacity-90 transition-transform hover:rotate-0 duration-500">
+                            <ProductCard {...destacadosHero[0]} />
+                        </div>
+
+                        <div class="absolute bottom-0 right-0 w-72 md:w-96 z-30 rotate-3 shadow-2xl transition-transform hover:rotate-0 duration-500">
+                            
+                            <div class="absolute -top-12 -right-4 z-50 bg-white p-5 rounded-[2.5rem] shadow-2xl border border-zinc-100 rotate-12 group">
+                                <div class="bg-[#2ecc71] text-white px-3 py-1 rounded-xl font-black italic text-xl mb-1 inline-block leading-none">PK</div>
+                                <div class="leading-none text-right">
+                                    <p class="font-black text-[11px] uppercase tracking-tighter text-slate-900">Grado Industrial</p>
+                                    <p class="text-[9px] text-zinc-400 font-extrabold uppercase">Tope de Gama Mundial</p>
+                                </div>
+                            </div>
+
+                            <ProductCard {...destacadosHero[1]} />
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
 
-        <section id="section-dark" class="relative py-80 px-6 min-h-screen flex items-center bg-white transition-colors duration-1000 ease-in-out overflow-hidden">
-            
-            <div 
-                id="short-gradient"
-                class="absolute top-0 left-0 w-full h-[150px] pointer-events-none z-10 opacity-0 transition-opacity duration-700"
-                style="background: linear-gradient(to bottom, #ffffff, transparent);"
-            ></div>
-
-            <div id="content-to-reveal" class="max-w-5xl mx-auto text-center space-y-12 relative z-20 opacity-0 translate-y-10 transition-all duration-[1000ms] ease-out">
-                <h2 class="text-7xl md:text-[140px] font-[900] uppercase italic tracking-tighter leading-[0.8] text-white font-['Inter',_sans-serif]">
-                    ¿POR QUÉ <br/> 
-                    <span class="text-[#2ecc71] drop-shadow-[0_0_40px_rgba(46,204,113,0.5)]">TAN BARATO?</span>
-                </h2>
+        <section class="py-24 bg-white reveal-init">
+            <div class="max-w-4xl mx-auto px-6">
+                <h3 class="text-zinc-900 font-[900] uppercase italic tracking-tighter text-2xl mb-8">Método de Pago</h3>
                 
-                <p class="text-xl md:text-3xl font-medium leading-relaxed text-gray-400 max-w-3xl mx-auto font-['Inter',_sans-serif]">
-                    Somos aficionados de las zapatillas cansados de los sobreprecios. Eliminamos intermediarios para conectarte directo con la fábrica. Calidad real, precio justo.
-                </p>
+                <div class="bg-[#f0f7ff] border border-blue-100 rounded-[45px] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                    <div class="flex items-center gap-6">
+                        <div class="bg-white p-5 rounded-[24px] shadow-sm">
+                            <svg class="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-[900] uppercase italic text-[#1e3a8a] tracking-tight text-2xl leading-none">PAGO SEGURO ENCRIPTADO</h4>
+                            <p class="text-blue-400 font-bold uppercase text-[10px] tracking-widest mt-1">MEDIANTE MERCADOPAGO</p>
+                        </div>
+                    </div>
 
-                <div class="pt-12">
-                    <a href="/coleccion" class="inline-block bg-[#2ecc71] text-white px-20 py-7 rounded-full font-[900] uppercase text-xs tracking-[0.3em] hover:scale-105 transition-all shadow-2xl">
-                        Explorar Catálogo
+                    <div class="bg-white/90 backdrop-blur-md p-5 rounded-[30px] border border-white flex items-center gap-5 shadow-sm">
+                        <div class="flex gap-4 font-black text-zinc-300 text-[10px] tracking-widest italic">
+                            <span>VISA</span>
+                            <span>MASTERCARD</span>
+                            <span>AMEX</span>
+                        </div>
+                        <div class="h-8 w-[1px] bg-zinc-200"></div>
+                        <span class="text-zinc-800 font-black text-lg">+2</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-dark" class="relative py-48 px-6 bg-white transition-colors duration-1000 flex items-center min-h-[70vh]">
+            <div id="content-to-reveal" class="max-w-4xl mx-auto text-center space-y-10 opacity-0 translate-y-10 transition-all duration-1000 z-20">
+                <h2 class="text-7xl md:text-[140px] font-[900] uppercase italic tracking-tighter leading-[0.8] text-white">
+                    VALOR <br/> <span class="text-[#2ecc71]">SIN VALORES RIDICULOS</span>
+                </h2>
+                <p class="text-xl text-zinc-400 max-w-2xl mx-auto italic">"Si nosotros no lo usaríamos, no te lo enviamos."</p>
+                <div class="pt-6">
+                    <a href="/sobre-nosotros" class="inline-block border-2 border-white text-white px-14 py-6 rounded-full font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white hover:text-black transition-all">
+                        Ver Manifiesto Completo
                     </a>
                 </div>
             </div>
         </section>
-
-        <footer class="bg-black text-white pt-40 pb-12 px-8 border-t border-white/5 relative z-10">
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[10px] font-black text-gray-700 uppercase tracking-[0.3em]">
-                <p>AMG SNEAKERS &bull; ALL RIGHTS RESERVED</p>
-                <p>Design by <span class="text-gray-400 italic">Hister</span></p>
-            </div>
-        </footer>
     </main>
 </Layout>
 
 <style is:global>
-    /* Clases de activación */
-    .is-dark {
-        background-color: #000000 !important;
-    }
+    .is-dark { background-color: #000000 !important; }
+    .reveal-init { opacity: 0; transform: translateY(40px); transition: all 1s ease-out; }
+    .reveal-init.active { opacity: 1; transform: translateY(0); }
+    .content-visible { opacity: 1 !important; transform: translateY(0) !important; }
     
-    .show-gradient {
-        opacity: 1 !important;
-    }
-
-    .reveal-init {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .reveal-init.active {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .content-visible {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
+    /* Forzamos nitidez en imágenes */
+    img {
+        image-rendering: -webkit-optimize-contrast;
+        backface-visibility: hidden;
     }
 </style>
 
 <script>
+    // Lógica Scroll Dark Mode
     const sectionDark = document.getElementById('section-dark');
     const contentToReveal = document.getElementById('content-to-reveal');
-    const shortGradient = document.getElementById('short-gradient');
 
     const darkObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (!sectionDark || !contentToReveal || !shortGradient) return;
-
             if (entry.isIntersecting) {
-                // 1. Animación del fondo: Blanco -> Negro
-                sectionDark.classList.add('is-dark');
-                // 2. Mostrar degradado corto
-                shortGradient.classList.add('show-gradient');
-                // 3. Mostrar contenido
-                contentToReveal.classList.add('content-visible');
-            } else {
-                // Revertir si el usuario vuelve arriba
-                if (entry.boundingClientRect.top > 0) {
-                    sectionDark.classList.remove('is-dark');
-                    shortGradient.classList.remove('show-gradient');
-                    contentToReveal.classList.remove('content-visible');
-                }
+                sectionDark?.classList.add('is-dark');
+                contentToReveal?.classList.add('content-visible');
+            } else if (entry.boundingClientRect.top > 0) {
+                sectionDark?.classList.remove('is-dark');
+                contentToReveal?.classList.remove('content-visible');
             }
         });
-    }, { 
-        threshold: 0.2 // Se activa cuando entra el 20% de la sección
-    });
+    }, { threshold: 0.3 });
 
     if (sectionDark) darkObserver.observe(sectionDark);
 
-    // Observer para productos
+    // Lógica Reveal General
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('active');
