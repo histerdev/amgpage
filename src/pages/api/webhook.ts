@@ -22,7 +22,8 @@ export const POST: APIRoute = async ({ request }) => {
 
                 if (!orderId) return new Response(null, { status: 200 });
 
-                // 1. ACTUALIZAR ESTADO EN SUPABASE
+                // 1. ACTUALIZAR Y OBTENER DATOS (Incluyendo la relación order_items)
+                // Usamos 'order_items(*)' para traer TALLA, CALIDAD y PRODUCTO
                 const { data: orderData, error } = await supabase
                     .from('orders')
                     .update({ 
@@ -30,28 +31,36 @@ export const POST: APIRoute = async ({ request }) => {
                         payment_id: paymentId.toString() 
                     })
                     .eq('id', orderId)
-                    .select('*, order_items(*)') // Traemos los datos de la orden y sus items
+                    .select(`
+                        *,
+                        order_items (
+                            product_name,
+                            size,
+                            quality
+                        )
+                    `)
                     .single();
 
                 if (error) {
                     console.error("Error Supabase:", error.message);
                 } else if (orderData) {
-                    // 2. ENVIAR NOTIFICACIÓN DETALLADA A TELEGRAM
-                    const item = orderData.order_items?.[0]; // Asumiendo un item principal
+                    // Extraemos el primer item (el par de zapatillas comprado)
+                    const item = orderData.order_items?.[0]; 
                     
+                    // 2. CONSTRUIR MENSAJE CON INFO ADUANERA Y PRODUCTO
                     const mensajeTelegram = `
-✅ *¡NUEVA VENTA CONFIRMADA!*
+✅ *VENTA CONFIRMADA - AMG SHOES*
 --------------------------------
 🆔 *Orden:* \`${orderId}\`
 💰 *Pago ID:* \`${paymentId}\`
-💵 *Total:* $${new Intl.NumberFormat('es-CL').format(orderData.total_price)} CLP
+💵 *Monto:* $${new Intl.NumberFormat('es-CL').format(orderData.total_price)} CLP
 
-👟 *PRODUCTO:*
-• ${item?.product_name || 'Desconocido'}
-• Talla: ${item?.size || 'N/A'}
-• Calidad: ${item?.quality || 'N/A'}
+👟 *DETALLES DEL PRODUCTO:*
+• *Modelo:* ${item?.product_name || 'No especificado'}
+• *Talla:* ${item?.size || 'No especificada'}
+• *Calidad:* ${item?.quality || 'No especificada'}
 
-📦 *DATOS DE ENVÍO (ADUANA):*
+📦 *INFORMACIÓN ADUANERA / ENVÍO:*
 👤 *Nombre:* ${orderData.customer_name}
 🆔 *RUT:* ${orderData.rut}
 📧 *Email:* ${orderData.email}
@@ -61,11 +70,11 @@ export const POST: APIRoute = async ({ request }) => {
 🗺️ *Región:* ${orderData.region}
 
 --------------------------------
-⚡ *Estado:* LISTO PARA PROCESAR
+🚀 *Estado:* LISTO PARA DESPACHO
                     `;
 
                     await sendAdminNotification(mensajeTelegram);
-                    console.log(`✅ Notificación enviada para orden ${orderId}`);
+                    console.log(`✅ Notificación completa enviada: Orden ${orderId}`);
                 }
             }
         }
