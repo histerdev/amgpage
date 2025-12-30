@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { supabase } from '../../lib/supabase';
+import { sendAdminNotification } from '../../lib/notifications';
 
 const client = new MercadoPagoConfig({ 
     accessToken: import.meta.env.MP_ACCESS_TOKEN 
@@ -19,27 +20,52 @@ export const POST: APIRoute = async ({ request }) => {
             if (payment.status === 'approved') {
                 const orderId = payment.external_reference;
 
-                if (!orderId) {
-                    console.error("ERROR: Pago sin external_reference");
-                    return new Response(null, { status: 200 });
-                }
+                if (!orderId) return new Response(null, { status: 200 });
 
-                // Intentamos la actualización
-                const { data, error } = await supabase
+                // 1. ACTUALIZAR ESTADO EN SUPABASE
+                const { data: orderData, error } = await supabase
                     .from('orders')
                     .update({ 
-                        status: 'PAGADO', // Probamos con mayúsculas por si tu base de datos es estricta
+                        status: 'PAGADO', 
                         payment_id: paymentId.toString() 
                     })
                     .eq('id', orderId)
-                    .select(); // El .select() es clave para confirmar si hubo cambios
+                    .select('*, order_items(*)') // Traemos los datos de la orden y sus items
+                    .single();
 
                 if (error) {
-                    console.error("Error de Supabase:", error.message);
-                } else if (data && data.length > 0) {
-                    console.log(`✅ EXITO: Orden ${orderId} actualizada a PAGADO en Supabase.`);
-                } else {
-                    console.error(`⚠️ ATENCIÓN: Se encontró la orden ${orderId} pero no se aplicó el cambio. Revisa los RLS en Supabase.`);
+                    console.error("Error Supabase:", error.message);
+                } else if (orderData) {
+                    // 2. ENVIAR NOTIFICACIÓN DETALLADA A TELEGRAM
+                    const item = orderData.order_items?.[0]; // Asumiendo un item principal
+                    
+                    const mensajeTelegram = `
+✅ *¡NUEVA VENTA CONFIRMADA!*
+--------------------------------
+🆔 *Orden:* \`${orderId}\`
+💰 *Pago ID:* \`${paymentId}\`
+💵 *Total:* $${new Intl.NumberFormat('es-CL').format(orderData.total_price)} CLP
+
+👟 *PRODUCTO:*
+• ${item?.product_name || 'Desconocido'}
+• Talla: ${item?.size || 'N/A'}
+• Calidad: ${item?.quality || 'N/A'}
+
+📦 *DATOS DE ENVÍO (ADUANA):*
+👤 *Nombre:* ${orderData.customer_name}
+🆔 *RUT:* ${orderData.rut}
+📧 *Email:* ${orderData.email}
+📞 *Teléfono:* ${orderData.phone}
+📍 *Dirección:* ${orderData.address}
+🌆 *Ciudad:* ${orderData.city}
+🗺️ *Región:* ${orderData.region}
+
+--------------------------------
+⚡ *Estado:* LISTO PARA PROCESAR
+                    `;
+
+                    await sendAdminNotification(mensajeTelegram);
+                    console.log(`✅ Notificación enviada para orden ${orderId}`);
                 }
             }
         }

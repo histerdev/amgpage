@@ -211,9 +211,6 @@ import RegionesYComunas from '../data/chile';
             const { init_point, error } = await response.json();
             if (error) throw new Error(error);
 
-            // 4. NOTIFICACIÓN TELEGRAM
-            await sendAdminNotification(`💳 *INTENTO DE PAGO*\n👤 Cliente: ${nombreCompleto}\n👟 Par: ${orderData.name}\nEsperando confirmación...`);
-
             // 5. REDIRIGIR A MERCADO PAGO
             window.location.href = init_point;
 
