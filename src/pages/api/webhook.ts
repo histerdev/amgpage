@@ -19,72 +19,45 @@ export const POST: APIRoute = async ({ request }) => {
 
             if (payment.status === 'approved') {
                 const orderId = payment.external_reference;
+                
+                // LEEMOS DE METADATA (Lo que enviamos en el paso 1)
+                const meta = payment.metadata;
 
-                if (!orderId) return new Response(null, { status: 200 });
-
-                // 1. ACTUALIZAR ESTADO DE LA ORDEN
-                await supabase
+                // Actualizamos estado en Supabase
+                const { data: orderData } = await supabase
                     .from('orders')
-                    .update({ 
-                        status: 'PAGADO', 
-                        payment_id: paymentId.toString() 
-                    })
-                    .eq('id', orderId);
-
-                // 2. CONSULTA ESPECÍFICA PARA TRAER LOS ITEMS
-                // Consultamos ambas tablas para asegurar que los datos de 'order_items' existan
-                const { data: orderWithItems, error: fetchError } = await supabase
-                    .from('orders')
-                    .select(`
-                        *,
-                        order_items (
-                            product_name,
-                            size,
-                            quality
-                        )
-                    `)
+                    .update({ status: 'PAGADO', payment_id: paymentId.toString() })
                     .eq('id', orderId)
+                    .select()
                     .single();
 
-                if (fetchError || !orderWithItems) {
-                    console.error("Error al recuperar items:", fetchError?.message);
-                }
-
-                const item = orderWithItems?.order_items?.[0];
-
-                // 3. CONSTRUIR MENSAJE PARA TELEGRAM CON DATOS CONFIRMADOS
+                // Construimos el mensaje con la info de METADATA (Garantizado)
                 const mensajeTelegram = `
 ✅ *VENTA CONFIRMADA - AMG SHOES*
 --------------------------------
 🆔 *Orden:* \`${orderId}\`
 💰 *Pago ID:* \`${paymentId}\`
-💵 *Monto:* $${new Intl.NumberFormat('es-CL').format(orderWithItems?.total_price || 0)} CLP
 
-👟 *DETALLES DEL PRODUCTO:*
-• *Modelo:* ${item?.product_name || '⚠️ Error al cargar nombre'}
-• *Talla:* ${item?.size || '⚠️ Error al cargar talla'}
-• *Calidad:* ${item?.quality || '⚠️ Error al cargar calidad'}
+👟 *PRODUCTO:*
+• *Modelo:* ${meta.product_name || 'No capturado'}
+• *Talla:* ${meta.size || 'No capturada'}
+• *Calidad:* ${meta.quality || 'No capturada'}
 
-📦 *INFO ADUANERA / ENVÍO:*
-👤 *Nombre:* ${orderWithItems?.customer_name}
-🆔 *RUT:* ${orderWithItems?.rut}
-📧 *Email:* ${orderWithItems?.email}
-📞 *Teléfono:* ${orderWithItems?.phone}
-📍 *Dirección:* ${orderWithItems?.address}
-🌆 *Ciudad:* ${orderWithItems?.city}
-🗺️ *Región:* ${orderWithItems?.region}
+📦 *CLIENTE (ADUANA):*
+👤 *Nombre:* ${orderData?.customer_name || 'Ver en DB'}
+🆔 *RUT:* ${orderData?.rut || 'Ver en DB'}
+📍 *Dirección:* ${orderData?.address || 'Ver en DB'}
+🌆 *Ciudad:* ${orderData?.city || 'Ver en DB'}
 
 --------------------------------
-🚀 *Estado:* LISTO PARA PROCESAR
+🚀 *ESTADO:* LISTO PARA DESPACHO
                 `;
 
                 await sendAdminNotification(mensajeTelegram);
             }
         }
-
         return new Response(null, { status: 200 });
     } catch (err: any) {
-        console.error("Fallo crítico en Webhook:", err.message);
         return new Response(null, { status: 200 });
     }
 };

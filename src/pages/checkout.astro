@@ -198,15 +198,18 @@ import RegionesYComunas from '../data/chile';
             }]);
 
             // 3. LLAMAR A TU API DE MERCADO PAGO USANDO EL MISMO ID
-            const response = await fetch('/api/create-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: orderData.name,
-                    price: parseInt(orderData.price.toString().replace(/\D/g, '')),
-                    orderId: customOrderId // <--- ENVIAMOS EL MISMO ID
-                })
-            });
+// Busca esta parte en tu script de checkout.astro
+                const response = await fetch('/api/create-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: orderData.name,
+                        price: parseInt(orderData.price.toString().replace(/\D/g, '')),
+                        orderId: customOrderId,
+                        quality: orderData.quality, // <-- AGREGAR ESTO
+                        size: orderData.size        // <-- AGREGAR ESTO
+                    })
+                });
 
             const { init_point, error } = await response.json();
             if (error) throw new Error(error);
