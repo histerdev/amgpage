@@ -22,15 +22,19 @@ export const POST: APIRoute = async ({ request }) => {
 
                 if (!orderId) return new Response(null, { status: 200 });
 
-                // 1. ACTUALIZAR Y OBTENER DATOS (Incluyendo la relación order_items)
-                // Usamos 'order_items(*)' para traer TALLA, CALIDAD y PRODUCTO
-                const { data: orderData, error } = await supabase
+                // 1. ACTUALIZAR ESTADO DE LA ORDEN
+                await supabase
                     .from('orders')
                     .update({ 
                         status: 'PAGADO', 
                         payment_id: paymentId.toString() 
                     })
-                    .eq('id', orderId)
+                    .eq('id', orderId);
+
+                // 2. CONSULTA ESPECÍFICA PARA TRAER LOS ITEMS
+                // Consultamos ambas tablas para asegurar que los datos de 'order_items' existan
+                const { data: orderWithItems, error: fetchError } = await supabase
+                    .from('orders')
                     .select(`
                         *,
                         order_items (
@@ -39,49 +43,48 @@ export const POST: APIRoute = async ({ request }) => {
                             quality
                         )
                     `)
+                    .eq('id', orderId)
                     .single();
 
-                if (error) {
-                    console.error("Error Supabase:", error.message);
-                } else if (orderData) {
-                    // Extraemos el primer item (el par de zapatillas comprado)
-                    const item = orderData.order_items?.[0]; 
-                    
-                    // 2. CONSTRUIR MENSAJE CON INFO ADUANERA Y PRODUCTO
-                    const mensajeTelegram = `
+                if (fetchError || !orderWithItems) {
+                    console.error("Error al recuperar items:", fetchError?.message);
+                }
+
+                const item = orderWithItems?.order_items?.[0];
+
+                // 3. CONSTRUIR MENSAJE PARA TELEGRAM CON DATOS CONFIRMADOS
+                const mensajeTelegram = `
 ✅ *VENTA CONFIRMADA - AMG SHOES*
 --------------------------------
 🆔 *Orden:* \`${orderId}\`
 💰 *Pago ID:* \`${paymentId}\`
-💵 *Monto:* $${new Intl.NumberFormat('es-CL').format(orderData.total_price)} CLP
+💵 *Monto:* $${new Intl.NumberFormat('es-CL').format(orderWithItems?.total_price || 0)} CLP
 
 👟 *DETALLES DEL PRODUCTO:*
-• *Modelo:* ${item?.product_name || 'No especificado'}
-• *Talla:* ${item?.size || 'No especificada'}
-• *Calidad:* ${item?.quality || 'No especificada'}
+• *Modelo:* ${item?.product_name || '⚠️ Error al cargar nombre'}
+• *Talla:* ${item?.size || '⚠️ Error al cargar talla'}
+• *Calidad:* ${item?.quality || '⚠️ Error al cargar calidad'}
 
-📦 *INFORMACIÓN ADUANERA / ENVÍO:*
-👤 *Nombre:* ${orderData.customer_name}
-🆔 *RUT:* ${orderData.rut}
-📧 *Email:* ${orderData.email}
-📞 *Teléfono:* ${orderData.phone}
-📍 *Dirección:* ${orderData.address}
-🌆 *Ciudad:* ${orderData.city}
-🗺️ *Región:* ${orderData.region}
+📦 *INFO ADUANERA / ENVÍO:*
+👤 *Nombre:* ${orderWithItems?.customer_name}
+🆔 *RUT:* ${orderWithItems?.rut}
+📧 *Email:* ${orderWithItems?.email}
+📞 *Teléfono:* ${orderWithItems?.phone}
+📍 *Dirección:* ${orderWithItems?.address}
+🌆 *Ciudad:* ${orderWithItems?.city}
+🗺️ *Región:* ${orderWithItems?.region}
 
 --------------------------------
-🚀 *Estado:* LISTO PARA DESPACHO
-                    `;
+🚀 *Estado:* LISTO PARA PROCESAR
+                `;
 
-                    await sendAdminNotification(mensajeTelegram);
-                    console.log(`✅ Notificación completa enviada: Orden ${orderId}`);
-                }
+                await sendAdminNotification(mensajeTelegram);
             }
         }
 
         return new Response(null, { status: 200 });
     } catch (err: any) {
-        console.error("Fallo crítico:", err.message);
+        console.error("Fallo crítico en Webhook:", err.message);
         return new Response(null, { status: 200 });
     }
 };
