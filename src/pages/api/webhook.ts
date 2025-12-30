@@ -9,14 +9,9 @@ const client = new MercadoPagoConfig({
 export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
-        
-        // Manejar tanto body.data.id como body.id dependiendo del evento
         const paymentId = body.data?.id || body.id;
 
-        // Ignorar notificaciones de prueba
-        if (paymentId === "123456" || !paymentId) {
-            return new Response(null, { status: 200 });
-        }
+        if (paymentId === "123456" || !paymentId) return new Response(null, { status: 200 });
 
         if (body.type === 'payment') {
             const payment = await new Payment(client).get({ id: paymentId });
@@ -25,30 +20,33 @@ export const POST: APIRoute = async ({ request }) => {
                 const orderId = payment.external_reference;
 
                 if (!orderId) {
-                    console.error("ERROR: El pago no tiene external_reference");
+                    console.error("ERROR: Pago sin external_reference");
                     return new Response(null, { status: 200 });
                 }
 
-                // Actualizar en Supabase usando tus columnas reales
-                const { error } = await supabase
+                // Intentamos la actualización
+                const { data, error } = await supabase
                     .from('orders')
                     .update({ 
-                        status: 'pagado', 
+                        status: 'PAGADO', // Probamos con mayúsculas por si tu base de datos es estricta
                         payment_id: paymentId.toString() 
                     })
-                    .eq('id', orderId);
+                    .eq('id', orderId)
+                    .select(); // El .select() es clave para confirmar si hubo cambios
 
                 if (error) {
-                    console.error("Error actualizando Supabase:", error.message);
+                    console.error("Error de Supabase:", error.message);
+                } else if (data && data.length > 0) {
+                    console.log(`✅ EXITO: Orden ${orderId} actualizada a PAGADO en Supabase.`);
                 } else {
-                    console.log(`Orden ${orderId} marcada como pagada.`);
+                    console.error(`⚠️ ATENCIÓN: Se encontró la orden ${orderId} pero no se aplicó el cambio. Revisa los RLS en Supabase.`);
                 }
             }
         }
 
         return new Response(null, { status: 200 });
     } catch (err: any) {
-        console.error("Error crítico en Webhook:", err.message);
+        console.error("Fallo crítico:", err.message);
         return new Response(null, { status: 200 });
     }
 };
