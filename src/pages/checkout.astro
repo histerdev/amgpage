@@ -161,14 +161,18 @@ import RegionesYComunas from '../data/chile';
         payBtn.disabled = true;
         payBtn.innerText = "GENERANDO ORDEN DE PAGO...";
 
+        // --- MEJORA CRÍTICA: GENERAR EL ID MANUALMENTE ---
+        const customOrderId = window.crypto.randomUUID();
+
         const formData = new FormData(form);
         const nombreCompleto = `${formData.get('primer_nombre')} ${formData.get('segundo_nombre') || ''} ${formData.get('apellido_paterno')} ${formData.get('apellido_materno')}`.replace(/\s+/g, ' ').trim().toUpperCase();
 
         try {
-            // 1. GUARDAR EN SUPABASE (Estado: Pendiente de Pago)
-            const { data: order, error: orderError } = await supabase
+            // 1. GUARDAR EN SUPABASE CON EL ID MANUAL (Estado: Pendiente de Pago)
+            const { error: orderError } = await supabase
                 .from('orders')
                 .insert([{
+                    id: customOrderId, // <--- Usamos el UUID generado
                     user_id: session.user.id,
                     customer_name: nombreCompleto,
                     rut: rutInput.value,
@@ -179,13 +183,13 @@ import RegionesYComunas from '../data/chile';
                     email: formData.get('email'),
                     total_price: orderData.price,
                     status: 'Pendiente de Pago'
-                }])
-                .select().single();
+                }]);
 
             if (orderError) throw orderError;
 
+            // 2. INSERTAR ITEMS DE LA ORDEN
             await supabase.from('order_items').insert([{
-                order_id: order.id,
+                order_id: customOrderId,
                 product_name: orderData.name,
                 price: orderData.price,
                 size: orderData.size,
@@ -193,24 +197,24 @@ import RegionesYComunas from '../data/chile';
                 image_url: orderData.image
             }]);
 
-            // 2. LLAMAR A TU API DE MERCADO PAGO
+            // 3. LLAMAR A TU API DE MERCADO PAGO USANDO EL MISMO ID
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
+                body: JSON.stringify({
                     name: orderData.name,
-                    price: parseInt(orderData.price.toString().replace(/\D/g, '')), // Esto limpia puntos o signos $
-                    orderId: order.id
+                    price: parseInt(orderData.price.toString().replace(/\D/g, '')),
+                    orderId: customOrderId // <--- ENVIAMOS EL MISMO ID
                 })
             });
 
             const { init_point, error } = await response.json();
             if (error) throw new Error(error);
 
-            // 3. NOTIFICACIÓN TELEGRAM (INTENTO)
-            await sendAdminNotification(`💳 *INTENTO DE PAGO*\n👤 Cliente: ${nombreCompleto}\n👟 Par: ${orderData.name}\nEsperando confirmación de Mercado Pago...`);
+            // 4. NOTIFICACIÓN TELEGRAM
+            await sendAdminNotification(`💳 *INTENTO DE PAGO*\n👤 Cliente: ${nombreCompleto}\n👟 Par: ${orderData.name}\nEsperando confirmación...`);
 
-            // 4. REDIRIGIR A MERCADO PAGO
+            // 5. REDIRIGIR A MERCADO PAGO
             window.location.href = init_point;
 
         } catch (err: any) {
