@@ -24,8 +24,8 @@ export const POST: APIRoute = async ({ request }) => {
                 // IMPORTANTE: En desarrollo, a veces es mejor usar URLs simples 
                 // o incluso omitirlas si dan problemas con localhost
                 back_urls: {
-                    success: "https://google.com", // Solo para probar que el link se genera
-                    failure: "https://google.com",
+                    success: "https://amgshoespreview.netlify.app/pago-exitoso", // Solo para probar que el link se genera
+                    failure: "https://amgshoespreview.netlify.app/pago-exitoso",
                 },
                 auto_return: 'approved',
             }
