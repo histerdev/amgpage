@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Sobre Nosotros | AMG SHOES">
+    <Header />
+
+    <main class="max-w-4xl mx-auto px-6 py-20">
+        <header class="text-center mb-20">
+            <span class="text-red-600 font-bold uppercase tracking-[0.3em] text-xs mb-4 block">Manifesto</span>
+            <h1 class="text-5xl md:text-6xl font-black uppercase italic tracking-tighter mb-6">
+                📄 Sobre Nosotros: <span class="text-slate-900">AMG SHOES</span>
+            </h1>
+            <div class="h-2 w-24 bg-black mx-auto"></div>
+        </header>
+
+        <div class="grid gap-16">
+            <section class="grid md:grid-cols-2 gap-10 items-center">
+                <div>
+                    <h2 class="text-2xl font-black uppercase italic mb-4">¿Quiénes somos?</h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        Somos, antes que todo, <strong>aficionados de las zapatillas</strong>. Al igual que tú, hemos pasado años en la cultura sneakerhead y hemos presenciado de todo: desde estafas directas hasta el abuso de tiendas que cobran precios ridículos a personas que solo quieren vestir sus pares favoritos sin gastar el sueldo de un mes.
+                    </p>
+                </div>
+                <div class="bg-gray-100 aspect-video rounded-2xl flex items-center justify-center">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Cultura Sneakerhead</span>
+                </div>
+            </section>
+
+            <section class="bg-slate-50 p-10 rounded-[40px] border border-gray-100">
+                <h2 class="text-2xl font-black uppercase italic mb-6">¿Por qué lo hacemos?</h2>
+                <p class="text-gray-700 leading-relaxed mb-6">
+                    Nacimos de la frustración de ver cómo se castiga al consumidor que no tiene un presupuesto extenso. Creamos esta sociedad porque creemos que la pasión por las zapatillas no debería ser un lujo inalcanzable ni un riesgo de estafa.
+                </p>
+                <div class="bg-white p-6 rounded-2xl border-l-4 border-red-600">
+                    <p class="italic font-medium text-slate-800">
+                        "Nuestra misión es ayudar al aficionado, porque nosotros somos esos mismos aficionados. Queremos que tengas el par que siempre quisiste, con la seguridad de que nadie te está robando en el proceso."
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-black uppercase italic mb-8 text-center">¿Cómo lo logramos? (Nuestro Modelo)</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="border border-gray-200 p-8 rounded-3xl hover:border-black transition-colors">
+                        <h3 class="font-bold uppercase mb-4 text-red-600">No somos reventa tradicional</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            No trabajamos con stock inflado. Somos una <strong>Sociedad de Gestión y Logística</strong>. Gracias a nuestra experiencia técnica, te conectamos directamente con las manufacturas de mayor grado mundial (Calidad PK).
+                        </p>
+                    </div>
+                    <div class="border border-gray-200 p-8 rounded-3xl hover:border-black transition-colors">
+                        <h3 class="font-bold uppercase mb-4 text-red-600">Valor Real</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Eliminamos a los intermediarios y sus márgenes usureros para entregarte el valor real del producto. Aquí no pagas por el "hype" de una bodega en Chile; pagas por materiales de élite.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-black text-white p-12 rounded-[50px] text-center shadow-2xl">
+                <h2 class="text-3xl font-black uppercase italic mb-6 italic">El Estándar amg</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
+                    Nosotros gestionamos la compra, realizamos el <strong>control de calidad riguroso</strong> y nos encargamos de que el par llegue impecable a tu puerta. 
+                </p>
+                <div class="inline-block border-2 border-white px-8 py-4 rounded-full font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                    Si nosotros no lo usaríamos, no te lo enviamos.
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="py-10 text-center text-gray-400 text-[10px] uppercase tracking-widest">
+        AMG SHOES &copy; 2025 - Sociedad de Gestión y Logística
+    </footer>
+</Layout>

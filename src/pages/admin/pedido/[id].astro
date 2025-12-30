@@ -1,0 +1,228 @@
+---
+// Rutas para subir niveles hasta src
+import Layout from '../../../layouts/Layout.astro';
+export const prerender = false;
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect('/admin');
+}
+---
+
+<Layout title={`Gestionar Pedido #${id?.slice(0,5)} | AMG`}>
+  <main class="max-w-4xl mx-auto px-6 py-12 font-['Inter']">
+    <div class="mb-8">
+      <a href="/admin" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-all flex items-center gap-2">
+        <span>←</span> Volver al panel de pedidos
+      </a>
+    </div>
+    
+    <div id="loading-status" class="py-20 text-center font-black uppercase italic text-gray-400 animate-pulse">
+        Cargando expediente del pedido...
+    </div>
+
+    <div id="order-details" class="hidden mt-8">
+      <div id="decision-alert" class="hidden mb-8 bg-red-50 border-2 border-red-200 p-8 rounded-[32px] flex flex-col items-center text-center">
+          <p class="text-[10px] font-black uppercase text-red-400 mb-2 tracking-widest">Respuesta del Cliente</p>
+          <p id="decision-text" class="text-4xl font-[900] uppercase italic text-red-600 tracking-tighter"></p>
+          <p id="decision-note" class="text-[10px] font-bold text-red-400 mt-2 uppercase"></p>
+      </div>
+
+      <h1 class="text-4xl font-[900] italic uppercase tracking-tighter mb-8 text-black">Gestión de Expediente</h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2 space-y-6">
+          
+          <div class="bg-white border-2 border-black rounded-[32px] p-8 shadow-sm">
+            <h3 class="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Identificación del Cliente</h3>
+            <div id="customer-info" class="space-y-1 text-black"></div>
+          </div>
+
+          <div class="bg-gray-50 border border-gray-200 rounded-[32px] p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-[10px] font-black uppercase text-red-600 tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+                    Datos de Importación y Aduanas
+                </h3>
+            </div>
+            
+            <div id="customs-info" class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 text-black">
+                </div>
+          </div>
+
+          <div class="bg-black text-white rounded-[32px] p-8 shadow-2xl">
+            <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-6 tracking-widest">Control Logístico (Admin)</h3>
+            
+            <div class="space-y-6">
+              <div>
+                <label class="block text-[10px] font-black uppercase mb-2 text-zinc-400">Estado del Envío</label>
+                <select id="status-select" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm font-bold uppercase text-white outline-none focus:border-[#2ecc71]">
+                  <option value="Procesando">Procesando</option>
+                  <option value="Esperando QC">Esperando QC</option>
+                  <option value="QC Listo">QC Listo</option>
+                  <option value="Enviado">Enviado</option>
+                  <option value="Reembolsado">Reembolsado</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black uppercase mb-2 text-[#2ecc71]">Multimedia QC (Fotos/Videos)</label>
+                <div class="relative group">
+                    <input type="file" id="file-input" multiple accept="image/*,video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                    <div class="bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-xl p-8 text-center group-hover:border-[#2ecc71] transition-colors">
+                        <p class="text-xs font-bold uppercase text-zinc-500" id="file-label">Arrastra o selecciona archivos locales</p>
+                    </div>
+                </div>
+                <div id="file-preview" class="grid grid-cols-4 gap-2 mt-4 text-white"></div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black uppercase mb-2 text-zinc-400">Notas Internas / Mensaje al Cliente</label>
+                <textarea id="admin-notes" rows="4" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-white outline-none focus:border-[#2ecc71] placeholder-zinc-700" placeholder="Escribe aquí actualizaciones para el cliente..."></textarea>
+              </div>
+
+              <button id="save-btn" class="w-full bg-[#2ecc71] text-black py-5 rounded-2xl font-[900] uppercase italic tracking-widest hover:bg-[#27ae60] transition-all transform active:scale-95">
+                Guardar y Actualizar Pedido
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6 h-fit sticky top-8">
+            <div class="bg-gray-50 rounded-[32px] p-8 border border-gray-100">
+                <h3 class="text-[10px] font-black uppercase text-gray-400 mb-6 tracking-widest">Resumen de Compra</h3>
+                <div id="product-info" class="text-black"></div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../../../lib/supabase';
+  const orderId = window.location.pathname.split('/').pop() || '';
+  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+  let currentQCImages: string[] = []; 
+
+  async function loadOrderData() {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('id', orderId)
+      .single();
+
+    if (error || !order) return;
+
+    // 1. Mostrar decisión del cliente si existe
+    if (order.client_decision) {
+        const alertBox = document.getElementById('decision-alert');
+        const textLabel = document.getElementById('decision-text');
+        alertBox?.classList.remove('hidden');
+        if (textLabel) textLabel.innerText = order.client_decision;
+    }
+
+    // 2. Información básica
+    document.getElementById('customer-info')!.innerHTML = `
+        <p class="font-black text-3xl uppercase italic leading-none">${order.customer_name}</p>
+        <p class="text-xs font-bold text-gray-400 mt-2 uppercase tracking-tighter italic">ID SEGUIMIENTO: ${order.id}</p>
+    `;
+
+    // 3. SECCIÓN ADUANERA (NUEVO: Mapeo de datos del Checkout)
+document.getElementById('customs-info')!.innerHTML = `
+    <div class="space-y-1">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">RUT Importador</p>
+        <p class="font-bold text-[13px] uppercase">${order.rut || 'No proporcionado'}</p> 
+    </div>
+    <div class="space-y-1">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Teléfono de Contacto</p>
+        <p class="font-bold text-[13px] uppercase">${order.phone || 'No proporcionado'}</p>
+    </div>
+    <div class="space-y-1 sm:col-span-2">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Dirección de Envío</p>
+        <p class="font-bold text-[13px] uppercase bg-white p-3 rounded-xl border border-gray-100 italic">
+            ${order.address || 'No proporcionada'}
+        </p>
+    </div>
+    <div class="space-y-1">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Ciudad</p>
+        <p class="font-bold text-[13px] uppercase">${order.city || 'No proporcionada'}</p>
+    </div>
+    <div class="space-y-1">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Región</p>
+        <p class="font-bold text-[13px] uppercase">${order.region || 'No proporcionada'}</p>
+    </div>
+    <div class="space-y-1 sm:col-span-2">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Correo de Notificación</p>
+        <p class="font-bold text-[13px] lowercase text-gray-600">${order.email || 'Sin email registrado'}</p>
+    </div>
+`;
+    // 4. Info Producto
+    const item = order.order_items?.[0] || {};
+    document.getElementById('product-info')!.innerHTML = `
+        <div class="space-y-4">
+            <img src="${item.image_url}" class="w-full aspect-square object-contain bg-white rounded-2xl p-4 border border-gray-100 shadow-sm" />
+            <div>
+                <p class="font-[900] uppercase italic text-xl leading-tight">${item.product_name}</p>
+                <div class="flex gap-2 mt-2">
+                    <span class="text-[9px] font-black bg-black text-white px-2 py-1 rounded uppercase tracking-tighter">${item.quality || 'PK'}</span>
+                    <span class="text-[9px] font-black bg-gray-200 text-black px-2 py-1 rounded uppercase tracking-tighter italic">EU ${item.size}</span>
+                </div>
+                <p class="text-2xl font-black mt-4">$${new Intl.NumberFormat('es-CL').format(order.total_price)}</p>
+            </div>
+        </div>
+    `;
+    
+    currentQCImages = order.qc_images || [];
+    (document.getElementById('status-select') as HTMLSelectElement).value = order.status;
+    (document.getElementById('admin-notes') as HTMLTextAreaElement).value = order.admin_notes || '';
+
+    document.getElementById('loading-status')?.classList.add('hidden');
+    document.getElementById('order-details')?.classList.remove('hidden');
+  }
+
+  // Lógica de carga de archivos (Se mantiene)
+  async function uploadFiles(files: FileList): Promise<string[]> {
+    const uploadedUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${orderId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { data, error } = await supabase.storage.from('qc-media').upload(fileName, file);
+      if (error) continue;
+      const { data: { publicUrl } } = supabase.storage.from('qc-media').getPublicUrl(fileName);
+      uploadedUrls.push(publicUrl);
+    }
+    return uploadedUrls;
+  }
+
+  document.getElementById('save-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('save-btn') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.innerText = "SUBIENDO DATOS...";
+
+    let newUrls: string[] = [];
+    if (fileInput.files && fileInput.files.length > 0) {
+        newUrls = await uploadFiles(fileInput.files);
+    }
+
+    const finalUrls = [...currentQCImages, ...newUrls];
+
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: (document.getElementById('status-select') as HTMLSelectElement).value,
+        admin_notes: (document.getElementById('admin-notes') as HTMLTextAreaElement).value,
+        qc_images: finalUrls
+      })
+      .eq('id', orderId);
+
+    if (error) {
+      alert("Error en Supabase");
+      btn.disabled = false;
+    } else {
+      window.location.href = '/admin';
+    }
+  });
+
+  loadOrderData();
+</script>

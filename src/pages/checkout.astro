@@ -1,0 +1,199 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import RegionesYComunas from '../data/chile'; // Asegúrate de tener este archivo
+---
+
+<Layout title="Checkout | Pago Seguro">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <Header />
+    <main class="max-w-4xl mx-auto px-6 py-10 md:py-20 font-['Inter',_sans-serif]">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            
+            <div class="space-y-8">
+                <h2 class="text-3xl font-[900] uppercase italic tracking-tighter text-black leading-none">
+                    Datos de Importación / Envío
+                </h2>
+                
+                <form id="checkout-form" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="primer_nombre" placeholder="PRIMER NOMBRE" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                        <input type="text" name="segundo_nombre" placeholder="SEGUNDO NOMBRE (OPC)" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="apellido_paterno" placeholder="APELLIDO PATERNO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                        <input type="text" name="apellido_materno" placeholder="APELLIDO MATERNO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="rut-input" name="rut" placeholder="RUT (EJ: 12345678-K)" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                        <input type="email" name="email" placeholder="CORREO ELECTRÓNICO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <select id="region-select" name="region" required class="custom-select w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-white cursor-pointer appearance-none">
+                            <option value="" disabled selected>SELECCIONAR REGIÓN</option>
+                            {RegionesYComunas.map((reg) => (
+                                <option value={reg.name}>{reg.name.toUpperCase()}</option>
+                            ))}
+                        </select>
+
+                        <select id="ciudad-select" name="ciudad" required disabled class="custom-select w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-white cursor-pointer appearance-none disabled:opacity-50">
+                            <option value="" disabled selected>SELECCIONAR CIUDAD</option>
+                        </select>
+                    </div>
+
+                    <input type="text" name="direccion" placeholder="DIRECCIÓN EXACTA" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="postal" placeholder="CÓDIGO POSTAL" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                        <input type="tel" name="telefono" placeholder="TELÉFONO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-[11px] font-bold tracking-widest bg-transparent" />
+                    </div>
+
+                    <div class="pt-10">
+                        <h3 class="text-xl font-[900] uppercase italic tracking-tighter mb-6">Método de Pago</h3>
+                        <div class="bg-blue-50 border-2 border-blue-200 p-6 rounded-2xl flex items-center gap-4 shadow-sm">
+                           <div class="bg-white p-2 rounded-lg shadow-sm">
+                                <img src="https://http2.mlstatic.com/frontend-assets/ml-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large.png" alt="Mercado Pago" class="h-6" />
+                           </div>
+                           <div>
+                               <p class="text-blue-900 font-black text-sm uppercase italic leading-none">Pago Seguro Procesado</p>
+                               <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider mt-1">Tarjetas de Crédito, Débito y Transferencias</p>
+                           </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="pay-button" class="w-full bg-black text-white py-6 rounded-2xl font-[900] uppercase italic tracking-[0.2em] text-[13px] shadow-xl hover:bg-zinc-800 active:scale-[0.98] transition-all mt-8">
+                        IR A PAGAR AHORA
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-[#f3f4f6]/50 p-8 rounded-[40px] h-fit lg:sticky lg:top-24 border border-gray-100/50 backdrop-blur-sm">
+                <h3 class="text-[11px] font-[900] uppercase tracking-[0.2em] text-gray-400 mb-8">Resumen de Compra</h3>
+                <div id="product-summary" class="space-y-8">
+                    <div class="flex items-center gap-6">
+                        <div class="w-24 h-24 bg-white rounded-[24px] flex items-center justify-center p-3 shadow-sm border border-gray-50">
+                            <img id="sum-img" src="" class="w-full h-full object-contain" alt="Producto" />
+                        </div>
+                        <div class="flex-1">
+                            <p id="sum-name" class="font-[900] uppercase italic text-lg leading-none tracking-tighter mb-2">Cargando...</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">
+                                CALIDAD: <span id="sum-quality" class="text-black">--</span> | TALLA: <span id="sum-size" class="text-black">--</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 pt-6 flex justify-between items-center">
+                        <span class="text-[11px] font-black uppercase tracking-widest text-gray-400">Total a pagar</span>
+                        <span id="sum-price" class="text-3xl font-[900] italic tracking-tighter text-black">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    input, select, option { font-family: 'Inter', sans-serif !important; }
+    .custom-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 4 3 3 3-3'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2.5rem;
+    }
+    ::placeholder { color: #d1d5db; opacity: 1; }
+</style>
+
+<script>
+    import { supabase } from '../lib/supabase';
+    import RegionesYComunas from '../data/chile';
+
+    const form = document.getElementById('checkout-form') as HTMLFormElement;
+    const payBtn = document.getElementById('pay-button') as HTMLButtonElement;
+    const regionSelect = document.getElementById('region-select') as HTMLSelectElement;
+    const ciudadSelect = document.getElementById('ciudad-select') as HTMLSelectElement;
+    const orderData = JSON.parse(localStorage.getItem('last_order') || '{}');
+
+    // 1. Cargar Resumen Visual
+    if (orderData.name) {
+        (document.getElementById('sum-img') as HTMLImageElement).src = orderData.image;
+        document.getElementById('sum-name')!.innerText = orderData.name.toUpperCase();
+        document.getElementById('sum-quality')!.innerText = orderData.quality.toUpperCase();
+        document.getElementById('sum-size')!.innerText = orderData.size.toUpperCase();
+        document.getElementById('sum-price')!.innerText = `$${new Intl.NumberFormat('es-CL').format(orderData.price)}`;
+    }
+
+    // 2. Lógica de Ciudades
+    regionSelect?.addEventListener('change', () => {
+        const selectedRegion = RegionesYComunas.find(r => r.name === regionSelect.value);
+        ciudadSelect.innerHTML = '<option value="" disabled selected>SELECCIONAR CIUDAD</option>';
+        ciudadSelect.disabled = false;
+        
+        selectedRegion?.communes.sort().forEach(commune => {
+            const option = document.createElement('option');
+            option.value = commune;
+            option.textContent = commune.toUpperCase();
+            ciudadSelect.appendChild(option);
+        });
+    });
+
+    // 3. Envío del Formulario
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        payBtn.disabled = true;
+        payBtn.innerText = "REDIRIGIENDO A MERCADO PAGO...";
+        payBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return window.location.href = '/login';
+
+    const formData = new FormData(form);
+    const fullName = `${formData.get('primer_nombre')} ${formData.get('apellido_paterno')}`;
+
+    // 1. Guardar en Supabase primero para tener el ID
+    const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert([{
+            user_id: session.user.id,
+            customer_name: fullName.toUpperCase(),
+            total_price: Math.round(Number(orderData.price)),
+            status: 'Pendiente' // Estado inicial
+        }])
+        .select().single();
+
+    if (orderError) throw orderError;
+
+    // 2. Llamar a la API de MP pasando el ID de la orden recién creada
+    const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: orderData.name,
+            price: orderData.price,
+            orderId: order.id // IMPORTANTE
+        })
+    });
+
+    const result = await response.json();
+    const finalUrl = result.sandbox_init_point || result.init_point;
+
+    if (finalUrl) {
+        // Redirigir
+        window.location.assign(finalUrl);
+    }
+        } catch (err: any) {
+            console.error("Error checkout:", err);
+            alert("Error: " + err.message);
+            payBtn.disabled = false;
+            payBtn.innerText = "IR A PAGAR AHORA";
+            payBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    });
+</script>

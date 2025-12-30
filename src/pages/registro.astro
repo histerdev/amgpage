@@ -1,0 +1,74 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Registro | AMG Sneakers">
+  <main class="min-h-screen flex items-center justify-center bg-gray-50 py-20 px-4">
+    <div class="max-w-xl w-full bg-white p-8 md:p-12 rounded-[40px] shadow-2xl border border-gray-100">
+      <div class="text-center mb-10">
+        <h2 class="text-5xl font-[900] italic uppercase tracking-tighter mb-2">Crear Perfil</h2>
+        <p class="text-gray-400 font-bold uppercase text-[10px] tracking-[0.3em]">Únete a la comunidad sneakerhead</p>
+      </div>
+      
+      <form id="register-form" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" name="full_name" placeholder="Nombre Completo" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
+          <input type="tel" name="phone" placeholder="WhatsApp +569..." required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
+        </div>
+        <input type="email" name="email" placeholder="Email" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="password" name="password" placeholder="Contraseña" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
+          <input type="password" name="confirm_password" placeholder="Confirmar" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
+        </div>
+        <button type="submit" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase italic tracking-widest hover:bg-[#2ecc71] transition-all transform active:scale-95 shadow-xl">
+          Finalizar Registro
+        </button>
+      </form>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const form = document.getElementById('register-form') as HTMLFormElement;
+  
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirm = formData.get('confirm_password') as string;
+    const full_name = formData.get('full_name') as string;
+    const phone = formData.get('phone') as string;
+
+    if (password !== confirm) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    // Registro con inicio de sesión automático (comportamiento por defecto de Supabase)
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: full_name,
+          phone: phone
+        }
+      }
+    });
+
+    if (error) {
+      alert("Error: " + error.message);
+    } else if (data.user) {
+      // 1. Forzamos un pequeño delay de 1.5 segundos 
+      // para que el disparador SQL termine de crear la fila en 'profiles'
+      alert("¡Cuenta creada! Iniciando sesión...");
+      
+      setTimeout(() => {
+        window.location.href = '/'; 
+      }, 1500);
+    }
+  });
+</script>

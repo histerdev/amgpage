@@ -1,0 +1,58 @@
+---
+interface Props {
+  id: string;
+  name: string;
+  prices: {
+    PK: number;
+    G5: number;
+  };
+  image: string;
+  tags: string[];
+}
+
+const { id, name, prices, image, tags } = Astro.props;
+const productUrl = `/producto/${id}`;
+
+// Formateamos el precio G5 (el más económico para el catálogo)
+const displayPrice = new Intl.NumberFormat('es-CL').format(prices.G5);
+---
+
+<div class="group relative bg-white border border-gray-100 rounded-[32px] overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full product-item" data-name={name.toLowerCase()} data-tags={tags.join(',')}>
+  
+  <div class="absolute top-5 left-5 z-20 flex flex-wrap gap-2 max-w-[90%]">
+    {tags.map((t) => (
+      <span class="bg-black text-white text-[11px] font-[900] uppercase px-4 py-2 rounded-full tracking-[0.1em] shadow-lg border border-white/10 antialiased font-['Inter',_sans-serif]">
+        {t}
+      </span>
+    ))}
+  </div>
+
+  <div class="aspect-square overflow-hidden bg-[#f9f9f9] flex items-center justify-center p-8 relative">
+    <img 
+      src={image} 
+      alt={name} 
+      class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" 
+      loading="lazy" 
+    />
+  </div>
+
+  <div class="p-8 flex flex-col flex-grow">
+    <div class="mb-6">
+      <h2 class="text-xl font-[900] uppercase italic tracking-tighter text-slate-900 leading-tight mb-2 font-['Inter',_sans-serif]">
+        {name}
+      </h2>
+      <div class="flex items-center gap-2">
+        <p class="text-lg font-bold text-gray-900 tracking-tighter font-['Inter',_sans-serif]">
+          ${displayPrice} CLP
+        </p>
+        <span class="text-[9px] font-black bg-gray-100 text-gray-400 px-2 py-1 rounded uppercase tracking-tighter">G5</span>
+      </div>
+    </div>
+
+    <div class="mt-auto">
+      <a href={productUrl} class="block w-full text-center text-[11px] font-[900] uppercase py-5 bg-black text-white rounded-2xl tracking-[0.2em] hover:bg-red-600 transition-all shadow-xl active:scale-95 font-['Inter',_sans-serif]">
+        Gestionar Pedido
+      </a>
+    </div>
+  </div>
+</div>
