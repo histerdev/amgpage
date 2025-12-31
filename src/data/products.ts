@@ -26,7 +26,7 @@ export const productos = [
     prices: {
    PK: 101990,
       G5: 83500
-    },    image: "https://static.nike.com/a/images/..."",
+    },    image: "https://static.nike.com/a/images/...",
     tallas: ["40", "41", "42", "43", "44"],
     tags: ["Jordan 1", "Travis Scott", "Exclusivo"]
   },
