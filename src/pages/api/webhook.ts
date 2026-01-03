@@ -1,41 +1,33 @@
 import type { APIRoute } from 'astro';
-import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { sendAdminNotification } from '../../lib/notifications';
-
-const client = new MercadoPagoConfig({
-    accessToken: import.meta.env.MP_ACCESS_TOKEN
-});
 
 export const POST: APIRoute = async ({ request }) => {
+    // 1. Obtenemos el ID de MercadoPago
     const url = new URL(request.url);
     const id = url.searchParams.get('data.id') || url.searchParams.get('id');
 
+    // USAMOS LOS VALORES DIRECTOS (Para descartar que el error sea la Variable de Entorno)
+    const TOKEN = "8170505944:AAEYPu3FtEv1x5aduVXmVOThymzBWyy4zIU";
+    const CHAT_ID = "7430626322";
+
     if (id) {
-        // Ejecutamos en background para responder rápido a MP
-        processPayment(id).catch(console.error);
-    }
-
-    return new Response(null, { status: 200 });
-};
-
-async function processPayment(paymentId: string) {
-    try {
-        const payment = await new Payment(client).get({ id: paymentId });
-        
-        if (payment.status === 'approved') {
-            // MENSAJE ULTRA SIMPLE (Como el que funcionó)
-            const mensaje = `
-💰 <b>¡VENTA REAL CONFIRMADA!</b>
-➖➖➖➖➖➖➖➖➖➖➖
-💵 <b>Monto:</b> $${payment.transaction_amount}
-🆔 <b>Pago ID:</b> <code>${paymentId}</code>
-📧 <b>Email:</b> ${payment.payer?.email}
-➖➖➖➖➖➖➖➖➖➖➖
-✅ Revisa el Panel Admin para detalles.`;
-
-            await sendAdminNotification(mensaje);
+        // Enviar notificación básica inmediata
+        try {
+            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: `🔔 <b>¡Webhook Recibido!</b>\nID de pago detectado: <code>${id}</code>\nEstado: Procesando...`,
+                    parse_mode: 'HTML'
+                })
+            });
+        } catch (e) {
+            console.error("Error enviando a Telegram:", e);
         }
-    } catch (e) {
-        console.error("Error en Webhook:", e);
     }
-}
+
+    return new Response(JSON.stringify({ received: true }), { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+    });
+};
