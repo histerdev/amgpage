@@ -1,17 +1,40 @@
 import type { APIRoute } from 'astro';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { supabase } from '../../lib/supabase';
-import { sendAdminNotification } from '../../lib/notifications';
 
 const client = new MercadoPagoConfig({
     accessToken: import.meta.env.MP_ACCESS_TOKEN
 });
+
+// Función interna para evitar errores de importación 404
+async function sendTelegram(htmlMessage: string) {
+    const botToken = import.meta.env.TELEGRAM_TOKEN;
+    const chatId = import.meta.env.CHAT_ID;
+
+    if (!botToken || !chatId) return;
+
+    try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: htmlMessage,
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            })
+        });
+    } catch (e) {
+        console.error("Error enviando Telegram:", e);
+    }
+}
 
 export const POST: APIRoute = async ({ request }) => {
     const url = new URL(request.url);
     const id = url.searchParams.get('data.id') || url.searchParams.get('id');
 
     if (id) {
+        // Ejecutamos en segundo plano para responder rápido a Mercado Pago
         processPayment(id).catch(console.error);
     }
 
@@ -25,7 +48,7 @@ async function processPayment(paymentId: string) {
         if (payment.status === 'approved') {
             const orderId = payment.external_reference;
 
-            // 1. Obtener datos de la orden y cliente
+            // 1. Obtener la orden
             const { data: order } = await supabase
                 .from('orders')
                 .select('*')
@@ -34,13 +57,13 @@ async function processPayment(paymentId: string) {
 
             if (!order || order.status === 'PAGADO') return;
 
-            // 2. Actualizar a PAGADO
+            // 2. Actualizar estado
             await supabase
                 .from('orders')
                 .update({ status: 'PAGADO', payment_id: paymentId })
                 .eq('id', orderId);
 
-            // 3. Obtener todos los productos (Zapatillas, Tallas, Calidad)
+            // 3. Obtener items con todos los detalles
             const { data: items } = await supabase
                 .from('order_items')
                 .select('*')
@@ -50,7 +73,7 @@ async function processPayment(paymentId: string) {
                 `👟 <b>${i.product_name}</b>\n   ├ Talla: ${i.size}\n   ├ Calidad: ${i.quality}\n   └ Precio: $${Number(i.price).toLocaleString('es-CL')}`
             ).join('\n\n') || "⚠️ No hay detalles de productos";
 
-            // 4. Construir Mensaje Profesional
+            // 4. Mensaje Profesional
             const mensaje = `
 🚨 <b>VENTA CONFIRMADA - AMG SHOES</b> 🚨
 ➖➖➖➖➖➖➖➖➖➖➖
@@ -65,15 +88,15 @@ ${itemsHtml}
 • Nombre: ${order.customer_name}
 • Email: ${order.email}
 • Teléfono: ${order.phone || 'No indicado'}
+• Ciudad: ${order.city || 'N/A'}
 
-✈️ <b>INFORMACIÓN ADUANERA:</b>
-• Declaración: Calzado Deportivo / Gift
-• Origen: International Shipping (QC Required)
+✈️ <b>ESTADO DE LOGÍSTICA:</b>
+• Origen: International Shipping
 • Estado: 🟡 <b>Esperando preparación de QC</b>
 ➖➖➖➖➖➖➖➖➖➖➖
-<i>Sistema de Notificaciones Vercel-Bot</i>`;
+<i>AMG Web System v2.0</i>`;
 
-            await sendAdminNotification(mensaje);
+            await sendTelegram(mensaje);
         }
     } catch (error) {
         console.error("❌ Error procesando el pago:", error);
