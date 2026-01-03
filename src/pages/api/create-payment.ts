@@ -30,11 +30,11 @@ export const POST: APIRoute = async ({ request }) => {
                     email: customerEmail
                 },
                 // USA LAS URLS DE TU NETLIFY DIRECTAMENTE AQUÍ
-                notification_url: "https://amgshoespreview.netlify.app/api/webhooks/mercadopago",
+                notification_url: "https://amgpage.vercel.app/api/webhook",
                 back_urls: {
-                    success: "https://amgshoespreview.netlify.app/pago-exitoso",
-                    failure: "https://amgshoespreview.netlify.app/checkout",
-                    pending: "https://amgshoespreview.netlify.app/checkout"
+                    success: "https://amgpage.vercel.app/pago-exitoso",
+                    failure: "https://amgpage.vercel.app/checkout",
+                    pending: "https://amgpage.vercel.app/checkout"
                 },
                 auto_return: "approved",
             }
