@@ -195,7 +195,7 @@ export const prerender = false;
             }
 
             // D. Crear Preferencia Mercado Pago
-            const response = await fetch('/api/webhooks/create-payment', { // Asegura que esta ruta coincida con tu archivo
+            const response = await fetch('/api/create-payment', { // Asegura que esta ruta coincida con tu archivo
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
