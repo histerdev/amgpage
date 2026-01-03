@@ -1,0 +1,64 @@
+---
+// Footer.astro
+---
+<footer class="bg-zinc-950 text-white pt-20 pb-10">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            
+            <div class="col-span-1 md:col-span-1">
+                <img src="/logo-amg-white.png" alt="AMG" class="h-12 w-auto mb-6 opacity-90">
+                <p class="text-zinc-500 text-[11px] leading-relaxed uppercase font-bold tracking-widest">
+                    Curadores de alta gama. <br/>
+                    Gestionamos los mejores batches <br/>
+                    del mercado global hacia Chile.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-[#2ecc71] mb-6">Explorar</h4>
+                <ul class="space-y-4 text-xs font-bold uppercase italic tracking-tighter text-zinc-400">
+                    <li><a href="/coleccion" class="hover:text-white transition-colors">Colección Completa</a></li>
+                    <li><a href="/calidades" class="hover:text-[#2ecc71] transition-colors">Guía de Calidades</a></li>
+                    <li><a href="#" onclick="window.dispatchEvent(new CustomEvent('open-size-guide'))" class="hover:text-white transition-colors">Guía de Tallas</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-[#2ecc71] mb-6">Soporte</h4>
+                <ul class="space-y-4 text-xs font-bold uppercase italic tracking-tighter text-zinc-400">
+                    <li><a href="/faq" class="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
+                    <li><a href="/terminos-y-condiciones" class="hover:text-white transition-colors">Términos del Servicio</a></li>
+                    <li><a href="https://wa.me/tu_numero" class="hover:text-[#2ecc71] transition-colors italic">Contacto WhatsApp</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-white mb-6">Información Legal</h4>
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                    <p class="text-[10px] text-zinc-500 leading-relaxed font-medium">
+                        Operado por:<br/>
+                        <span class="text-zinc-300 font-black uppercase">NOMBRE EIRL EN PROCESO</span><br/>
+                        RUT EMPRESA EN PROCESO<br/>
+                        Santiago, Chile.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-zinc-900 mb-10">
+
+        <div class="flex flex-col md:row items-center justify-between gap-6">
+            <div class="flex gap-6">
+                <div class="flex gap-2 opacity-30 grayscale hover:grayscale-0 transition-all">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="Visa" class="h-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/960px-Mastercard-logo.svg.png?20210817144358" alt="Master" class="h-4">
+                    <img src="https://vectorseek.com/wp-content/uploads/2023/08/Mercado-Pago-Icon-Logo-Vector.svg-.png" alt="Webpay" class="h-4 text-white">
+                </div>
+            </div>
+            
+            <p class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">
+                © 2026 AMG SNEAKERS CHILE - TODOS LOS DERECHOS RESERVADOS.
+            </p>
+        </div>
+    </div>
+</footer>

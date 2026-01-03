@@ -5,33 +5,45 @@ const client = new MercadoPagoConfig({
     accessToken: import.meta.env.MP_ACCESS_TOKEN 
 });
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, url }) => {
     try {
-        const { name, price, orderId, quality, size } = await request.json();
+        const { items, orderId, customerEmail } = await request.json();
 
+        // VALIDACIÓN BÁSICA
+        if (!items || items.length === 0) throw new Error("Carrito vacío");
+        if (!orderId) throw new Error("Falta ID de Orden");
+
+        // Detectar dominio automáticamente (Localhost o Producción)
+        const origin = url.origin; 
+        const webhookUrl = `${origin}/api/webhooks/mercadopago`;
+
+        // CONSTRUCCIÓN DE LA PREFERENCIA
         const preference = await new Preference(client).create({
             body: {
-                items: [{
-                    id: orderId,
-                    title: name,
-                    quantity: 1,
-                    unit_price: Number(price),
+                items: items.map((item: any) => ({
+                    id: item.id || 'PRODUCT-ID',
+                    title: item.title,
+                    quantity: Number(item.quantity),
+                    unit_price: Number(item.unit_price),
                     currency_id: 'CLP',
-                }],
-                external_reference: orderId,
-                // GUARDAMOS LOS DATOS AQUÍ PARA NO DEPENDER DE LA BASE DE DATOS LUEGO
-                metadata: {
-                    product_name: name,
-                    quality: quality,
-                    size: size
+                    description: item.description, // Talla y Calidad aquí
+                    picture_url: item.image_url // Importante para visualización en MP
+                })),
+                external_reference: orderId, // EL VÍNCULO CON SUPABASE
+                payer: {
+                    email: customerEmail || 'cliente@email.com'
                 },
-                notification_url: "https://amgshoespreview.netlify.app/api/webhook",
+ notification_url: "https://amgshoespreview.netlify.app/api/webhooks/mercadopago",
                 back_urls: {
                     success: "https://amgshoespreview.netlify.app/pago-exitoso",
                     failure: "https://amgshoespreview.netlify.app/checkout",
                     pending: "https://amgshoespreview.netlify.app/checkout"
                 },
                 auto_return: "approved",
+                statement_descriptor: "AMG SNEAKERS",
+                metadata: {
+                    order_id: orderId // Respaldo en metadata
+                }
             }
         });
 
@@ -39,7 +51,11 @@ export const POST: APIRoute = async ({ request }) => {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
+
     } catch (error: any) {
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        console.error("❌ Error creando preferencia:", error);
+        return new Response(JSON.stringify({ error: error.message }), { 
+            status: 500 
+        });
     }
 };

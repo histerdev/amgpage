@@ -1,0 +1,140 @@
+---
+// src/components/CartDrawer.astro
+---
+<div id="cart-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300"></div>
+
+<aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[101] translate-x-full transition-transform duration-500 ease-out shadow-2xl flex flex-col">
+    <div class="p-6 border-b border-zinc-100 flex justify-between items-center">
+        <h2 class="text-2xl font-[900] italic uppercase tracking-tighter text-black">Tu Pedido <span class="text-[#2ecc71]">AMG</span></h2>
+        <button id="close-cart-btn" class="text-zinc-400 hover:text-black transition-colors font-black uppercase text-[10px] tracking-widest cursor-pointer border-none bg-transparent">Cerrar</button>
+    </div>
+
+    <div id="cart-content" class="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
+        </div>
+
+    <div class="p-6 bg-zinc-50 border-t border-zinc-100">
+        <div class="flex justify-between mb-4">
+            <span class="font-bold text-zinc-500 uppercase text-xs tracking-widest">Total Gestión</span>
+            <span id="cart-total" class="font-[900] text-2xl italic tracking-tighter text-black">$0</span>
+        </div>
+        <button id="checkout-btn" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-[#2ecc71] transition-all cursor-pointer shadow-lg active:scale-95">
+            Finalizar Pedido
+        </button>
+    </div>
+</aside>
+<script>
+    import { isCartOpen, cartItems, removeFromCart } from '../store/cartStore';
+
+    // Seleccionar elementos del DOM
+    const drawer = document.getElementById('cart-drawer');
+    const overlay = document.getElementById('cart-overlay');
+    const closeBtn = document.getElementById('close-cart-btn');
+    const content = document.getElementById('cart-content');
+    const totalEl = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    // 1. GESTIÓN DE APERTURA Y CIERRE
+    // Usamos 'as any' para evitar que TS proteste por el origen del Store JS
+    (isCartOpen as any).subscribe((open: boolean) => {
+        if (!drawer || !overlay) return;
+        
+        if (open) {
+            overlay.classList.remove('hidden');
+            // Pequeño delay para que la transición CSS funcione
+            setTimeout(() => {
+                overlay.classList.add('opacity-100');
+                drawer.classList.remove('translate-x-full');
+            }, 10);
+        } else {
+            overlay.classList.remove('opacity-100');
+            drawer.classList.add('translate-x-full');
+            // Esperamos a que termine la animación para ocultar el overlay
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 500);
+        }
+    });
+
+    // 2. RENDERIZADO DINÁMICO DE PRODUCTOS
+    // Solución definitiva al error 'never[]': Forzamos el tipado a any[]
+    (cartItems as any).subscribe((items: any[]) => {
+        if (!content || !totalEl) return;
+        
+        if (!items || items.length === 0) {
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-64 opacity-40">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1" class="mb-4">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    <p class="text-center font-black uppercase text-[10px] tracking-[0.3em]">Carrito Vacío</p>
+                </div>
+            `;
+            totalEl.innerText = '$0';
+            return;
+        }
+
+        // Generar el HTML de cada producto
+        content.innerHTML = items.map((item: any) => {
+            // Normalización de datos (Sopabase usa product_name / Local usa name)
+            const nombre = item.name || item.product_name || "PRODUCTO AMG";
+            const imagen = item.image || item.image_url || "/placeholder.jpg";
+            const precio = Number(item.price) || 0;
+            const cantidad = Number(item.quantity) || 1;
+            const itemId = item.id || item.product_id;
+
+            return `
+                <div class="flex gap-4 items-center border-b border-zinc-50 pb-4 group animate-in fade-in slide-in-from-right-4 duration-300">
+                    <img src="${imagen}" class="w-20 h-20 object-contain rounded-2xl bg-zinc-100 shadow-sm p-2" />
+                    <div class="flex-1 text-left">
+                        <h4 class="font-black uppercase italic text-[11px] leading-tight mb-1 text-black">${nombre}</h4>
+                        
+                        <div class="flex gap-2 mb-1">
+                            <span class="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter">EU: ${item.size || 'N/A'}</span>
+                            <span class="bg-black text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">${item.quality || 'TOP'}</span>
+                        </div>
+                        
+                        <p class="text-[9px] text-zinc-400 font-extrabold uppercase tracking-tighter">Unidades: ${cantidad}</p>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-2">
+                        <p class="font-black italic text-sm text-black">
+                            $${(precio * cantidad).toLocaleString('es-CL')}
+                        </p>
+                        <button class="remove-item-btn text-zinc-300 hover:text-red-600 transition-all cursor-pointer border-none bg-transparent p-1 active:scale-90" data-id="${itemId}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 9v-4m4 4v-4"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Calcular total general
+        const totalFinal = items.reduce((acc: number, item: any) => acc + (Number(item.price) * (Number(item.quantity) || 1)), 0);
+        totalEl.innerText = `$${totalFinal.toLocaleString('es-CL')}`;
+
+        // Asignar eventos a los botones de eliminar generados
+        content.querySelectorAll('.remove-item-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+                if (id) {
+                    removeFromCart(id);
+                }
+            });
+        });
+    });
+
+    // 3. LISTENERS DE ACCIÓN MANUAL
+    closeBtn?.addEventListener('click', () => isCartOpen.set(false));
+    overlay?.addEventListener('click', () => isCartOpen.set(false));
+
+    checkoutBtn?.addEventListener('click', () => {
+        // Obtenemos los items actuales para validar antes de ir al checkout
+        const currentItems = (cartItems as any).get();
+        if (currentItems.length > 0) {
+            window.location.href = '/checkout';
+        } else {
+            alert("TU CARRITO ESTÁ VACÍO. AÑADE PRODUCTOS PARA CONTINUAR.");
+        }
+    });
+</script>

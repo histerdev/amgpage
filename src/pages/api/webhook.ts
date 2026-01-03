@@ -8,67 +8,77 @@ const client = new MercadoPagoConfig({
 });
 
 export const POST: APIRoute = async ({ request }) => {
-    try {
-        const body = await request.json();
-        const paymentId = body.data?.id || body.id;
+    // Mercado Pago espera 200 OK rápido. Procesamos en background.
+    const url = new URL(request.url);
+    const topic = url.searchParams.get('topic') || url.searchParams.get('type');
+    const id = url.searchParams.get('id') || url.searchParams.get('data.id');
 
-        if (paymentId === "123456" || !paymentId) return new Response(null, { status: 200 });
-
-        if (body.type === 'payment') {
-            const payment = await new Payment(client).get({ id: paymentId });
-
+    if (topic === 'payment' && id) {
+        try {
+            const payment = await new Payment(client).get({ id });
+            
             if (payment.status === 'approved') {
                 const orderId = payment.external_reference;
-                const meta = payment.metadata; // Datos del producto (talla/calidad)
+                
+                // 1. VERIFICAR ESTADO ACTUAL EN SUPABASE (Evitar duplicados)
+                const { data: currentOrder } = await supabase
+                    .from('orders')
+                    .select('status, customer_name, total_price')
+                    .eq('id', orderId)
+                    .single();
 
-                // 1. ACTUALIZAR Y EXTRAER TODO DE SUPABASE
-                const { data: orderData, error } = await supabase
+                if (currentOrder?.status === 'PAGADO') {
+                    console.log(`⚠️ Orden ${orderId} ya procesada.`);
+                    return new Response(null, { status: 200 });
+                }
+
+                // 2. ACTUALIZAR SUPABASE
+                const { error: updateError } = await supabase
                     .from('orders')
                     .update({ 
                         status: 'PAGADO', 
-                        payment_id: paymentId.toString() 
+                        payment_id: id,
+                        updated_at: new Date().toISOString()
                     })
-                    .eq('id', orderId)
-                    .select() // Traemos todas las columnas actualizadas
-                    .single();
+                    .eq('id', orderId);
 
-                if (error) {
-                    console.error("Error al obtener datos de la orden:", error.message);
-                }
+                if (updateError) throw new Error("Fallo actualizando Supabase");
 
-                // 2. CONSTRUIR EL REPORTE ADUANERO COMPLETO
-                const mensajeTelegram = `
-✅ *VENTA CONFIRMADA - AMG SHOES*
---------------------------------
+                // 3. RECUPERAR ITEMS PARA EL REPORTE (Desde Supabase, más seguro)
+                const { data: orderItems } = await supabase
+                    .from('order_items')
+                    .select('*')
+                    .eq('order_id', orderId);
+
+                const itemsText = orderItems?.map(i => 
+                    `👟 *${i.product_name}*\n   ├ Talla: ${i.size}\n   ├ Calidad: ${i.quality}\n   └ Precio: $${i.price}`
+                ).join('\n\n') || "Detalles no disponibles";
+
+                // 4. PREPARAR MENSAJE TELEGRAM
+                const mensaje = `
+🚨 *NUEVA VENTA CONFIRMADA* 🚨
+➖➖➖➖➖➖➖➖➖➖➖
+💰 *Monto:* $${new Intl.NumberFormat('es-CL').format(payment.transaction_amount || 0)}
+💳 *ID Pago:* \`${id}\`
 🆔 *ID Orden:* \`${orderId}\`
-💰 *ID Pago:* \`${paymentId}\`
-💵 *Monto:* $${new Intl.NumberFormat('es-CL').format(orderData?.total_price || 0)} CLP
 
-👟 *DETALLES DEL PRODUCTO:*
-• *Modelo:* ${meta.product_name || 'No capturado'}
-• *Talla:* ${meta.size || 'No capturada'}
-• *Calidad:* ${meta.quality || 'No capturada'}
+📦 *PRODUCTOS:*
+${itemsText}
 
-📦 *INFORMACIÓN COMPLETA PARA ADUANA / ENVÍO:*
-👤 *Nombre:* ${orderData?.customer_name || 'N/A'}
-🆔 *RUT:* ${orderData?.rut || 'N/A'}
-📧 *Correo:* ${orderData?.email || 'N/A'}
-📞 *Teléfono:* ${orderData?.phone || 'N/A'}
-📍 *Dirección:* ${orderData?.address || 'N/A'}
-🌆 *Comuna/Ciudad:* ${orderData?.city || 'N/A'}
-🗺️ *Región:* ${orderData?.region || 'N/A'}
-
---------------------------------
-⚡ *ESTADO:* LISTO PARA DESPACHO INTERNACIONAL
+👤 *CLIENTE:*
+Nombre: ${currentOrder?.customer_name}
+Estado: ✅ PAGADO (Mercado Pago)
+➖➖➖➖➖➖➖➖➖➖➖
+_Panel Admin actualizado correctamente_
                 `;
 
-                await sendAdminNotification(mensajeTelegram);
-                console.log(`✅ Notificación aduanera completa enviada para la orden: ${orderId}`);
+                await sendAdminNotification(mensaje);
             }
+        } catch (error) {
+            console.error("❌ Error en Webhook:", error);
+            // Aún retornamos 200 para que MP no reintente infinitamente si es error lógico
         }
-        return new Response(null, { status: 200 });
-    } catch (err: any) {
-        console.error("Fallo crítico:", err.message);
-        return new Response(null, { status: 200 });
     }
+
+    return new Response(null, { status: 200 });
 };

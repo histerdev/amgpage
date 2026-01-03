@@ -71,37 +71,25 @@
                     </div>
 
                     <div id="menu-guest" class="p-2">
-                        <a href="/login" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl transition-colors text-center">Iniciar Sesión</a>
+                        <a href="/login" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl transition-colors text-center text-black">Iniciar Sesión</a>
                         <a href="/registro" class="block px-4 py-3 text-[12px] font-black uppercase italic bg-black text-white rounded-xl hover:bg-[#2ecc71] transition-colors mt-1 text-center">Registrarse</a>
                     </div>
 
                     <div id="menu-user" class="hidden p-2">
-                        <a href="/perfil" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl">Mi Perfil</a>
-                        <a href="/pedidos" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl">Mis Pedidos</a>
+                        <a href="/perfil" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl text-black">Mi Perfil</a>
+                        <a href="/pedidos" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl text-black">Mis Pedidos</a>
                         <hr class="my-2 border-gray-100">
-                        <button id="btn-logout" class="w-full text-left px-4 py-3 text-[12px] font-black uppercase italic text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer">Cerrar Sesión</button>
+                        <button id="btn-logout" class="w-full text-left px-4 py-3 text-[12px] font-black uppercase italic text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer border-none bg-transparent">Cerrar Sesión</button>
                     </div>
                 </div>
             </div>
 
-            <div class="relative p-2.5 bg-gray-100 rounded-full hover:bg-black hover:text-white transition-all group cursor-pointer">
+            <div id="cart-btn" class="relative p-2.5 bg-gray-100 rounded-full hover:bg-black hover:text-white transition-all group cursor-pointer">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
-                <span class="absolute -top-1 -right-1 bg-[#2ecc71] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black border-2 border-white">0</span>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-[#2ecc71] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black border-2 border-white">0</span>
             </div>
-        </div>
-    </div>
-
-    <div class="bg-white border-t border-gray-100 hidden md:block">
-        <div class="max-w-7xl mx-auto px-6 h-12 flex items-center gap-8">
-            <a href="/coleccion" class="text-[11px] font-extrabold uppercase tracking-widest text-black hover:text-[#2ecc71] transition-colors flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                Menú Colección
-            </a>
-            <div class="h-4 w-[1px] bg-gray-200"></div>
-            <a href="/sobre-nosotros" class="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors">Sobre Nosotros</a>
-            <a href="/terminos-y-condiciones" class="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors">Términos</a>
         </div>
     </div>
 </header>
@@ -115,82 +103,86 @@
         animation: marquee 25s linear infinite;
     }
 </style>
+
 <script>
     import { supabase } from '../lib/supabase';
+    import { isCartOpen, loadCartFromDB, cartItems } from '../store/cartStore';
 
-    // 1. Elementos del DOM
-    const btn = document.getElementById('user-menu-button');
-    const dropdown = document.getElementById('dropdown-menu');
-    const guestMenu = document.getElementById('menu-guest');
-    const userMenu = document.getElementById('menu-user');
-    const adminOption = document.getElementById('admin-only-option');
-    const nameDisplay = document.getElementById('user-name-display');
-    const greetingDisplay = document.getElementById('user-greeting');
+    // 1. Manejo del Dropdown (Abrir/Cerrar)
+    function setupDropdown() {
+        const userBtn = document.getElementById('user-menu-button');
+        const dropdown = document.getElementById('dropdown-menu');
 
-    // 2. Control del Dropdown (CORREGIDO)
-    btn?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Alternar la clase hidden
-        dropdown?.classList.toggle('hidden');
-    });
+        userBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown?.classList.toggle('hidden');
+        });
 
-    // Cerrar si se hace clic fuera del menú
-    document.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        if (!dropdown?.contains(target) && !btn?.contains(target)) {
-            dropdown?.classList.add('hidden');
-        }
-    });
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!dropdown?.classList.contains('hidden')) {
+                dropdown?.classList.add('hidden');
+            }
+        });
+    }
 
-    // 3. Lógica de Usuario
-    async function updateUserData() {
+    // 2. Actualizar Interfaz de Sesión
+    async function updateHeaderUI() {
         const { data: { session } } = await supabase.auth.getSession();
+        const guestMenu = document.getElementById('menu-guest');
+        const userMenu = document.getElementById('menu-user');
+        const nameDisplay = document.getElementById('user-name-display');
+        const adminOption = document.getElementById('admin-only-option');
 
         if (session) {
-            // Usuario logueado: Mostramos menú de usuario y ocultamos el de invitado
             guestMenu?.classList.add('hidden');
             userMenu?.classList.remove('hidden');
-
-            // Chequeo de Admin
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profile?.role === 'admin') {
-                adminOption?.classList.remove('hidden');
-            } else {
-                adminOption?.classList.add('hidden');
+            
+            // Mostrar nombre
+            if (nameDisplay) {
+                const fullName = session.user.user_metadata?.full_name || "Usuario";
+                nameDisplay.innerText = fullName.toUpperCase();
             }
 
-            const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || "USUARIO";
-            if (nameDisplay) nameDisplay.innerText = name.split(' ')[0].toUpperCase();
-            if (greetingDisplay) greetingDisplay.innerText = "BIENVENIDO,";
+            // Mostrar admin si corresponde
+            if (session.user.email === 'tu-correo-admin@gmail.com') { // Cambia esto por tu lógica de admin
+                adminOption?.classList.remove('hidden');
+            }
+
+            await loadCartFromDB();
         } else {
-            // Invitado: Mostramos login/registro y ocultamos perfil
             guestMenu?.classList.remove('hidden');
             userMenu?.classList.add('hidden');
             adminOption?.classList.add('hidden');
             if (nameDisplay) nameDisplay.innerText = "MI CUENTA";
-            if (greetingDisplay) greetingDisplay.innerText = "HOLA,";
         }
     }
 
-    // 4. Logout
-    document.addEventListener('click', async (e) => {
-        const target = e.target as HTMLElement;
-        if (target.id === 'btn-logout') {
-            await supabase.auth.signOut();
-            window.location.href = '/'; // Redirigir al home tras salir
+    // 3. Contador del Carrito
+    (cartItems as any).subscribe((items: any[]) => {
+        const countEl = document.getElementById('cart-count');
+        if (countEl) {
+            const totalItems = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+            countEl.innerText = totalItems.toString();
         }
     });
 
-    // Ejecución inicial y escucha de cambios
-    updateUserData();
-    
-    supabase.auth.onAuthStateChange(() => {
-        updateUserData();
+    // 4. Listeners de Eventos
+    document.getElementById('cart-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        isCartOpen.set(true);
     });
+
+    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = '/';
+    });
+
+    // 5. Inicialización
+    supabase.auth.onAuthStateChange((event) => {
+        updateHeaderUI();
+    });
+
+    setupDropdown();
+    updateHeaderUI();
 </script>

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
+import SizeGuideModal from '../../components/SizeGuideModal.astro';
 import { productos } from '../../data/products';
 
 export const prerender = true;
@@ -14,176 +15,152 @@ export async function getStaticPaths() {
 
 const { product } = Astro.props;
 
-if (!product) {
-  return Astro.redirect('/404');
-}
+if (!product) return Astro.redirect('/404');
 
-const initialPrice = new Intl.NumberFormat('es-CL').format(product.prices.PK);
+const initialImage = Array.isArray(product.image) ? product.image[0] : product.image;
+const albumImages = Array.isArray(product.image) ? product.image : [product.image];
 ---
 
 <Layout title={`${product.name} | AMG Sneakers`}>
   <Header />
 
-  <main class="relative bg-white overflow-x-hidden">
-    <section class="min-h-[90vh] pt-32 pb-20 relative z-20 bg-white">
-      <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+  <main class="relative bg-white pt-32 pb-20">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16">
+      
+      <div class="space-y-4">
+        <div class="bg-[#f9f9f9] rounded-[40px] aspect-square flex items-center justify-center border border-gray-100 overflow-hidden">
+          <img id="main-product-image" src={initialImage} alt={product.name} class="w-full h-full object-contain p-6" />
+        </div>
+        <div class="grid grid-cols-6 gap-2">
+          {albumImages.map((img) => (
+            <button class="thumb-btn border-2 border-gray-100 rounded-xl aspect-square overflow-hidden bg-[#f9f9f9]" data-src={img}>
+              <img src={img} class="w-full h-full object-contain" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div class="space-y-8" 
+           id="product-root" 
+           data-id={product.id} 
+           data-name={product.name} 
+           data-price-pk={product.prices.PK} 
+           data-price-g5={product.prices.G5}>
         
-        <div class="reveal-item reveal-left">
-          <div class="bg-[#f9f9f9] rounded-[40px] overflow-hidden aspect-square flex items-center justify-center border border-gray-100">
-            <img src={product.image} alt={product.name} class="w-full h-full object-contain p-6" />
+        <div>
+          <h1 class="text-6xl font-[900] uppercase italic tracking-tighter text-slate-900 leading-none">{product.name}</h1>
+          <p class="text-3xl font-light mt-4 italic text-gray-500">
+            $ <span id="display-price">{new Intl.NumberFormat('es-CL').format(product.prices.PK)}</span> CLP
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <p class="text-[10px] font-black uppercase text-gray-400">Calidad de Gestión:</p>
+          <div class="flex gap-3">
+            <button data-q="PK" class="q-selector flex-1 bg-black text-white py-4 rounded-xl font-black text-[11px] border-2 border-black italic transition-all">
+              PK INDUSTRIAL (TOP)
+            </button>
+            <button data-q="G5" class="q-selector flex-1 bg-white text-gray-400 py-4 rounded-xl font-black text-[11px] border-2 border-gray-100 italic transition-all">
+              G5 STANDARD
+            </button>
           </div>
         </div>
 
-        <div class="reveal-item reveal-right space-y-8 text-black">
-          <div>
-            <span class="text-red-600 font-black uppercase tracking-[0.2em] text-[10px]">
-                {product.tags?.join(" / ")}
-            </span>
-            <h1 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-none mt-2">
-              {product.name}
-            </h1>
-            <p class="text-3xl font-light mt-4 italic text-gray-500">
-              $ <span id="display-price">{initialPrice}</span> CLP
-            </p>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <p class="text-[10px] font-black uppercase text-gray-400">Talla EU:</p>
+            <button onclick="window.dispatchEvent(new CustomEvent('open-size-guide'))" class="text-[9px] font-black text-[#2ecc71] uppercase">Guía de tallas</button>
           </div>
-
-          <div class="space-y-4">
-            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Seleccionar Calidad:</p>
-            <div class="flex gap-3">
-              <button 
-                data-quality="PK" 
-                data-price={product.prices.PK}
-                class="q-btn flex-1 bg-black text-white py-4 rounded-xl font-black text-[11px] uppercase border-2 border-black transition-all italic"
-              >
-                PK Batch (Top)
+          <div class="grid grid-cols-5 gap-2">
+            {product.tallas.map(talla => (
+              <button data-size={talla} class="s-selector border-2 border-gray-100 py-3 rounded-xl font-black text-xs italic bg-white text-black hover:border-black transition-all">
+                {talla}
               </button>
-              <button 
-                data-quality="G5" 
-                data-price={product.prices.G5}
-                class="q-btn flex-1 bg-white text-gray-400 py-4 rounded-xl font-black text-[11px] uppercase border-2 border-gray-100 hover:border-black hover:text-black transition-all italic"
-              >
-                G5 (Standard)
-              </button>
-            </div>
+            ))}
           </div>
+        </div>
 
-          <div class="space-y-4">
-              <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Talla (EU):</p>
-              <div class="grid grid-cols-5 gap-2">
-                  {product.tallas.map(talla => (
-                      <button data-size={talla} class="s-btn border-2 border-gray-100 py-3 rounded-xl font-[900] text-xs transition-all italic bg-white text-black hover:border-black">
-                          {talla}
-                      </button>
-                  ))}
-              </div>
-          </div>
-
-          <button id="add-to-cart" class="w-full bg-black text-white py-6 rounded-2xl font-[900] uppercase tracking-[0.3em] text-[11px] shadow-2xl hover:bg-[#2ecc71] transition-all">
-            Continuar Pedido
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+          <button id="add-to-cart-action" class="bg-white text-black border-2 border-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-gray-50 transition-all">
+            Añadir al Carrito
+          </button>
+          <button id="buy-now-action" class="bg-black text-white py-6 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl hover:bg-[#2ecc71] transition-all">
+            Comprar Ahora
           </button>
         </div>
       </div>
-    </section>
+    </div>
   </main>
 
-  <script define:vars={{ product }}>
-    let selectedSize = null;
-    let selectedQuality = "PK";
-    let currentPrice = product.prices.PK;
+  <SizeGuideModal />
 
-    const priceDisplay = document.getElementById('display-price');
-    const qualityBtns = document.querySelectorAll('.q-btn');
-    const sizeBtns = document.querySelectorAll('.s-btn');
-    const overlay = document.getElementById('dynamic-overlay');
+<script>
+  import { addToCart } from '../../store/cartStore';
 
-    // 1. CAMBIO DE PRECIO
-    qualityBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        qualityBtns.forEach(b => {
-          b.classList.remove('bg-black', 'text-white', 'border-black');
-          b.classList.add('bg-white', 'text-gray-400', 'border-gray-100');
-        });
-        btn.classList.remove('bg-white', 'text-gray-400', 'border-gray-100');
-        btn.classList.add('bg-black', 'text-white', 'border-black');
+  const root = document.getElementById('product-root') as HTMLElement;
+  const displayPrice = document.getElementById('display-price') as HTMLElement;
+  const mainImg = document.getElementById('main-product-image') as HTMLImageElement;
+  const qButtons = document.querySelectorAll('.q-selector');
+  const sButtons = document.querySelectorAll('.s-selector');
 
-        selectedQuality = btn.dataset.quality;
-        currentPrice = btn.dataset.price;
-        priceDisplay.innerText = new Intl.NumberFormat('es-CL').format(currentPrice);
-      });
+  let selectedSize: string | null = null;
+  let selectedQuality: 'PK' | 'G5' = "PK";
+
+  const prices: Record<string, number> = {
+    PK: Number(root.dataset.pricePk),
+    G5: Number(root.dataset.priceG5)
+  };
+
+  qButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const quality = (btn as HTMLElement).dataset.q as 'PK' | 'G5';
+      selectedQuality = quality;
+      qButtons.forEach(b => b.className = "q-selector flex-1 bg-white text-gray-400 py-4 rounded-xl font-black text-[11px] border-2 border-gray-100 italic transition-all");
+      btn.className = "q-selector flex-1 bg-black text-white py-4 rounded-xl font-black text-[11px] border-2 border-black italic transition-all";
+      displayPrice.innerText = new Intl.NumberFormat('es-CL').format(prices[selectedQuality]);
     });
+  });
 
-    // 2. TALLAS
-    sizeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        sizeBtns.forEach(b => {
-          b.classList.remove('bg-black', 'text-white', 'border-black');
-          b.classList.add('bg-white', 'text-black', 'border-gray-100');
-        });
-        btn.classList.add('bg-black', 'text-white', 'border-black');
-        btn.classList.remove('bg-white', 'text-black', 'border-gray-100');
-        selectedSize = btn.dataset.size;
-      });
+  sButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedSize = (btn as HTMLElement).dataset.size || null;
+      sButtons.forEach(b => b.classList.remove('border-black', 'bg-black', 'text-white'));
+      btn.classList.add('border-black', 'bg-black', 'text-white');
     });
+  });
 
-    // 3. ANIMACIONES Y OVERLAY (Intersection Observer)
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        // Activar animaciones de entrada
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-          
-          // Lógica específica para el fondo negro
-          if (entry.target.id === 'dark-trigger') {
-            overlay?.classList.add('overlay-active');
-          }
-        } else {
-          // Quitar overlay si volvemos arriba
-          if (entry.target.id === 'dark-trigger' && entry.boundingClientRect.top > 0) {
-            overlay?.classList.remove('overlay-active');
-          }
+function handlePurchase(redirect: boolean = false) {
+    if (!selectedSize) {
+        alert("POR FAVOR SELECCIONA TU TALLA");
+        return;
+    }
+
+    const priceToPay = prices[selectedQuality];
+
+    const productToSave = {
+        id: `${root.dataset.id}-${selectedQuality}-${selectedSize}`,
+        productId: root.dataset.id,
+        name: root.dataset.name,
+        image: mainImg.src,
+        size: selectedSize,        // <--- Esto es lo que leerá el carrito
+        quality: selectedQuality,  // <--- Esto es lo que leerá el carrito
+        quantity: 1,
+        price: priceToPay,         // <--- Enviamos el precio directo
+        prices: {
+            [selectedQuality]: priceToPay
         }
-      });
-    }, { threshold: 0.1 });
+    };
 
-    // Observar todos los elementos con animaciones
-    document.querySelectorAll('.reveal-item, #dark-trigger').forEach(el => observer.observe(el));
+    addToCart(productToSave);
+    
+    if (redirect) {
+        window.location.href = '/checkout';
+    } else {
+        window.dispatchEvent(new CustomEvent('open-cart'));
+    }
+}
 
-    // 4. CARRITO
-    document.getElementById('add-to-cart')?.addEventListener('click', () => {
-      if(!selectedSize) return alert("POR FAVOR SELECCIONA TU TALLA");
-      const order = {
-        name: product.name,
-        price: currentPrice,
-        quality: selectedQuality,
-        size: selectedSize,
-        image: product.image
-      };
-      localStorage.setItem('last_order', JSON.stringify(order));
-      window.location.href = '/checkout';
-    });
-  </script>
+  document.getElementById('add-to-cart-action')?.addEventListener('click', () => handlePurchase(false));
+  document.getElementById('buy-now-action')?.addEventListener('click', () => handlePurchase(true));
+</script>
 </Layout>
-
-<style>
-  /* Base de animaciones */
-  .reveal-item { 
-    opacity: 0; 
-    transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); 
-  }
-  
-  .reveal-left { transform: translateX(-50px); }
-  .reveal-right { transform: translateX(50px); }
-  .reveal-dark { transform: translateY(50px); }
-
-  /* Estado Activo (Cuando entra en pantalla) */
-  .active { 
-    opacity: 1 !important; 
-    transform: translate(0) !important; 
-  }
-
-  .overlay-active { 
-    opacity: 1 !important; 
-  }
-
-  * { font-family: 'Inter', sans-serif; }
-</style>

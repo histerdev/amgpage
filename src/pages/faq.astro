@@ -1,0 +1,97 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Preguntas Frecuentes | AMG Sneakers">
+    <Header />
+    
+    <main class="bg-white pt-32 pb-24">
+        <div class="max-w-3xl mx-auto px-6">
+            <div class="mb-16 text-center">
+                <span class="text-[#2ecc71] font-black uppercase tracking-[0.3em] text-[10px]">Centro de Ayuda</span>
+                <h1 class="text-5xl md:text-6xl font-[900] uppercase italic tracking-tighter leading-none mt-4 text-slate-900">
+                    RESOLVEMOS <br/> <span class="text-[#2ecc71]">TUS DUDAS</span>
+                </h1>
+            </div>
+
+            <div class="space-y-4">
+                <details class="group border border-zinc-100 rounded-[25px] bg-zinc-50 overflow-hidden transition-all duration-300 open:ring-1 open:ring-zinc-200">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <span class="text-sm font-black uppercase italic tracking-tight text-slate-800">¿Son pares originales?</span>
+                        <span class="transition-transform duration-300 group-open:rotate-180">
+                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-xs leading-relaxed text-zinc-500 font-medium">
+                        Somos transparentes: Gestionamos las mejores fabricaciones del mercado (Batch Industrial/PK). No son pares comprados en retail, pero se fabrican con los <strong>mismos materiales y moldes originales</strong>. Es lo más cercano a la versión de tienda que existe a nivel mundial.
+                    </div>
+                </details>
+
+                <details class="group border border-zinc-100 rounded-[25px] bg-zinc-50 overflow-hidden transition-all duration-300 open:ring-1 open:ring-zinc-200">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <span class="text-sm font-black uppercase italic tracking-tight text-slate-800">¿Cuánto tarda en llegar mi pedido?</span>
+                        <span class="transition-transform duration-300 group-open:rotate-180">
+                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-xs leading-relaxed text-zinc-500 font-medium">
+                        El proceso total toma entre <strong>8 a 20 días hábiles</strong>. Esto incluye la gestión en fábrica, nuestra inspección física de calidad (QC) y el envío internacional hasta tu domicilio en Chile.
+                    </div>
+                </details>
+
+                <details class="group border border-zinc-100 rounded-[25px] bg-zinc-50 overflow-hidden transition-all duration-300 open:ring-1 open:ring-zinc-200">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <span class="text-sm font-black uppercase italic tracking-tight text-slate-800">¿Qué pasa si el par tiene fallas?</span>
+                        <span class="transition-transform duration-300 group-open:rotate-180">
+                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-xs leading-relaxed text-zinc-500 font-medium">
+                        Aquí entra nuestra <strong>Garantía de Gestión</strong>. Antes de enviar el par a Chile, te mandaremos fotos y videos HD. Si detectamos (o tú detectas) cualquier detalle que no cumpla con el estándar, pedimos un cambio inmediato a la fábrica. No enviamos nada que no sea perfecto.
+                    </div>
+                </details>
+
+                <details class="group border border-zinc-100 rounded-[25px] bg-zinc-50 overflow-hidden transition-all duration-300 open:ring-1 open:ring-zinc-200">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <span class="text-sm font-black uppercase italic tracking-tight text-slate-800">¿Cómo sé mi talla exacta?</span>
+                        <span class="transition-transform duration-300 group-open:rotate-180">
+                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-xs leading-relaxed text-zinc-500 font-medium">
+                        Nuestros pares son <strong>True to Size (TTS)</strong>. Recomendamos pedir la talla EUR que usas habitualmente. De todas formas, puedes revisar nuestra <a href="#" onclick="window.dispatchEvent(new CustomEvent('open-size-guide'))" class="text-[#2ecc71] underline font-bold">Guía de Tallas aquí</a>.
+                    </div>
+                </details>
+
+                <details class="group border border-zinc-100 rounded-[25px] bg-zinc-50 overflow-hidden transition-all duration-300 open:ring-1 open:ring-zinc-200">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <span class="text-sm font-black uppercase italic tracking-tight text-slate-800">¿Qué métodos de pago aceptan?</span>
+                        <span class="transition-transform duration-300 group-open:rotate-180">
+                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-xs leading-relaxed text-zinc-500 font-medium">
+                        Aceptamos transferencias bancarias, tarjetas de crédito/débito a través de Mercado Pago y PayPal para mayor seguridad de nuestros clientes.
+                    </div>
+                </details>
+            </div>
+
+            <div class="mt-16 p-10 bg-zinc-950 rounded-[40px] text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[#2ecc71] blur-[80px] opacity-20"></div>
+                <h3 class="text-white font-[900] italic uppercase tracking-tighter text-2xl mb-4">¿Aún tienes dudas?</h3>
+                <p class="text-zinc-400 text-[10px] uppercase tracking-[0.2em] font-bold mb-8">Hablemos directamente por WhatsApp</p>
+                <a href="https://wa.me/tu_numero" class="inline-block bg-white text-black px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-[#2ecc71] hover:text-white transition-all">
+                    Contactar a un experto
+                </a>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    /* Ocultar la flecha por defecto de details en algunos navegadores */
+    details > summary::-webkit-details-marker {
+        display: none;
+    }
+</style>

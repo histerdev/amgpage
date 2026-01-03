@@ -1,0 +1,76 @@
+<div id="size-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-lg rounded-[30px] overflow-hidden shadow-2xl relative">
+        <button id="close-modal" class="absolute top-6 right-6 text-zinc-400 hover:text-black transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <div class="p-8 md:p-10">
+            <h3 class="text-2xl font-[900] uppercase italic tracking-tighter mb-2">Guía de Tallas</h3>
+            <p class="text-zinc-500 text-xs mb-8 uppercase font-bold tracking-widest">Asegura tu calce perfecto</p>
+
+            <div class="space-y-6">
+                <div class="bg-[#f0f7ff] border border-blue-100 p-4 rounded-2xl">
+                    <p class="text-[10px] text-blue-600 font-black uppercase mb-1">Tip de Experto:</p>
+                    <p class="text-xs text-blue-900 leading-relaxed">Nuestros pares <strong>Batch Industrial</strong> son fieles a la talla original (TTS). Te recomendamos medir tu pie en CM para mayor precisión.</p>
+                </div>
+
+                <div class="border border-zinc-100 rounded-2xl overflow-hidden overflow-y-auto max-h-[350px]">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="bg-zinc-50 border-b border-zinc-100 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 font-black uppercase italic text-zinc-400">EUR</th>
+                                <th class="px-4 py-3 font-black uppercase italic text-zinc-400">US Men</th>
+                                <th class="px-4 py-3 font-black uppercase italic text-zinc-400">CM</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100 text-zinc-600 font-bold italic">
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">36.0</td><td class="px-4 py-2">4.0</td><td class="px-4 py-2">23.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">37.5</td><td class="px-4 py-2">5.0</td><td class="px-4 py-2">23.5</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">38.0</td><td class="px-4 py-2">5.5</td><td class="px-4 py-2">24.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">39.0</td><td class="px-4 py-2">6.5</td><td class="px-4 py-2">24.5</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">40.0</td><td class="px-4 py-2">7.0</td><td class="px-4 py-2">25.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">41.0</td><td class="px-4 py-2">8.0</td><td class="px-4 py-2">26.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">42.0</td><td class="px-4 py-2">8.5</td><td class="px-4 py-2">26.5</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">42.5</td><td class="px-4 py-2">9.0</td><td class="px-4 py-2">27.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">43.0</td><td class="px-4 py-2">9.5</td><td class="px-4 py-2">27.5</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">44.0</td><td class="px-4 py-2">10.0</td><td class="px-4 py-2">28.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">44.5</td><td class="px-4 py-2">10.5</td><td class="px-4 py-2">28.5</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">45.0</td><td class="px-4 py-2">11.0</td><td class="px-4 py-2">29.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">46.0</td><td class="px-4 py-2">12.0</td><td class="px-4 py-2">30.0</td></tr>
+                            <tr><td class="px-4 py-2 bg-zinc-50/50">47.5</td><td class="px-4 py-2">13.0</td><td class="px-4 py-2">31.0</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pt-4 border-t border-zinc-50">
+                    <p class="text-[9px] text-zinc-400 uppercase leading-relaxed font-bold italic">
+                        * Medida CM corresponde a la longitud de la plantilla interna.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('size-modal');
+    const closeBtn = document.getElementById('close-modal');
+
+    window.addEventListener('open-size-guide', () => {
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+        document.body.style.overflow = 'hidden'; // Evita scroll de fondo
+    });
+
+    const closeModal = () => {
+        modal?.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    };
+
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+</script>

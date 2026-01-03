@@ -5,17 +5,47 @@ interface Props {
 
 const { title } = Astro.props;
 import '../styles/global.css'; 
+import CartDrawer from '../components/CartDrawer.astro';
+import Footer from '../components/footer.astro';
 ---
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{title}</title>
+        <title>{title} | AMG Sneakers</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    <body class="bg-white text-black antialiased selection:bg-[#2ecc71] selection:text-white">
-        <slot />
+    <body class="bg-white text-black antialiased selection:bg-[#2ecc71] selection:text-white flex flex-col min-h-screen">
+        
+        <div class="flex-grow">
+            <slot />
+        </div>
+
+        <Footer />
+
+        <CartDrawer />
+
     </body>
 </html>
+
+<style is:global>
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #18181b;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #2ecc71;
+    }
+</style>

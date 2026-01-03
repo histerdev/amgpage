@@ -1,25 +1,26 @@
 ---
+// ProductCard.astro
 interface Props {
   id: string;
   name: string;
-  prices: {
-    PK: number;
-    G5: number;
-  };
-  image: string;
+  prices: { PK: number; G5: number; };
+  image: string | string[]; 
   tags: string[];
 }
 
 const { id, name, prices, image, tags = [] } = Astro.props;
 const productUrl = `/producto/${id}`;
-
-// Formateamos precios (G5 como base)
+const mainImage = Array.isArray(image) ? image[0] : image;
 const g5PriceValue = prices?.G5 || 0;
 const displayPrice = new Intl.NumberFormat('es-CL').format(g5PriceValue);
+const tagsData = tags.map(t => t.toLowerCase()).join('|');
 ---
 
-<div class="group relative bg-white border border-gray-100 rounded-[32px] overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full product-item shadow-sm">
-  
+<div 
+  class="group relative bg-white border border-gray-100 rounded-[32px] overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full product-item shadow-sm"
+  data-name={name.toLowerCase()}
+  data-tags={tagsData}
+>
   <div class="absolute top-4 left-4 z-20 flex flex-wrap gap-1.5 max-w-[80%]">
     {tags.map((t) => (
       <span class="bg-black/90 backdrop-blur-md text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg tracking-wider">
@@ -28,25 +29,21 @@ const displayPrice = new Intl.NumberFormat('es-CL').format(g5PriceValue);
     ))}
   </div>
 
-  <div class="aspect-square overflow-hidden bg-[#fbfbfb] flex items-center justify-center p-10 relative">
-    <img 
-      src={image} 
-      alt={name} 
-      class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 z-10" 
-      loading="lazy" 
-    />
-    <div class="absolute bottom-8 w-1/2 h-4 bg-black/5 blur-xl rounded-[100%] z-0 group-hover:scale-110 transition-transform duration-700"></div>
-  </div>
+  <a href={productUrl} class="aspect-square overflow-hidden bg-[#fbfbfb] flex items-center justify-center p-10 relative cursor-pointer">
+    <img src={mainImage} alt={name} class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 z-10" loading="lazy" />
+  </a>
 
   <div class="p-6 flex flex-col flex-grow">
     <div class="flex items-center gap-1.5 mb-3">
         <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71] animate-pulse"></span>
-        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Disponible para pedido</span>
+        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Disponible</span>
     </div>
 
-    <h2 class="text-lg font-[900] uppercase italic tracking-tighter text-slate-900 leading-[1.1] mb-4 group-hover:text-[#2ecc71] transition-colors">
-      {name}
-    </h2>
+    <a href={productUrl}>
+      <h2 class="text-lg font-[900] uppercase italic tracking-tighter text-slate-900 leading-[1.1] mb-4 group-hover:text-[#2ecc71] transition-colors">
+        {name}
+      </h2>
+    </a>
 
     <div class="mt-auto flex flex-col gap-4">
       <div class="flex items-baseline gap-2">
@@ -54,11 +51,11 @@ const displayPrice = new Intl.NumberFormat('es-CL').format(g5PriceValue);
         <span class="text-[10px] font-bold text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded">G5</span>
       </div>
 
-      <a href={productUrl} class="flex items-center justify-center gap-2 w-full py-4 bg-black text-white rounded-2xl font-black uppercase text-[11px] tracking-[0.15em] hover:bg-[#2ecc71] transition-all shadow-lg active:scale-95 shadow-black/5">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-        </svg>
-        Comprar Ahora
+      <a 
+        href={productUrl}
+        class="flex items-center justify-center gap-2 w-full py-4 bg-black text-white rounded-2xl font-black uppercase text-[11px] tracking-[0.15em] hover:bg-[#2ecc71] transition-all shadow-lg active:scale-95 text-center"
+      >
+        Seleccionar talla
       </a>
     </div>
   </div>

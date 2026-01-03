@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="PK vs G5 | AMG Sneakers">
+    <Header />
+    
+    <main class="bg-white pt-32 pb-24">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="mb-16 text-center reveal-init">
+                <span class="text-[#2ecc71] font-black uppercase tracking-[0.3em] text-[10px]">Estándares de Fabricación</span>
+                <h1 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-none mt-4 text-slate-900">
+                    GUÍA DE <span class="text-[#2ecc71]">CALIDAD</span>
+                </h1>
+                <p class="text-zinc-500 mt-6 text-sm max-w-xl mx-auto leading-relaxed font-medium">
+                    En AMG Sneakers gestionamos solo dos niveles de fabricación. La diferencia radica en la fidelidad de los materiales y la precisión de los detalles.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <section class="bg-zinc-50 rounded-[40px] p-8 border border-zinc-100 flex flex-col reveal-init">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="bg-black text-white px-4 py-1 rounded-full text-[10px] font-black uppercase italic">Top Tier</div>
+                        <span class="text-3xl font-[900] text-[#2ecc71]">99%</span>
+                    </div>
+                    
+                    <h2 class="text-3xl font-[900] uppercase italic tracking-tighter mb-4">PK (Perfect kicks)</h2>
+                    <p class="text-zinc-600 text-xs leading-relaxed mb-6 flex-grow">
+                        Es el nivel más alto de fidelidad. Se utilizan <strong>materiales idénticos</strong> a los lanzamientos de retail: cueros de primera capa, gamuza real con movimiento y tecnología de amortiguación exacta.
+                    </p>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71]"></span> Materiales Originales
+                        </li>
+                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71]"></span> Construcción 1:1
+                        </li>
+                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71]"></span> Fidelidad Total (99%)
+                        </li>
+                    </ul>
+
+                    <div class="text-center p-4 bg-white rounded-2xl border border-zinc-100">
+                        <p class="text-[9px] font-black uppercase text-zinc-400">Recomendado para Coleccionistas</p>
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-[40px] p-8 border border-zinc-100 flex flex-col reveal-init">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="bg-zinc-200 text-zinc-500 px-4 py-1 rounded-full text-[10px] font-black uppercase italic">High Tier</div>
+                        <span class="text-3xl font-[900] text-zinc-400">80%</span>
+                    </div>
+                    
+                    <h2 class="text-3xl font-[900] uppercase italic tracking-tighter mb-4 text-zinc-800">G5 STANDARD</h2>
+                    <p class="text-zinc-600 text-xs leading-relaxed mb-6 flex-grow">
+                        Una opción equilibrada. Utiliza <strong>materiales similares</strong> de alta calidad. Estéticamente es impecable, pero con sutiles diferencias en la composición de los materiales premium.
+                    </p>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-400">
+                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span> Materiales Similares
+                        </li>
+                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-400">
+                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span> Estética Superior
+                        </li>
+                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-400">
+                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span> Fidelidad Alta (80%)
+                        </li>
+                    </ul>
+
+                    <div class="text-center p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                        <p class="text-[9px] font-black uppercase text-zinc-400">Excelente relación precio/calidad</p>
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-12 bg-black rounded-[30px] p-8 text-center reveal-init">
+                <h3 class="text-white font-[900] italic uppercase tracking-tighter text-xl mb-2">Nuestra Garantía de Gestión</h3>
+                <p class="text-zinc-400 text-[11px] uppercase tracking-widest font-bold">
+                    Sea cual sea el nivel que elijas, cada par pasa por nuestra inspección física antes del envío.
+                </p>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    .reveal-init { opacity: 0; transform: translateY(20px); transition: all 0.8s ease-out; }
+    .reveal-init.active { opacity: 1; transform: translateY(0); }
+</style>
+
+<script>
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('active');
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal-init').forEach(el => revealObserver.observe(el));
+</script>

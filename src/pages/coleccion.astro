@@ -4,97 +4,175 @@ import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
 
-// Extraer todas las etiquetas únicas para los botones de filtro
-const todasLasEtiquetas = [...new Set(productos.flatMap(p => p.tags))].sort();
+// Lista de siluetas para los botones principales
+const siluetas = ["Jordan 1", "Jordan 3", "Jordan 4", "Jordan 5", "Jordan 6", "Jordan 7", "Jordan 8", "Jordan 9", "Jordan 11", "Jordan 12", "Jordan 13", "Dunk", "Travis Scott"];
+
+// Extraer todos los tags únicos para el panel avanzado
+const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
 ---
 
-<Layout title="Colección | AMG SNEAKERS">
+<Layout title="Catálogo | AMG SNEAKERS">
     <Header />
-    <main class="py-12 md:py-20 font-['Inter']">
-        <div class="max-w-7xl mx-auto px-6">
+    <main class="py-8 md:py-16 bg-white font-['Inter']">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
             
-            <div class="mb-16 space-y-8">
-                <h1 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-none text-black">Explorar Catálogo</h1>
+            <div class="mb-12 space-y-8">
+                <div class="flex items-baseline gap-4">
+                    <h1 class="text-6xl md:text-8xl font-[950] uppercase italic tracking-tighter leading-none text-black">DROPS</h1>
+                    <span class="text-sm font-bold bg-black text-white px-3 py-1 rounded-full">{productos.length} PARES</span>
+                </div>
                 
-                <div class="flex flex-col md:flex-row gap-6 items-center justify-between bg-gray-50 p-6 rounded-[30px] border border-gray-100">
-                    <div class="relative w-full md:w-1/3">
-                        <input type="text" id="search-input" placeholder="BUSCAR POR MODELO..." class="w-full bg-white border-2 border-transparent focus:border-black rounded-2xl px-6 py-4 outline-none font-bold uppercase text-[11px] tracking-widest transition-all" />
-                    </div>
+                <div class="sticky top-4 z-40 bg-white/90 backdrop-blur-xl p-4 rounded-[32px] border border-gray-100 shadow-xl shadow-black/5 space-y-4">
+                    <input type="text" id="search-input" placeholder="BUSCAR POR NOMBRE O COLOR..." class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-black rounded-2xl px-8 py-5 outline-none font-bold uppercase text-xs tracking-widest transition-all" />
 
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <button class="filter-btn active px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 border-black bg-black text-white" data-filter="all">TODOS</button>
-                        {todasLasEtiquetas.map(tag => (
-                            <button class="filter-btn px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 border-transparent bg-white text-gray-400 hover:border-black hover:text-black shadow-sm" data-filter={tag.toLowerCase()}>
-                                {tag}
+                    <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar">
+                        <button class="silhouette-btn active bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all border-2 border-black" data-filter="all">TODOS</button>
+                        {siluetas.map(s => (
+                            <button class="silhouette-btn bg-gray-100 text-gray-500 px-6 py-3 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all border-2 border-transparent hover:border-black hover:text-black" data-filter={s.toLowerCase()}>
+                                {s}
                             </button>
                         ))}
                     </div>
+
+                    <button id="toggle-advanced" class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#2ecc71] transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                        Filtros Avanzados (Colores / Estilos)
+                    </button>
+                </div>
+
+                <div id="advanced-panel" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 p-6 bg-gray-50 rounded-3xl border border-gray-200">
+                    {todosLosTags.map(tag => (
+                        <label class="flex items-center gap-2 p-3 bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-black transition-all">
+                            <input type="checkbox" class="tag-checkbox w-4 h-4 accent-black" value={tag.toLowerCase()} />
+                            <span class="text-[9px] font-black uppercase tracking-tighter text-gray-600">{tag}</span>
+                        </label>
+                    ))}
                 </div>
             </div>
 
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
                 {productos.map((prod) => (
-                    <ProductCard {...prod} />
+                    <div class="product-wrapper">
+                        <ProductCard {...prod} />
+                    </div>
                 ))}
             </div>
 
-            <div id="no-results" class="hidden text-center py-20">
-                <p class="text-gray-400 font-black uppercase italic tracking-tighter text-2xl">No se encontraron modelos para tu búsqueda.</p>
+            <div id="no-results" class="hidden text-center py-40">
+                <p class="text-gray-400 font-black uppercase italic text-2xl">No hay coincidencias en el stock.</p>
             </div>
         </div>
     </main>
 </Layout>
 
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Estilo forzado para el botón activo */
+    .silhouette-btn.active {
+        background-color: black !important;
+        color: white !important;
+        border-color: black !important;
+        transform: translateY(-2px);
+    }
+</style>
+
 <script>
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const products = document.querySelectorAll('.product-item');
+    const silhouetteBtns = document.querySelectorAll('.silhouette-btn');
+    const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
+    const toggleAdvanced = document.getElementById('toggle-advanced');
+    const advancedPanel = document.getElementById('advanced-panel');
+    const productWrappers = document.querySelectorAll('.product-wrapper');
     const noResults = document.getElementById('no-results');
 
-    let currentFilter = 'all';
+    let currentSilhouette = 'all';
+    // Solución error TS: Definimos tipo string[]
+    let selectedTags: string[] = []; 
     let currentSearch = '';
 
-    function filterProducts() {
+    function applyFilters() {
         let visibleCount = 0;
 
-        products.forEach(item => {
-            const el = item as HTMLElement;
-            const name = el.dataset.name || '';
-            const tags = (el.dataset.tags || '').toLowerCase().split(',');
+        productWrappers.forEach(wrapper => {
+            const container = wrapper as HTMLElement;
+            // Seleccionamos el elemento que tiene los data-attributes dentro de ProductCard
+            const card = container.querySelector('[data-name]') as HTMLElement;
+            if (!card) return;
 
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const tags = (card.getAttribute('data-tags') || '').toLowerCase().split('|');
+
+            // 1. Filtro de búsqueda manual
             const matchesSearch = name.includes(currentSearch.toLowerCase());
-            const matchesFilter = currentFilter === 'all' || tags.includes(currentFilter.toLowerCase());
 
-            if (matchesSearch && matchesFilter) {
-                el.classList.remove('hidden');
+            // 2. Filtro de silueta (Lógica Exacta)
+            let matchesSilhouette = false;
+            if (currentSilhouette === 'all') {
+                matchesSilhouette = true;
+            } else {
+                matchesSilhouette = tags.some(t => {
+                    const tag = t.trim();
+                    // Coincidencia exacta o que empiece con la silueta + espacio (ej: "jordan 1 retro")
+                    return tag === currentSilhouette || tag.startsWith(currentSilhouette + " ");
+                });
+            }
+
+            // 3. Filtro de tags avanzados (checkboxes)
+            const matchesAdvancedTags = selectedTags.length === 0 || 
+                                       selectedTags.every(st => tags.includes(st));
+
+            if (matchesSearch && matchesSilhouette && matchesAdvancedTags) {
+                container.style.display = 'block';
                 visibleCount++;
             } else {
-                el.classList.add('hidden');
+                container.style.display = 'none';
             }
         });
 
-        noResults?.classList.toggle('hidden', visibleCount > 0);
+        if (noResults) {
+            noResults.classList.toggle('hidden', visibleCount > 0);
+        }
     }
 
-    // Evento Buscador
-    searchInput?.addEventListener('input', (e) => {
-        currentSearch = (e.target as HTMLInputElement).value;
-        filterProducts();
+    // Toggle Panel Avanzado
+    toggleAdvanced?.addEventListener('click', () => {
+        advancedPanel?.classList.toggle('hidden');
     });
 
-    // Evento Filtros de Botón
-    filterBtns.forEach(btn => {
+    // Lógica de botones de Siluetas
+    silhouetteBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            filterBtns.forEach(b => {
-                b.classList.remove('bg-black', 'text-white', 'border-black');
-                b.classList.add('bg-white', 'text-gray-400', 'border-transparent');
+            // Reset visual de todos los botones
+            silhouetteBtns.forEach(b => {
+                b.classList.remove('active', 'bg-black', 'text-white', 'border-black');
+                b.classList.add('bg-gray-100', 'text-gray-500', 'border-transparent');
             });
-            btn.classList.replace('bg-white', 'bg-black');
-            btn.classList.replace('text-gray-400', 'text-white');
-            btn.classList.add('border-black');
-            
-            currentFilter = (btn as HTMLElement).dataset.filter || 'all';
-            filterProducts();
+
+            // Activar botón clickeado
+            const clickedBtn = btn as HTMLElement;
+            clickedBtn.classList.add('active', 'bg-black', 'text-white', 'border-black');
+            clickedBtn.classList.remove('bg-gray-100', 'text-gray-500', 'border-transparent');
+
+            currentSilhouette = clickedBtn.dataset.filter || 'all';
+            applyFilters();
         });
+    });
+
+    // Lógica de Checkboxes
+    tagCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            selectedTags = Array.from(tagCheckboxes)
+                .filter(i => (i as HTMLInputElement).checked)
+                .map(i => (i as HTMLInputElement).value);
+            applyFilters();
+        });
+    });
+
+    // Lógica de Buscador
+    searchInput?.addEventListener('input', (e) => {
+        currentSearch = (e.target as HTMLInputElement).value;
+        applyFilters();
     });
 </script>
