@@ -1,129 +1,105 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-
 export const prerender = false;
 ---
 
 <Layout title="Mis Pedidos | AMG">
     <Header />
-    <main class="max-w-4xl mx-auto px-6 py-10 md:py-20 font-['Inter',_sans-serif]">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
-            <div>
-                <h1 class="text-5xl font-[900] uppercase italic tracking-tighter text-black leading-none">Mis Pedidos</h1>
-                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mt-4">Seguimiento y QC</p>
-            </div>
-        </div>
-
-        <div id="orders-list" class="space-y-10">
-            </div>
+    <main class="max-w-5xl mx-auto px-6 py-20 font-['Inter'] text-black">
+        <h1 class="text-5xl font-[900] uppercase italic tracking-tighter mb-12">Mis Pedidos</h1>
+        <div id="orders-list" class="space-y-12"></div>
     </main>
 </Layout>
 
 <script>
     import { supabase } from '../lib/supabase';
 
-    // Función para manejar la decisión del cliente
-    (window as any).handleDecision = async (orderId: string, decision: string) => {
-        const confirmMsg = decision === 'Reembolso' 
-            ? "¿Confirmas la solicitud de reembolso? (Tarda 1-10 días hábiles)" 
-            : `¿Confirmas la opción: ${decision}?`;
+    interface OrderItem {
+        id: string;
+        product_name: string;
+        size: string;
+        quality: string;
+        image_url: string;
+        qc_images: string[] | null;
+        item_notes: string | null;
+    }
 
-        if (!confirm(confirmMsg)) return;
-
-        const { error } = await supabase
-            .from('orders')
-            .update({ client_decision: decision })
-            .eq('id', orderId);
-
-        if (error) {
-            alert("Error al procesar: " + error.message);
-        } else {
-            location.reload();
-        }
-    };
+    interface Order {
+        id: string;
+        status: string;
+        client_decision: string | null;
+        created_at: string;
+        order_items: OrderItem[];
+    }
 
     async function loadOrders() {
-        const list = document.getElementById('orders-list');
         const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-            if (list) list.innerHTML = `<div class="text-center py-20 font-black uppercase text-gray-400">Inicia sesión</div>`;
-            return;
-        }
+        if (!session) return;
 
-        const { data: orders } = await supabase
+        const { data: orders, error } = await supabase
             .from('orders')
-            .select('*, order_items(*)')
+            .select(`
+                *,
+                order_items (
+                    id, product_name, size, quality, image_url, qc_images, item_notes
+                )
+            `)
             .eq('user_id', session.user.id)
             .order('created_at', { ascending: false });
 
-        if (!orders || orders.length === 0) {
-            if (list) list.innerHTML = `<div class="text-center py-20 font-black uppercase text-gray-400">No hay pedidos</div>`;
-            return;
-        }
+        const list = document.getElementById('orders-list');
+        if (error || !orders || !list) return;
 
-        if (list) {
-            list.innerHTML = orders.map(order => {
-                const item = order.order_items[0] || {};
-                const hasQC = order.qc_images && order.qc_images.length > 0;
-                const hasDecision = order.client_decision && order.client_decision !== '';
+        list.innerHTML = (orders as Order[]).map((order: Order) => `
+            <div class="bg-white rounded-[40px] border border-gray-100 shadow-xl overflow-hidden mb-8">
+                <div class="p-6 bg-black text-white flex justify-between items-center">
+                    <span class="text-[10px] font-black uppercase italic text-[#2ecc71]">${order.status}</span>
+                    <span class="text-[10px] font-black opacity-40">#${order.id.slice(0,8)}</span>
+                </div>
 
-                return `
-                <div class="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden mb-10">
-                    <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                        <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">ID: ${order.id.slice(0, 8)}</span>
-                        <span class="text-[10px] font-black uppercase italic px-4 py-2 rounded-full bg-black text-white">${order.status}</span>
-                    </div>
-
-                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div class="flex gap-6">
-                            <div class="w-24 h-24 bg-gray-50 rounded-3xl p-2"><img src="${item.image_url}" class="w-full h-full object-contain" /></div>
-                            <div>
-                                <h3 class="font-[900] uppercase italic text-xl tracking-tighter">${item.product_name}</h3>
-                                <p class="text-[10px] font-black text-gray-400 uppercase">Talla: ${item.size}</p>
+                <div class="p-8 space-y-8">
+                    ${order.order_items.map((item: OrderItem) => `
+                        <div class="grid md:grid-cols-2 gap-6 border-b border-gray-50 pb-8 last:border-0 last:pb-0">
+                            <div class="flex gap-4">
+                                <img src="${item.image_url}" class="w-24 h-24 object-contain bg-gray-50 rounded-2xl" />
+                                <div>
+                                    <h3 class="font-black uppercase italic text-sm">${item.product_name}</h3>
+                                    <p class="text-[9px] font-bold text-gray-400">TALLA: ${item.size}</p>
+                                    <div class="mt-2 p-3 bg-zinc-50 rounded-xl italic text-[11px] text-zinc-500">
+                                        "${item.item_notes || 'Sin mensaje adicional.'}"
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2">
+                                ${(item.qc_images || []).map((img: string) => `
+                                    <a href="${img}" target="_blank" class="aspect-square rounded-lg overflow-hidden">
+                                        <img src="${img}" class="w-full h-full object-cover" />
+                                    </a>
+                                `).join('') || '<p class="col-span-4 text-[9px] uppercase font-black text-gray-300 py-10 text-center">QC en proceso...</p>'}
                             </div>
                         </div>
-                        <div class="bg-zinc-50 rounded-3xl p-6 border border-zinc-100">
-                            <p class="text-[9px] font-black uppercase text-zinc-400 mb-2">Notas del Staff</p>
-                            <p class="text-xs italic text-zinc-600">"${order.admin_notes || 'Procesando...'}"</p>
-                        </div>
-                    </div>
-
-                    <div class="px-8 pb-6">
-                        <div class="bg-zinc-950 rounded-[32px] p-6 text-white border border-zinc-800">
-                            <p class="text-[9px] font-black uppercase text-[#2ecc71] mb-4 tracking-widest text-center">Acciones Disponibles</p>
-                            ${!hasDecision ? `
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <button onclick="handleDecision('${order.id}', 'Cambio de par')" class="bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 py-4 rounded-2xl text-[9px] font-black uppercase italic transition-all">Cambiar par</button>
-                                    <button onclick="handleDecision('${order.id}', 'Confirmado')" class="bg-[#2ecc71] text-black py-4 rounded-2xl text-[9px] font-black uppercase italic transition-all">Confirmar y Mandar</button>
-                                    <button onclick="handleDecision('${order.id}', 'Reembolso')" class="border border-red-500/30 text-red-500 py-4 rounded-2xl text-[9px] font-black uppercase italic transition-all hover:bg-red-500 hover:text-white">Reembolso</button>
-                                </div>
-                                <p class="text-[7px] text-zinc-600 mt-4 uppercase font-bold text-center">Reembolsos: 1 a 10 días hábiles</p>
-                            ` : `
-                                <div class="text-center py-2">
-                                    <p class="text-[8px] font-black uppercase text-zinc-500 mb-1">Tu elección:</p>
-                                    <span class="text-[#2ecc71] font-black uppercase italic text-sm">${order.client_decision}</span>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-
-                    <div class="px-8 pb-8">
-                        <p class="text-[9px] font-black uppercase text-gray-400 mb-4 tracking-widest">QC Media</p>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            ${hasQC ? order.qc_images.map((url: string) => {
-                                const isVideo = url.toLowerCase().match(/\.(mp4|webm|mov)$/);
-                                return isVideo 
-                                    ? `<video src="${url}" controls class="w-full aspect-square object-cover rounded-2xl bg-black"></video>`
-                                    : `<a href="${url}" target="_blank" class="block aspect-square rounded-2xl overflow-hidden border border-gray-100"><img src="${url}" class="w-full h-full object-cover" /></a>`;
-                            }).join('') : '<p class="col-span-full text-center text-[10px] font-bold text-gray-300 uppercase italic py-4">Esperando multimedia...</p>'}
-                        </div>
-                    </div>
+                    `).join('')}
                 </div>
-                `;
-            }).join('');
-        }
+
+                <div class="p-6 bg-zinc-50 flex justify-center border-t border-gray-100">
+                    ${!order.client_decision ? `
+                        <div class="flex gap-4">
+                            <button onclick="window.makeDecision('${order.id}', 'Confirmado')" class="bg-black text-white px-8 py-3 rounded-full font-black uppercase italic text-[10px]">Aprobar Todo</button>
+                            <button onclick="window.makeDecision('${order.id}', 'Reembolso')" class="border border-red-200 text-red-500 px-8 py-3 rounded-full font-black uppercase italic text-[10px]">Reembolso</button>
+                        </div>
+                    ` : `
+                        <p class="font-black uppercase italic text-sm">Decisión: ${order.client_decision}</p>
+                    `}
+                </div>
+            </div>
+        `).join('');
     }
+
+    (window as any).makeDecision = async (id: string, decision: string) => {
+        await supabase.from('orders').update({ client_decision: decision }).eq('id', id);
+        location.reload();
+    };
+
     loadOrders();
 </script>
