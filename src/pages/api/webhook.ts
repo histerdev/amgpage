@@ -1,33 +1,24 @@
-import type { APIRoute } from 'astro';
+// En src/lib/notifications.ts o en tu webhook
 
-export const POST: APIRoute = async ({ request }) => {
-    // 1. Obtenemos el ID de MercadoPago
-    const url = new URL(request.url);
-    const id = url.searchParams.get('data.id') || url.searchParams.get('id');
+export async function sendAdminNotification(message: string) {
+  // Intenta leer de Astro, y si no, del sistema de Node (Vercel)
+  const botToken = import.meta.env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = import.meta.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
 
-    // USAMOS LOS VALORES DIRECTOS (Para descartar que el error sea la Variable de Entorno)
-    const TOKEN = "8170505944:AAEYPu3FtEv1x5aduVXmVOThymzBWyy4zIU";
-    const CHAT_ID = "7430626322";
+  if (!botToken) {
+    console.error("❌ Error: El Token de Telegram no llegó al servidor");
+    return;
+  }
 
-    if (id) {
-        // Enviar notificación básica inmediata
-        try {
-            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: `🔔 <b>¡Webhook Recibido!</b>\nID de pago detectado: <code>${id}</code>\nEstado: Procesando...`,
-                    parse_mode: 'HTML'
-                })
-            });
-        } catch (e) {
-            console.error("Error enviando a Telegram:", e);
-        }
-    }
-
-    return new Response(JSON.stringify({ received: true }), { 
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-    });
-};
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'HTML'
+    })
+  });
+}
