@@ -2,15 +2,15 @@ import type { APIRoute } from 'astro';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { supabase } from '../../lib/supabase';
 
+// IMPORTANTE: Asegúrate de que en Vercel MP_ACCESS_TOKEN sea el de PRODUCCIÓN (APP_USR-...) 
+// si estás recibiendo pagos reales.
 const client = new MercadoPagoConfig({
     accessToken: import.meta.env.MP_ACCESS_TOKEN
 });
 
-// Función interna para evitar errores de importación 404
 async function sendTelegram(htmlMessage: string) {
     const botToken = import.meta.env.TELEGRAM_TOKEN;
     const chatId = import.meta.env.CHAT_ID;
-
     if (!botToken || !chatId) return;
 
     try {
@@ -25,20 +25,27 @@ async function sendTelegram(htmlMessage: string) {
             })
         });
     } catch (e) {
-        console.error("Error enviando Telegram:", e);
+        console.error("Error Telegram:", e);
     }
 }
 
 export const POST: APIRoute = async ({ request }) => {
-    const url = new URL(request.url);
-    const id = url.searchParams.get('data.id') || url.searchParams.get('id');
+    try {
+        const body = await request.json();
+        
+        // Mercado Pago puede enviar el ID en diferentes lugares según el tipo de evento
+        const paymentId = body.data?.id || body.id;
 
-    if (id) {
-        // Ejecutamos en segundo plano para responder rápido a Mercado Pago
-        processPayment(id).catch(console.error);
+        if (paymentId && (body.type === 'payment' || body.action?.includes('payment'))) {
+            // Limpiamos el ID por si viene con ruido
+            const cleanId = String(paymentId).trim();
+            processPayment(cleanId).catch(err => console.error("Detalle Error Pago:", err));
+        }
+
+        return new Response(null, { status: 200 });
+    } catch (e) {
+        return new Response(null, { status: 200 }); // Siempre respondemos 200 a MP
     }
-
-    return new Response(null, { status: 200 });
 };
 
 async function processPayment(paymentId: string) {
@@ -48,7 +55,6 @@ async function processPayment(paymentId: string) {
         if (payment.status === 'approved') {
             const orderId = payment.external_reference;
 
-            // 1. Obtener la orden
             const { data: order } = await supabase
                 .from('orders')
                 .select('*')
@@ -57,13 +63,11 @@ async function processPayment(paymentId: string) {
 
             if (!order || order.status === 'PAGADO') return;
 
-            // 2. Actualizar estado
             await supabase
                 .from('orders')
                 .update({ status: 'PAGADO', payment_id: paymentId })
                 .eq('id', orderId);
 
-            // 3. Obtener items con todos los detalles
             const { data: items } = await supabase
                 .from('order_items')
                 .select('*')
@@ -71,34 +75,24 @@ async function processPayment(paymentId: string) {
 
             const itemsHtml = items?.map(i => 
                 `👟 <b>${i.product_name}</b>\n   ├ Talla: ${i.size}\n   ├ Calidad: ${i.quality}\n   └ Precio: $${Number(i.price).toLocaleString('es-CL')}`
-            ).join('\n\n') || "⚠️ No hay detalles de productos";
+            ).join('\n\n') || "⚠️ No hay detalles";
 
-            // 4. Mensaje Profesional
             const mensaje = `
 🚨 <b>VENTA CONFIRMADA - AMG SHOES</b> 🚨
 ➖➖➖➖➖➖➖➖➖➖➖
-💰 <b>Total Pagado:</b> $${new Intl.NumberFormat('es-CL').format(payment.transaction_amount || 0)}
-🆔 <b>Orden ID:</b> <code>${orderId}</code>
-💳 <b>Pago ID:</b> <code>${paymentId}</code>
+💰 <b>Total:</b> $${new Intl.NumberFormat('es-CL').format(payment.transaction_amount || 0)}
+🆔 <b>Orden:</b> <code>${orderId}</code>
+👤 <b>Cliente:</b> ${order.customer_name}
+📞 <b>Tel:</b> ${order.phone || 'N/A'}
 
-📦 <b>DETALLE DEL PEDIDO:</b>
+📦 <b>PRODUCTOS:</b>
 ${itemsHtml}
-
-👤 <b>DATOS DEL CLIENTE:</b>
-• Nombre: ${order.customer_name}
-• Email: ${order.email}
-• Teléfono: ${order.phone || 'No indicado'}
-• Ciudad: ${order.city || 'N/A'}
-
-✈️ <b>ESTADO DE LOGÍSTICA:</b>
-• Origen: International Shipping
-• Estado: 🟡 <b>Esperando preparación de QC</b>
-➖➖➖➖➖➖➖➖➖➖➖
-<i>AMG Web System v2.0</i>`;
+➖➖➖➖➖➖➖➖➖➖➖`;
 
             await sendTelegram(mensaje);
         }
-    } catch (error) {
-        console.error("❌ Error procesando el pago:", error);
+    } catch (error: any) {
+        // Esto te dirá en Vercel si el error es de autenticación
+        console.error("❌ Fallo crítico en MP:", error.message);
     }
 }
