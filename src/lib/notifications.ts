@@ -1,9 +1,12 @@
-// src/lib/notifications.ts
-
 export async function sendAdminNotification(htmlMessage: string) {
-  // Usamos el token que te funcionó en el Debugger
-  const botToken = '8170505944:AAEYPu3FtEv1x5aduVXmVOThymzBWyy4zIU';
-  const chatId = '7430626322';
+  // Nombres EXACTOS según tu captura de Vercel
+  const botToken = import.meta.env.TELEGRAM_TOKEN || process.env.TELEGRAM_TOKEN;
+  const chatId = import.meta.env.CHAT_ID || process.env.CHAT_ID;
+
+  if (!botToken || !chatId) {
+    console.error("❌ Error: No se encontraron las variables CHAT_ID o TELEGRAM_TOKEN en Vercel");
+    return;
+  }
 
   const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
@@ -18,8 +21,7 @@ export async function sendAdminNotification(htmlMessage: string) {
         disable_web_page_preview: true
       })
     });
-    console.log("✅ Notificación enviada");
   } catch (error) {
-    console.error("❌ Error de red con Telegram:", error);
+    console.error("❌ Error enviando a Telegram:", error);
   }
 }
