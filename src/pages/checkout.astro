@@ -28,14 +28,9 @@ export const prerender = false;
                             <input type="text" name="primer_nombre" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Segundo Nombre (Opc)</label>
-                            <input type="text" name="segundo_nombre" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
+                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Apellido Paterno</label>
+                            <input type="text" name="apellido_paterno" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
                         </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input type="text" name="apellido_paterno" placeholder="APELLIDO PATERNO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-                        <input type="text" name="apellido_materno" placeholder="APELLIDO MATERNO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -44,41 +39,25 @@ export const prerender = false;
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <select id="region-select" name="region" required class="custom-select w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-white cursor-pointer appearance-none">
+                        <select id="region-select" name="region" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none uppercase text-xs font-bold bg-white">
                             <option value="" disabled selected>SELECCIONAR REGIÓN</option>
                             {RegionesYComunas.map((reg) => (
                                 <option value={reg.name}>{reg.name.toUpperCase()}</option>
                             ))}
                         </select>
 
-                        <select id="ciudad-select" name="ciudad" required disabled class="custom-select w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-white cursor-pointer appearance-none disabled:opacity-50">
+                        <select id="ciudad-select" name="ciudad" required disabled class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none uppercase text-xs font-bold bg-white disabled:opacity-50">
                             <option value="" disabled selected>SELECCIONAR CIUDAD</option>
                         </select>
                     </div>
 
-                    <input type="text" name="direccion" placeholder="DIRECCIÓN EXACTA (CALLE, NÚMERO, DEPTO)" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
+                    <input type="text" name="direccion" placeholder="DIRECCIÓN (CALLE, NÚMERO, DEPTO)" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input type="text" name="postal" placeholder="CÓDIGO POSTAL" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
                         <input type="tel" name="telefono" placeholder="TELÉFONO DE CONTACTO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
                     </div>
                     
-                    <div class="pt-8 space-y-4">
-                        <h3 class="text-xl font-[900] uppercase italic tracking-tighter text-black ml-1">Método de Pago</h3>
-                        <div class="bg-[#f8faff] border border-[#e5edff] rounded-[32px] p-6 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center gap-4">
-                                <div class="bg-white p-2.5 rounded-2xl shadow-sm border border-gray-50 flex items-center justify-center">
-                                    <img src="https://vectorseek.com/wp-content/uploads/2023/08/Mercado-Pago-Icon-Logo-Vector.svg-.png" alt="Mercado Pago" class="h-6 w-auto" />
-                                </div>
-                                <div>
-                                    <p class="text-[#001d61] font-[900] text-xs uppercase italic leading-none tracking-tight">Pago Seguro Encriptado</p>
-                                    <p class="text-[#5c77b3] text-[9px] font-bold uppercase tracking-widest mt-1">Crédito, Débito y Webpay</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="pay-button" class="w-full bg-black text-white py-7 rounded-[32px] font-[900] uppercase italic tracking-[0.2em] text-[14px] shadow-2xl shadow-black/20 hover:bg-zinc-800 active:scale-[0.98] transition-all mt-6">
+                    <button type="submit" id="pay-button" class="w-full bg-black text-white py-7 rounded-[32px] font-[900] uppercase italic tracking-[0.2em] text-[14px] shadow-2xl hover:bg-zinc-800 transition-all mt-6 cursor-pointer">
                         Pagar con Mercado Pago
                     </button>
                 </form>
@@ -94,19 +73,19 @@ export const prerender = false;
                     <div class="border-t-2 border-dashed border-zinc-200 pt-8 flex flex-col items-center">
                         <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Total Final</span>
                         <span id="sum-price" class="text-5xl font-[900] italic tracking-tighter text-black">$0</span>
-                        <p class="text-[8px] text-zinc-400 uppercase font-bold mt-4 tracking-widest">Incluye impuestos e importación</p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 </Layout>
+
 <script>
     import { supabase } from '../lib/supabase';
     import RegionesYComunas from '../data/chile';
     import { cartItems } from '../store/cartStore';
 
-    // 1. VARIABLES Y SELECTORES
+    // 1. VARIABLES
     const listContainer = document.getElementById('checkout-products-list');
     const totalEl = document.getElementById('sum-price');
     const form = document.getElementById('checkout-form') as HTMLFormElement;
@@ -114,33 +93,24 @@ export const prerender = false;
     const regionSelect = document.getElementById('region-select') as HTMLSelectElement;
     const ciudadSelect = document.getElementById('ciudad-select') as HTMLSelectElement;
 
-    // 2. RENDERIZADO REACTIVO DEL RESUMEN
-    // Usamos subscribe para que si el store cambia o tarda en cargar, el checkout se actualice
+    // 2. RENDERIZADO REACTIVO
     (cartItems as any).subscribe((items: any[]) => {
         if (!listContainer || !totalEl) return;
 
         if (!items || items.length === 0) {
-            listContainer.innerHTML = `
-                <div class="text-center py-10">
-                    <p class="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em]">El carrito está vacío</p>
-                    <a href="/" class="text-[9px] font-black underline mt-4 inline-block">VOLVER A LA TIENDA</a>
-                </div>`;
+            listContainer.innerHTML = `<div class="text-center py-10"><p class="text-[10px] uppercase text-zinc-400">Carrito vacío</p></div>`;
             totalEl.innerText = '$0';
             return;
         }
 
         listContainer.innerHTML = items.map((item: any) => `
-            <div class="flex items-center gap-4 bg-white p-4 rounded-3xl border border-zinc-100 mb-4 animate-in fade-in slide-in-from-right-4">
+            <div class="flex items-center gap-4 bg-white p-4 rounded-3xl border border-zinc-100 mb-4">
                 <img src="${item.image || item.image_url}" class="w-16 h-16 object-contain rounded-xl" />
                 <div class="flex-1">
-                    <p class="font-black text-[10px] uppercase text-black leading-tight">${item.name || item.product_name}</p>
-                    <div class="flex gap-2 mt-1">
-                        <span class="text-[8px] font-black text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded uppercase">Talla: ${item.size}</span>
-                        <span class="text-[8px] font-black text-white bg-black px-1.5 py-0.5 rounded uppercase">${item.quality}</span>
-                    </div>
-                    <p class="text-[8px] font-bold text-zinc-400 mt-1 uppercase">Cantidad: ${item.quantity || 1}</p>
+                    <p class="font-black text-[10px] uppercase">${item.name || item.product_name}</p>
+                    <span class="text-[8px] font-bold text-zinc-500">Talla: ${item.size} | Cant: ${item.quantity}</span>
                 </div>
-                <p class="font-black text-xs text-black">$${((item.price) * (item.quantity || 1)).toLocaleString('es-CL')}</p>
+                <p class="font-black text-xs">$${((item.price) * (item.quantity || 1)).toLocaleString('es-CL')}</p>
             </div>
         `).join('');
 
@@ -148,39 +118,35 @@ export const prerender = false;
         totalEl.innerText = `$${total.toLocaleString('es-CL')}`;
     });
 
-    // 3. LÓGICA DE PROCESAMIENTO DE PAGO
+    // 3. PROCESO DE PAGO
     form?.addEventListener('submit', async (e: SubmitEvent) => {
         e.preventDefault();
         
-        // Obtenemos los items actuales del store
         const currentItems = (cartItems as any).get();
+        if (!currentItems || currentItems.length === 0) return alert("TU CARRITO ESTÁ VACÍO");
 
-        if (!currentItems || currentItems.length === 0) {
-            alert("TU CARRITO ESTÁ VACÍO");
-            return;
-        }
-
+        // Bloquear botón
         if (payBtn) {
             payBtn.disabled = true;
-            payBtn.innerHTML = `<span class="animate-pulse">GENERANDO ORDEN SEGURA...</span>`;
+            payBtn.innerHTML = `<span class="animate-pulse">PROCESANDO... NO CIERRES</span>`;
         }
 
         try {
-            // A. VALIDAR SESIÓN
+            // A. Validar Sesión
             const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
-            if (sessionErr) throw new Error("Error de sesión: " + sessionErr.message);
-            
-            if (!session) {
-                alert("DEBES INICIAR SESIÓN PARA FINALIZAR TU PEDIDO.");
+            if (sessionErr || !session) {
+                alert("Debes iniciar sesión.");
                 window.location.href = "/login";
                 return;
             }
 
             const formData = new FormData(form);
-            const customOrderId = window.crypto.randomUUID();
-            const totalAmount = currentItems.reduce((acc: number, item: any) => acc + (item.price * (item.quantity || 1)), 0);
+            const customOrderId = crypto.randomUUID(); // ID único para todo el pedido
+            
+            // Calcular total exacto
+            const totalAmount = currentItems.reduce((acc: number, i: any) => acc + (Number(i.price) * (Number(i.quantity) || 1)), 0);
 
-            // B. INSERTAR EN TABLA 'orders' (Acorde a tu esquema de Supabase)
+            // B. Insertar Orden (Cabecera)
             const { error: orderError } = await supabase.from('orders').insert([{
                 id: customOrderId,
                 user_id: session.user.id,
@@ -192,56 +158,81 @@ export const prerender = false;
                 phone: formData.get('telefono'),
                 email: formData.get('email'),
                 total_price: totalAmount,
-                status: 'Pendiente'
+                status: 'Pendiente' // Estado inicial
             }]);
 
-            if (orderError) throw orderError;
+            if (orderError) throw new Error("Error creando orden: " + orderError.message);
 
-            // C. INSERTAR EN TABLA 'order_items'
-            const itemsToInsert = currentItems.map((item: any) => ({
-                order_id: customOrderId,
-                product_name: item.name || item.product_name,
-                price: item.price,
-                size: item.size,
-                quality: item.quality,
-                image_url: item.image || item.image_url
-            }));
+            // C. Insertar Items (Detalle) - AQUÍ ESTABA EL POSIBLE ERROR
+            // Mapeamos explícitamente asegurando tipos de datos
+            const itemsToInsert = [];
+            
+            for (const item of currentItems) {
+                // Si el item tiene cantidad > 1, creamos filas individuales o una fila con cantidad? 
+                // MercadoPago prefiere items separados, pero Supabase depende de tu modelo.
+                // Asumiremos 1 fila por tipo de producto (tu esquema no muestra columna 'quantity' en order_items, 
+                // si compras 2 del mismo, deberías insertar 2 filas o agregar columna quantity).
+                // Por seguridad, insertamos N filas si quantity > 1 para que el conteo sea real en DB.
+                
+                const qty = item.quantity || 1;
+                for (let q = 0; q < qty; q++) {
+                    itemsToInsert.push({
+                        order_id: customOrderId, // Vinculamos con la cabecera
+                        product_name: item.name || item.product_name,
+                        price: item.price,
+                        size: item.size,
+                        quality: item.quality,
+                        image_url: item.image || item.image_url
+                    });
+                }
+            }
 
             const { error: itemsError } = await supabase.from('order_items').insert(itemsToInsert);
-            if (itemsError) throw itemsError;
+            
+            if (itemsError) {
+                console.error("Error insertando items:", itemsError);
+                throw new Error("Error guardando productos del pedido.");
+            }
 
-            // D. LLAMADA A API MERCADO PAGO
-            const response = await fetch('/api/create-payment', {
+            // D. Crear Preferencia Mercado Pago
+            const response = await fetch('/api/webhooks/create-payment', { // Asegura que esta ruta coincida con tu archivo
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    items: currentItems.map((i: any) => ({ 
-                        title: i.name || i.product_name, 
-                        unit_price: i.price, 
-                        quantity: i.quantity || 1,
-                        description: `Talla: ${i.size} | Calidad: ${i.quality}`, // Importante para Telegram
+                    items: currentItems.map((i: any) => ({
+                        id: i.id || 'ITEM',
+                        title: i.name || i.product_name,
+                        unit_price: Number(i.price),
+                        quantity: Number(i.quantity || 1),
+                        description: `Talla: ${i.size} - ${i.quality}`,
                         image_url: i.image || i.image_url
                     })),
                     orderId: customOrderId,
-                    customerEmail: formData.get('email') // <--- AGREGAR ESTO
+                    customerEmail: formData.get('email')
                 })
             });
 
             const result = await response.json();
 
             if (result.init_point) {
-                // Limpiamos el store y el localStorage antes de redirigir
+                // E. VACIAR CARRITO ANTES DE REDIRIGIR
+                // Limpiamos el Store de Astro
                 cartItems.set([]); 
-                localStorage.removeItem('amg-cart');
-                window.location.href = result.init_point;
+                
+                // Limpiamos LocalStorage explícitamente (clave por defecto de nanostores o la tuya manual)
+                localStorage.removeItem('amg-cart'); 
+                
+                // Forzamos un pequeño delay para asegurar que el storage se limpie antes del redirect
+                setTimeout(() => {
+                    window.location.href = result.init_point;
+                }, 100);
             } else {
-                throw new Error(result.error || "Error al conectar con Mercado Pago");
+                throw new Error("No se pudo conectar con Mercado Pago");
             }
 
         } catch (err: any) {
-            console.error("❌ ERROR:", err);
-            alert("ERROR AL PROCESAR: " + (err.message || "Intenta nuevamente"));
-            
+            console.error(err);
+            alert("OCURRIÓ UN ERROR: " + err.message);
             if (payBtn) {
                 payBtn.disabled = false;
                 payBtn.innerText = "PAGAR CON MERCADO PAGO";
@@ -249,7 +240,7 @@ export const prerender = false;
         }
     });
 
-    // 4. SELECTS DE REGIÓN Y CIUDAD
+    // 4. Lógica de Selects (Región/Ciudad) - Se mantiene igual
     regionSelect?.addEventListener('change', () => {
         const reg = RegionesYComunas.find(r => r.name === regionSelect.value);
         if (ciudadSelect && reg) {
@@ -257,7 +248,7 @@ export const prerender = false;
             ciudadSelect.disabled = false;
             reg.communes.sort().forEach(c => {
                 const opt = document.createElement('option');
-                opt.value = c; 
+                opt.value = c;
                 opt.textContent = c.toUpperCase();
                 ciudadSelect.appendChild(opt);
             });
