@@ -855,15 +855,5 @@ export const productos = [
     },    image: "/productos/bape-low-shark.png",
     tallas: ["38", "39", "40", "41", "42", "43", "44", "45"],
     tags: ["Bape", "Famoso", "Shark"] 
-  },
-  {
-    id: "jordan-1-travis-scott",
-    name: "Jordan 1 Retro High Travis Scott",
-    prices: {
-   PK: 101990,
-      G5: 83500
-    },    image: "https://static.nike.com/a/images/...",
-    tallas: ["40", "41", "42", "43", "44"],
-    tags: ["Jordan 1", "Travis Scott", "Exclusivo"]
-  },
+  }
 ];

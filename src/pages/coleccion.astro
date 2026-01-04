@@ -14,7 +14,11 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
 <Layout title="Catálogo | AMG SNEAKERS">
     <Header />
     <main class="py-8 md:py-16 bg-white font-['Inter']">
-        <div class="max-w-7xl mx-auto px-4 md:px-6">
+        <div 
+            id="catalog-container" 
+            data-products={JSON.stringify(productos)}
+            class="max-w-7xl mx-auto px-4 md:px-6"
+        >
             
             <div class="mb-12 space-y-8">
                 <div class="flex items-baseline gap-4">
@@ -23,7 +27,12 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
                 </div>
                 
                 <div class="sticky top-4 z-40 bg-white/90 backdrop-blur-xl p-4 rounded-[32px] border border-gray-100 shadow-xl shadow-black/5 space-y-4">
-                    <input type="text" id="search-input" placeholder="BUSCAR POR NOMBRE O COLOR..." class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-black rounded-2xl px-8 py-5 outline-none font-bold uppercase text-xs tracking-widest transition-all" />
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="BUSCAR POR NOMBRE O COLOR..." 
+                        class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-black rounded-2xl px-8 py-5 outline-none font-bold uppercase text-xs tracking-widest transition-all" 
+                    />
 
                     <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar">
                         <button class="silhouette-btn active bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all border-2 border-black" data-filter="all">TODOS</button>
@@ -52,7 +61,7 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
 
             <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
                 {productos.map((prod) => (
-                    <div class="product-wrapper">
+                    <div class="product-wrapper" data-product-id={prod.id}>
                         <ProductCard {...prod} />
                     </div>
                 ))}
@@ -69,7 +78,6 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Estilo forzado para el botón activo */
     .silhouette-btn.active {
         background-color: black !important;
         color: white !important;
@@ -79,6 +87,10 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
 </style>
 
 <script>
+    // 1. SELECTORES
+    const container = document.getElementById('catalog-container');
+    const productsData = JSON.parse(container?.dataset.products || '[]');
+    
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
     const silhouetteBtns = document.querySelectorAll('.silhouette-btn');
     const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
@@ -88,46 +100,39 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
     const noResults = document.getElementById('no-results');
 
     let currentSilhouette = 'all';
-    // Solución error TS: Definimos tipo string[]
     let selectedTags: string[] = []; 
     let currentSearch = '';
 
+    // 2. FUNCIÓN DE FILTRADO (Lógica de Cliente)
     function applyFilters() {
         let visibleCount = 0;
 
         productWrappers.forEach(wrapper => {
-            const container = wrapper as HTMLElement;
-            // Seleccionamos el elemento que tiene los data-attributes dentro de ProductCard
-            const card = container.querySelector('[data-name]') as HTMLElement;
-            if (!card) return;
+            const el = wrapper as HTMLElement;
+            const productId = el.dataset.productId;
+            const product = productsData.find((p: any) => p.id === productId);
 
-            const name = (card.getAttribute('data-name') || '').toLowerCase();
-            const tags = (card.getAttribute('data-tags') || '').toLowerCase().split('|');
+            if (!product) return;
 
-            // 1. Filtro de búsqueda manual
+            const name = product.name.toLowerCase();
+            const tags = product.tags.map((t: string) => t.toLowerCase());
+
+            // Validación de Búsqueda
             const matchesSearch = name.includes(currentSearch.toLowerCase());
 
-            // 2. Filtro de silueta (Lógica Exacta)
-            let matchesSilhouette = false;
-            if (currentSilhouette === 'all') {
-                matchesSilhouette = true;
-            } else {
-                matchesSilhouette = tags.some(t => {
-                    const tag = t.trim();
-                    // Coincidencia exacta o que empiece con la silueta + espacio (ej: "jordan 1 retro")
-                    return tag === currentSilhouette || tag.startsWith(currentSilhouette + " ");
-                });
-            }
+            // Validación de Silueta
+            let matchesSilhouette = currentSilhouette === 'all' || 
+                tags.some((t: string) => t === currentSilhouette || t.startsWith(currentSilhouette + " "));
 
-            // 3. Filtro de tags avanzados (checkboxes)
+            // Validación de Tags Avanzados
             const matchesAdvancedTags = selectedTags.length === 0 || 
-                                       selectedTags.every(st => tags.includes(st));
+                selectedTags.every(st => tags.includes(st));
 
             if (matchesSearch && matchesSilhouette && matchesAdvancedTags) {
-                container.style.display = 'block';
+                el.style.display = 'block';
                 visibleCount++;
             } else {
-                container.style.display = 'none';
+                el.style.display = 'none';
             }
         });
 
@@ -136,31 +141,26 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
         }
     }
 
-    // Toggle Panel Avanzado
+    // 3. EVENT LISTENERS
     toggleAdvanced?.addEventListener('click', () => {
         advancedPanel?.classList.toggle('hidden');
     });
 
-    // Lógica de botones de Siluetas
     silhouetteBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Reset visual de todos los botones
             silhouetteBtns.forEach(b => {
                 b.classList.remove('active', 'bg-black', 'text-white', 'border-black');
                 b.classList.add('bg-gray-100', 'text-gray-500', 'border-transparent');
             });
 
-            // Activar botón clickeado
             const clickedBtn = btn as HTMLElement;
             clickedBtn.classList.add('active', 'bg-black', 'text-white', 'border-black');
-            clickedBtn.classList.remove('bg-gray-100', 'text-gray-500', 'border-transparent');
-
+            
             currentSilhouette = clickedBtn.dataset.filter || 'all';
             applyFilters();
         });
     });
 
-    // Lógica de Checkboxes
     tagCheckboxes.forEach(cb => {
         cb.addEventListener('change', () => {
             selectedTags = Array.from(tagCheckboxes)
@@ -170,7 +170,6 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
         });
     });
 
-    // Lógica de Buscador
     searchInput?.addEventListener('input', (e) => {
         currentSearch = (e.target as HTMLInputElement).value;
         applyFilters();
