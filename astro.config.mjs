@@ -1,8 +1,11 @@
 import { defineConfig } from 'astro/config';
-import netlify from '@astrojs/netlify';
-import vercel from '@astrojs/vercel';
+import vercel from '@astrojs/vercel'; // o el que uses
+
 export default defineConfig({
-  // `site` can be set to a fully-qualified URL for production builds, e.g.
-output: 'server', // O 'hybrid' si la mayoría son estáticas  // Omit it for local development to avoid "Invalid url" errors.
-adapter: vercel(),
+  output: 'server',
+  adapter: vercel({
+    webAnalytics: { enabled: true },
+    functionPerRoute: false, // Recomendado para evitar muchas funciones pequeñas
+    runtime: 'nodejs20.x',    // <--- FUERZA ESTA LÍNEA AQUÍ
+  }),
 });

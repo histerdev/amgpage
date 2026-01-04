@@ -1,5 +1,8 @@
 {
   "name": "astro-tailwind-app",
+  "engines": {
+    "node": "20.x"
+  },
   "version": "0.0.0",
   "private": true,
   "scripts": {
