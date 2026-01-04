@@ -6,250 +6,220 @@ import RegionesYComunas from '../data/chile';
 export const prerender = false;
 ---
 
-<Layout title="Checkout | Pago Seguro">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    
+<Layout title="Checkout | Finalizar Compra">
     <Header />
-    <main class="max-w-5xl mx-auto px-6 py-10 md:py-20 font-['Inter',_sans-serif]">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+    
+    <main class="max-w-5xl mx-auto px-6 py-12 font-['Inter',_sans-serif]">
+        <div class="mb-12 text-center md:text-left">
+            <h1 class="text-3xl md:text-5xl font-[900] uppercase italic tracking-tighter mb-2">
+                Checkout Seguro
+            </h1>
+            <div class="flex items-center gap-2 justify-center md:justify-start text-green-600 text-xs font-bold uppercase tracking-widest">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Conexión Encriptada SSL
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
-            <div class="lg:col-span-7 space-y-10">
-                <div>
-                    <h2 class="text-4xl font-[900] uppercase italic tracking-tighter text-black leading-none mb-2">
-                        Datos de Envío
-                    </h2>
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Importación Directa / QC Ready</p>
-                </div>
-                
+            <div class="lg:col-span-7">
                 <form id="checkout-form" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Primer Nombre</label>
-                            <input type="text" name="primer_nombre" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Apellido Paterno</label>
-                            <input type="text" name="apellido_paterno" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input type="text" id="rut-input" name="rut" placeholder="RUT (EJ: 12345678-K)" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-                        <input type="email" name="email" placeholder="CORREO ELECTRÓNICO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <select id="region-select" name="region" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none uppercase text-xs font-bold bg-white">
-                            <option value="" disabled selected>SELECCIONAR REGIÓN</option>
-                            {RegionesYComunas.map((reg) => (
-                                <option value={reg.name}>{reg.name.toUpperCase()}</option>
-                            ))}
-                        </select>
-
-                        <select id="ciudad-select" name="ciudad" required disabled class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none uppercase text-xs font-bold bg-white disabled:opacity-50">
-                            <option value="" disabled selected>SELECCIONAR CIUDAD</option>
-                        </select>
-                    </div>
-
-                    <input type="text" name="direccion" placeholder="DIRECCIÓN (CALLE, NÚMERO, DEPTO)" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input type="tel" name="telefono" placeholder="TELÉFONO DE CONTACTO" required class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-all uppercase text-xs font-bold tracking-widest bg-transparent" />
-                    </div>
                     
-                    <button type="submit" id="pay-button" class="w-full bg-black text-white py-7 rounded-[32px] font-[900] uppercase italic tracking-[0.2em] text-[14px] shadow-2xl hover:bg-zinc-800 transition-all mt-6 cursor-pointer">
-                        Pagar con Mercado Pago
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <h3 class="text-xs font-black uppercase text-gray-400 tracking-widest mb-6">Datos del Cliente</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" name="primer_nombre" placeholder="NOMBRE" required class="input-amg" />
+                            <input type="text" name="apellido_paterno" placeholder="APELLIDO" required class="input-amg" />
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <input type="text" name="rut" placeholder="RUT (12345678-K)" required class="input-amg" />
+                            <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required class="input-amg" />
+                        </div>
+                        <div class="mt-4">
+                             <input type="tel" name="telefono" placeholder="TELÉFONO (+569...)" required class="input-amg" />
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <h3 class="text-xs font-black uppercase text-gray-400 tracking-widest mb-6">Dirección de Envío</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <select id="region-select" name="region" required class="input-amg bg-transparent">
+                                <option value="" disabled selected>SELECCIONAR REGIÓN</option>
+                                {RegionesYComunas.map((reg) => (
+                                    <option value={reg.name}>{reg.name}</option>
+                                ))}
+                            </select>
+
+                            <select id="ciudad-select" name="ciudad" required disabled class="input-amg bg-transparent disabled:opacity-50">
+                                <option value="" disabled selected>SELECCIONAR COMUNA</option>
+                            </select>
+                        </div>
+                        <input type="text" name="direccion" placeholder="CALLE, NÚMERO, DEPTO" required class="input-amg" />
+                    </div>
+
+                    <div id="error-message" class="hidden bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold text-center border border-red-100"></div>
+
+                    <button type="submit" id="pay-button" class="w-full bg-black text-white py-6 rounded-[20px] font-[900] uppercase italic tracking-widest text-sm hover:scale-[1.01] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-70 disabled:cursor-not-allowed">
+                        Ir a Pagar
                     </button>
+                    <p class="text-[10px] text-center text-gray-400 mt-4 font-bold uppercase">Procesado por Mercado Pago</p>
                 </form>
             </div>
 
             <div class="lg:col-span-5">
-                <div class="bg-zinc-50 p-8 rounded-[50px] h-fit lg:sticky lg:top-24 border border-zinc-100 shadow-sm">
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-8 text-center">Resumen del Pedido</h3>
+                <div class="bg-zinc-50 p-6 rounded-[40px] border border-zinc-200 lg:sticky lg:top-24">
+                    <h3 class="text-xs font-black uppercase text-gray-400 tracking-widest mb-6 text-center">Tu Pedido</h3>
                     
-                    <div id="checkout-products-list" class="space-y-6 mb-10 max-h-[400px] overflow-y-auto pr-2">
+                    <div id="checkout-products-list" class="space-y-4 mb-8 max-h-[400px] overflow-y-auto custom-scrollbar">
                         </div>
-                    
-                    <div class="border-t-2 border-dashed border-zinc-200 pt-8 flex flex-col items-center">
-                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Total Final</span>
-                        <span id="sum-price" class="text-5xl font-[900] italic tracking-tighter text-black">$0</span>
+
+                    <div class="border-t border-dashed border-gray-300 pt-6">
+                        <div class="flex justify-between items-end">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Total a Pagar</span>
+                            <span id="sum-price" class="text-4xl font-[900] italic tracking-tighter text-black">$0</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </main>
 </Layout>
+
+<style>
+    /* Estilo reutilizable para inputs */
+    .input-amg {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid #f3f4f6;
+        padding: 12px 0;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        outline: none;
+        transition: all 0.3s;
+    }
+    .input-amg:focus {
+        border-bottom-color: black;
+    }
+</style>
 
 <script>
     import { supabase } from '../lib/supabase';
     import RegionesYComunas from '../data/chile';
     import { cartItems } from '../store/cartStore';
 
-    // 1. VARIABLES
+    // ELEMENTOS DEL DOM
     const listContainer = document.getElementById('checkout-products-list');
     const totalEl = document.getElementById('sum-price');
     const form = document.getElementById('checkout-form') as HTMLFormElement;
     const payBtn = document.getElementById('pay-button') as HTMLButtonElement;
+    const errorMsg = document.getElementById('error-message');
     const regionSelect = document.getElementById('region-select') as HTMLSelectElement;
     const ciudadSelect = document.getElementById('ciudad-select') as HTMLSelectElement;
 
-    // 2. RENDERIZADO REACTIVO
+    // 1. RENDERIZADO DEL CARRITO
     (cartItems as any).subscribe((items: any[]) => {
         if (!listContainer || !totalEl) return;
 
-        if (!items || items.length === 0) {
-            listContainer.innerHTML = `<div class="text-center py-10"><p class="text-[10px] uppercase text-zinc-400">Carrito vacío</p></div>`;
+        if (items.length === 0) {
+            listContainer.innerHTML = `<p class="text-center text-xs font-bold text-gray-400 py-10">CARRITO VACÍO</p>`;
             totalEl.innerText = '$0';
+            if (payBtn) payBtn.disabled = true;
             return;
         }
 
+        if (payBtn) payBtn.disabled = false;
+
         listContainer.innerHTML = items.map((item: any) => `
-            <div class="flex items-center gap-4 bg-white p-4 rounded-3xl border border-zinc-100 mb-4">
-                <img src="${item.image || item.image_url}" class="w-16 h-16 object-contain rounded-xl" />
-                <div class="flex-1">
-                    <p class="font-black text-[10px] uppercase">${item.name || item.product_name}</p>
-                    <span class="text-[8px] font-bold text-zinc-500">Talla: ${item.size} | Cant: ${item.quantity}</span>
+            <div class="flex gap-4 bg-white p-3 rounded-2xl border border-gray-100 items-center">
+                <img src="${item.image}" class="w-14 h-14 object-contain rounded-lg bg-gray-50" />
+                <div class="flex-1 min-w-0">
+                    <p class="font-black text-[10px] uppercase truncate">${item.name}</p>
+                    <p class="text-[9px] font-bold text-gray-400">Talla: ${item.size}</p>
                 </div>
-                <p class="font-black text-xs">$${((item.price) * (item.quantity || 1)).toLocaleString('es-CL')}</p>
+                <p class="font-black text-xs">$${(item.price * (item.quantity || 1)).toLocaleString('es-CL')}</p>
             </div>
         `).join('');
 
-        const total = items.reduce((acc: number, item: any) => acc + (item.price * (item.quantity || 1)), 0);
+        const total = items.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
         totalEl.innerText = `$${total.toLocaleString('es-CL')}`;
     });
 
-    // 3. PROCESO DE PAGO
-    form?.addEventListener('submit', async (e: SubmitEvent) => {
+    // 2. MANEJO DEL SUBMIT (PAGO)
+    form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const currentItems = (cartItems as any).get();
-        if (!currentItems || currentItems.length === 0) return alert("TU CARRITO ESTÁ VACÍO");
-
-        // Bloquear botón
-        if (payBtn) {
-            payBtn.disabled = true;
-            payBtn.innerHTML = `<span class="animate-pulse">PROCESANDO... NO CIERRES</span>`;
-        }
+        // Bloquear UI
+        payBtn.disabled = true;
+        payBtn.innerHTML = "Procesando...";
+        if (errorMsg) errorMsg.classList.add('hidden');
 
         try {
-            // A. Validar Sesión
-            const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
-            if (sessionErr || !session) {
-                alert("Debes iniciar sesión.");
-                window.location.href = "/login";
-                return;
-            }
-
             const formData = new FormData(form);
-            const customOrderId = crypto.randomUUID(); // ID único para todo el pedido
+            const currentItems = (cartItems as any).get();
             
-            // Calcular total exacto
-            const totalAmount = currentItems.reduce((acc: number, i: any) => acc + (Number(i.price) * (Number(i.quantity) || 1)), 0);
+            // Intentar obtener usuario (opcional)
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id || null;
 
-            // B. Insertar Orden (Cabecera)
-            const { error: orderError } = await supabase.from('orders').insert([{
-                id: customOrderId,
-                user_id: session.user.id,
-                customer_name: `${formData.get('primer_nombre')} ${formData.get('apellido_paterno')}`.toUpperCase(),
-                rut: formData.get('rut'),
-                address: formData.get('direccion'),
-                city: formData.get('ciudad'),
-                region: formData.get('region'),
-                phone: formData.get('telefono'),
-                email: formData.get('email'),
-                total_price: totalAmount,
-                status: 'Pendiente' // Estado inicial
-            }]);
-
-            if (orderError) throw new Error("Error creando orden: " + orderError.message);
-
-            // C. Insertar Items (Detalle) - AQUÍ ESTABA EL POSIBLE ERROR
-            // Mapeamos explícitamente asegurando tipos de datos
-            const itemsToInsert = [];
-            
-            for (const item of currentItems) {
-                // Si el item tiene cantidad > 1, creamos filas individuales o una fila con cantidad? 
-                // MercadoPago prefiere items separados, pero Supabase depende de tu modelo.
-                // Asumiremos 1 fila por tipo de producto (tu esquema no muestra columna 'quantity' en order_items, 
-                // si compras 2 del mismo, deberías insertar 2 filas o agregar columna quantity).
-                // Por seguridad, insertamos N filas si quantity > 1 para que el conteo sea real en DB.
-                
-                const qty = item.quantity || 1;
-                for (let q = 0; q < qty; q++) {
-                    itemsToInsert.push({
-                        order_id: customOrderId, // Vinculamos con la cabecera
-                        product_name: item.name || item.product_name,
-                        price: item.price,
-                        size: item.size,
-                        quality: item.quality,
-                        image_url: item.image || item.image_url
-                    });
+            // Construir payload
+            const payload = {
+                items: currentItems,
+                customer: {
+                    userId: userId, // Puede ser null
+                    firstName: formData.get('primer_nombre'),
+                    lastName: formData.get('apellido_paterno'),
+                    email: formData.get('email'),
+                    rut: formData.get('rut'),
+                    phone: formData.get('telefono'),
+                    region: formData.get('region'),
+                    city: formData.get('ciudad'),
+                    address: formData.get('direccion')
                 }
-            }
+            };
 
-            const { error: itemsError } = await supabase.from('order_items').insert(itemsToInsert);
-            
-            if (itemsError) {
-                console.error("Error insertando items:", itemsError);
-                throw new Error("Error guardando productos del pedido.");
-            }
-
-            // D. Crear Preferencia Mercado Pago
-            const response = await fetch('/api/create-payment', { // Asegura que esta ruta coincida con tu archivo
+            // Llamar al endpoint seguro
+            const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    items: currentItems.map((i: any) => ({
-                        id: i.id || 'ITEM',
-                        title: i.name || i.product_name,
-                        unit_price: Number(i.price),
-                        quantity: Number(i.quantity || 1),
-                        description: `Talla: ${i.size} - ${i.quality}`,
-                        image_url: i.image || i.image_url
-                    })),
-                    orderId: customOrderId,
-                    customerEmail: formData.get('email')
-                })
+                body: JSON.stringify(payload)
             });
 
             const result = await response.json();
 
-            if (result.init_point) {
-                // E. VACIAR CARRITO ANTES DE REDIRIGIR
-                // Limpiamos el Store de Astro
-                cartItems.set([]); 
-                
-                // Limpiamos LocalStorage explícitamente (clave por defecto de nanostores o la tuya manual)
-                localStorage.removeItem('amg-cart'); 
-                
-                // Forzamos un pequeño delay para asegurar que el storage se limpie antes del redirect
-                setTimeout(() => {
-                    window.location.href = result.init_point;
-                }, 100);
-            } else {
-                throw new Error("No se pudo conectar con Mercado Pago");
-            }
+            if (!response.ok) throw new Error(result.error || "Error en el servidor");
+            if (!result.init_point) throw new Error("No se pudo generar el pago");
+
+            // Limpieza y Redirección
+            cartItems.set([]); 
+            localStorage.removeItem('amg-cart'); // Ajusta según tu clave
+            window.location.href = result.init_point;
 
         } catch (err: any) {
             console.error(err);
-            alert("OCURRIÓ UN ERROR: " + err.message);
-            if (payBtn) {
-                payBtn.disabled = false;
-                payBtn.innerText = "PAGAR CON MERCADO PAGO";
+            if (errorMsg) {
+                errorMsg.innerText = `⚠️ ${err.message}`;
+                errorMsg.classList.remove('hidden');
             }
+            payBtn.disabled = false;
+            payBtn.innerHTML = "INTENTAR NUEVAMENTE";
         }
     });
 
-    // 4. Lógica de Selects (Región/Ciudad) - Se mantiene igual
+    // 3. LOGICA REGIONES (Se mantiene igual, solo optimizada visualmente)
     regionSelect?.addEventListener('change', () => {
         const reg = RegionesYComunas.find(r => r.name === regionSelect.value);
         if (ciudadSelect && reg) {
-            ciudadSelect.innerHTML = '<option value="" disabled selected>SELECCIONAR CIUDAD</option>';
+            ciudadSelect.innerHTML = '<option value="" disabled selected>SELECCIONAR COMUNA</option>';
             ciudadSelect.disabled = false;
             reg.communes.sort().forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c;
-                opt.textContent = c.toUpperCase();
+                opt.textContent = c;
                 ciudadSelect.appendChild(opt);
             });
         }

@@ -1,139 +1,109 @@
 import type { APIRoute } from 'astro';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend'; // 📧 NUEVO: Importamos Resend
 
-// Configuración del cliente
-const client = new MercadoPagoConfig({
-    accessToken: import.meta.env.MP_ACCESS_TOKEN
-});
-
-// Función de espera para sincronización con Mercado Pago
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const mp = new MercadoPagoConfig({ accessToken: import.meta.env.MP_ACCESS_TOKEN });
+const resend = new Resend(import.meta.env.RESEND_API_KEY); // Pon tu key en .env
+const supabaseAdmin = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export const POST: APIRoute = async ({ request }) => {
     try {
         const url = new URL(request.url);
         const topic = url.searchParams.get('topic') || url.searchParams.get('type');
         const queryId = url.searchParams.get('id') || url.searchParams.get('data.id');
+        
+        // Manejo básico del body para notificaciones JSON
         const body = await request.json().catch(() => ({}));
+        const id = queryId || body?.data?.id;
 
-        const notificationType = body.type || body.topic || topic;
-        const dataId = body.data?.id || body.id || queryId;
-
-        console.log(`📨 Webhook Recibido: Tipo=[${notificationType}] ID=[${dataId}]`);
-
-        if (notificationType === 'payment' && dataId) {
-            const cleanId = String(dataId).trim();
+        if (topic === 'payment' && id) {
+            console.log(`⚡ Procesando pago: ${id}`);
             
-            if (cleanId === "1234567890" || cleanId.length < 5) {
-                return new Response(null, { status: 200 });
+            // Consultar estado en MercadoPago
+            const payment = await new Payment(mp).get({ id });
+            
+            if (payment.status === 'approved') {
+                const orderId = payment.external_reference;
+                
+                // 1. Actualizar Supabase a PAGADO
+                const { data: order, error } = await supabaseAdmin
+                    .from('orders')
+                    .update({ 
+                        status: 'PAGADO', 
+                        payment_id: id,
+                        updated_at: new Date() 
+                    })
+                    .eq('id', orderId)
+                    .select('*') // Retornamos la orden actualizada para usar sus datos
+                    .single();
+
+                if (error || !order) {
+                    console.error("❌ Orden no encontrada para actualizar:", orderId);
+                    return new Response(null, { status: 200 }); // Responder 200 a MP para que no reintente
+                }
+
+                // 2. Notificación Telegram (Tu código existente, optimizado)
+                await sendTelegramNotification(order, payment);
+
+                // 3. 📧 NUEVO: Enviar Email al Cliente
+                await sendClientEmail(order);
             }
-
-            // Esperar 2 segundos para asegurar que el pago esté registrado en la API de MP
-            await delay(2000);
-            await processPayment(cleanId);
         }
-
         return new Response(null, { status: 200 });
-
     } catch (e: any) {
-        console.error("🔥 Error crítico en Webhook:", e.message);
-        return new Response(null, { status: 200 });
+        console.error("Webhook Error:", e.message);
+        return new Response(null, { status: 500 });
     }
 };
 
-async function processPayment(paymentId: string) {
+// --- HELPERS ---
+
+async function sendClientEmail(order: any) {
+    if (!order.email) return;
     try {
-        console.log(`🔍 Consultando pago ${paymentId}...`);
-        const payment = await new Payment(client).get({ id: paymentId });
-
-        if (payment.status === 'approved') {
-            const orderId = payment.external_reference;
-            
-            if (!orderId) {
-                console.error("⚠️ El pago no tiene external_reference.");
-                return;
-            }
-
-            // 1. Obtener la orden principal de Supabase
-            const { data: order, error: dbError } = await supabase
-                .from('orders')
-                .select('*')
-                .eq('id', orderId)
-                .single();
-
-            if (dbError || !order) {
-                console.error("❌ Orden no encontrada en DB:", dbError?.message);
-                return;
-            }
-
-            // 2. Obtener los productos (items) de la orden
-            const { data: items, error: itemsError } = await supabase
-                .from('order_items')
-                .select('*')
-                .eq('order_id', orderId);
-
-            if (itemsError) console.error("⚠️ Error cargando items:", itemsError.message);
-
-            // 3. Actualizar estado a PAGADO
-            if (order.status !== 'PAGADO') {
-                await supabase.from('orders')
-                    .update({ status: 'PAGADO', payment_id: paymentId })
-                    .eq('id', orderId);
-                console.log("💾 DB Actualizada.");
-            }
-
-            // 4. Formatear lista de productos para Telegram
-            const itemsHtml = items?.map((i: any, index: number) => 
-                `📦 <b>Producto ${index + 1}:</b>
-👟 Modelo: ${i.product_name}
-📏 Talla: ${i.size}
-✨ Calidad: ${i.quality}
-💵 Precio: $${Number(i.price).toLocaleString('es-CL')}`
-            ).join('\n\n') || "⚠️ Sin detalle de productos";
-
-            // 5. Enviar Notificación Completa
-            const botToken = import.meta.env.TELEGRAM_TOKEN;
-            const chatId = import.meta.env.CHAT_ID;
-
-            if (botToken && chatId) {
-                const mensaje = `🚨 <b>VENTA CONFIRMADA - AMG SHOES</b> 🚨
-➖➖➖➖➖➖➖➖➖➖➖
-🆔 <b>ID Orden:</b> <code>${orderId}</code>
-💳 <b>ID Pago MP:</b> <code>${paymentId}</code>
-💰 <b>Total Pagado:</b> $${Number(payment.transaction_amount).toLocaleString('es-CL')}
-
-👤 <b>DATOS DEL CLIENTE:</b>
-• Nombre: ${order.customer_name}
-• Email: ${order.email}
-• Teléfono: ${order.phone || 'No indicado'}
-• Ciudad: ${order.city || 'No indicada'}
-
-📦 <b>DETALLE DEL PEDIDO:</b>
-${itemsHtml}
-
-✈️ <b>INFORMACIÓN ADUANERA:</b>
-• Declaración: Calzado Deportivo / Gift
-• Origen: International Shipping
-• Estado: 🟡 <b>Esperando preparación de QC</b>
-
-➖➖➖➖➖➖➖➖➖➖➖
-<i>Sistema de Control AMG Web</i>`;
-
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        chat_id: chatId, 
-                        text: mensaje, 
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true 
-                    })
-                });
-                console.log("✅ Notificación detallada enviada.");
-            }
-        }
-    } catch (error: any) {
-        console.error(`❌ Error en processPayment:`, error.message);
+        await resend.emails.send({
+            from: 'amgsneakerscl@gmail.com', // Configura esto en Resend
+            to: [order.email],
+            subject: `👟 ¡Orden Confirmada! #${order.id.slice(0, 8)}`,
+            html: `
+                <div style="font-family: sans-serif; color: #333;">
+                    <h1>¡Gracias por tu compra, ${order.customer_name}!</h1>
+                    <p>Tu pago ha sido recibido correctamente. Estamos preparando tus zapatillas para el control de calidad (QC).</p>
+                    <p><strong>ID de Orden:</strong> ${order.id}</p>
+                    <p>Pronto recibirás las fotos de QC antes del envío.</p>
+                    <br>
+                    <p style="color: #888; font-size: 12px;">AMG Shoes Team</p>
+                </div>
+            `
+        });
+        console.log("✅ Email enviado al cliente.");
+    } catch (error) {
+        console.error("❌ Error enviando email:", error);
     }
+}
+
+async function sendTelegramNotification(order: any, payment: any) {
+    const botToken = import.meta.env.TELEGRAM_TOKEN;
+    const chatId = import.meta.env.CHAT_ID;
+    
+    if (!botToken || !chatId) return;
+
+    const message = `
+🚨 <b>NUEVA VENTA CONFIRMADA</b>
+💰 <b>Monto:</b> $${Number(payment.transaction_amount).toLocaleString('es-CL')}
+👤 <b>Cliente:</b> ${order.customer_name}
+📧 <b>Email:</b> ${order.email}
+📍 <b>Ciudad:</b> ${order.city}
+🆔 <b>Orden:</b> <code>${order.id}</code>
+    `;
+
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+    });
 }
