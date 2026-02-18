@@ -8,12 +8,15 @@ export const prerender = false;
     <Header />
     <main class="max-w-5xl mx-auto px-6 py-20 font-['Inter'] text-black">
         <h1 class="text-5xl font-[900] uppercase italic tracking-tighter mb-12">Mis Pedidos</h1>
-        <div id="orders-list" class="space-y-12"></div>
+        <div id="orders-list" class="space-y-12">
+            <p class="font-black uppercase text-gray-400 animate-pulse text-sm tracking-widest">Cargando pedidos...</p>
+        </div>
     </main>
 </Layout>
 
 <script>
     import { supabase } from '../lib/supabase';
+    import { waitForSession } from '../lib/auth';
 
     interface OrderItem {
         id: string;
@@ -34,8 +37,15 @@ export const prerender = false;
     }
 
     async function loadOrders() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+        const list = document.getElementById('orders-list');
+
+        // Espera a que la sesión esté disponible
+        const session = await waitForSession();
+
+        if (!session) {
+            window.location.replace('/login');
+            return;
+        }
 
         const { data: orders, error } = await supabase
             .from('orders')
@@ -48,8 +58,19 @@ export const prerender = false;
             .eq('user_id', session.user.id)
             .order('created_at', { ascending: false });
 
-        const list = document.getElementById('orders-list');
-        if (error || !orders || !list) return;
+        if (error || !orders || !list) {
+            if (list) list.innerHTML = `<p class="font-black uppercase text-red-400 text-sm">⚠️ Error al cargar pedidos</p>`;
+            return;
+        }
+
+        if (orders.length === 0) {
+            list.innerHTML = `
+                <div class="bg-zinc-50 p-16 rounded-[40px] text-center border-2 border-dashed border-zinc-200">
+                    <p class="text-[11px] font-black uppercase tracking-widest text-zinc-400">Aún no tienes pedidos registrados</p>
+                </div>
+            `;
+            return;
+        }
 
         list.innerHTML = (orders as Order[]).map((order: Order) => `
             <div class="bg-white rounded-[40px] border border-gray-100 shadow-xl overflow-hidden mb-8">
@@ -101,5 +122,7 @@ export const prerender = false;
         location.reload();
     };
 
+
     loadOrders();
+
 </script>

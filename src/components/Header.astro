@@ -64,22 +64,30 @@
 
                 <div id="dropdown-menu" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100]">
                     
+                    <!-- Solo visible para admins -->
                     <div id="admin-only-option" class="hidden p-2 bg-red-50/50">
                         <a href="/admin" class="block px-4 py-3 text-[11px] font-black uppercase italic bg-white text-red-600 border border-red-100 shadow-sm rounded-xl hover:bg-red-600 hover:text-white transition-all text-center">
                             ⚡ Panel Admin
                         </a>
                     </div>
 
+                    <!-- Menú para visitantes -->
                     <div id="menu-guest" class="p-2">
                         <a href="/login" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl transition-colors text-center text-black">Iniciar Sesión</a>
                         <a href="/registro" class="block px-4 py-3 text-[12px] font-black uppercase italic bg-black text-white rounded-xl hover:bg-[#2ecc71] transition-colors mt-1 text-center">Registrarse</a>
                     </div>
 
+                    <!-- Menú para usuarios autenticados -->
                     <div id="menu-user" class="hidden p-2">
                         <a href="/perfil" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl text-black">Mi Perfil</a>
                         <a href="/pedidos" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl text-black">Mis Pedidos</a>
                         <hr class="my-2 border-gray-100">
-                        <button id="btn-logout" class="w-full text-left px-4 py-3 text-[12px] font-black uppercase italic text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer border-none bg-transparent">Cerrar Sesión</button>
+                        <button
+                            id="logout-btn"
+                            class="w-full px-4 py-3 text-[12px] font-black uppercase italic text-left text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                        >
+                            Cerrar Sesión
+                        </button>
                     </div>
                 </div>
             </div>
@@ -108,7 +116,7 @@
     import { supabase } from '../lib/supabase';
     import { isCartOpen, loadCartFromDB, cartItems } from '../store/cartStore';
 
-    // 1. Manejo del Dropdown (Abrir/Cerrar)
+    // 1. Manejo del Dropdown
     function setupDropdown() {
         const userBtn = document.getElementById('user-menu-button');
         const dropdown = document.getElementById('dropdown-menu');
@@ -118,71 +126,83 @@
             dropdown?.classList.toggle('hidden');
         });
 
-        // Cerrar al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            if (!dropdown?.classList.contains('hidden')) {
-                dropdown?.classList.add('hidden');
-            }
+        document.addEventListener('click', () => {
+            dropdown?.classList.add('hidden');
         });
     }
 
-    // 2. Actualizar Interfaz de Sesión
+    // 2. Actualizar Interfaz según sesión
     async function updateHeaderUI() {
         const { data: { session } } = await supabase.auth.getSession();
-        const guestMenu = document.getElementById('menu-guest');
-        const userMenu = document.getElementById('menu-user');
+
+        const guestMenu   = document.getElementById('menu-guest');
+        const userMenu    = document.getElementById('menu-user');
         const nameDisplay = document.getElementById('user-name-display');
         const adminOption = document.getElementById('admin-only-option');
 
         if (session) {
+            // Mostrar menú de usuario, ocultar el de invitado
             guestMenu?.classList.add('hidden');
             userMenu?.classList.remove('hidden');
-            
-            // Mostrar nombre
+
+            // Mostrar nombre del usuario
             if (nameDisplay) {
-                const fullName = session.user.user_metadata?.full_name || "Usuario";
+                const fullName = session.user.user_metadata?.full_name
+                    || session.user.email?.split('@')[0]
+                    || 'Usuario';
                 nameDisplay.innerText = fullName.toUpperCase();
             }
 
-            // Mostrar admin si corresponde
-            if (session.user.email === 'tu-correo-admin@gmail.com') { // Cambia esto por tu lógica de admin
+            // Verificar rol admin en la tabla profiles
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile?.role === 'admin') {
                 adminOption?.classList.remove('hidden');
+            } else {
+                adminOption?.classList.add('hidden');
             }
 
             await loadCartFromDB();
         } else {
+            // Sin sesión: mostrar menú de invitado
             guestMenu?.classList.remove('hidden');
             userMenu?.classList.add('hidden');
             adminOption?.classList.add('hidden');
-            if (nameDisplay) nameDisplay.innerText = "MI CUENTA";
+            if (nameDisplay) nameDisplay.innerText = 'MI CUENTA';
         }
     }
 
-    // 3. Contador del Carrito
+    // 3. Contador del carrito
     (cartItems as any).subscribe((items: any[]) => {
         const countEl = document.getElementById('cart-count');
         if (countEl) {
-            const totalItems = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
-            countEl.innerText = totalItems.toString();
+            const total = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+            countEl.innerText = total.toString();
         }
     });
 
-    // 4. Listeners de Eventos
+    // 4. Botón carrito
     document.getElementById('cart-btn')?.addEventListener('click', (e) => {
         e.preventDefault();
         isCartOpen.set(true);
     });
 
-    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+    // 5. Botón cerrar sesión (siempre disponible en menu-user)
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.href = '/';
     });
 
-    // 5. Inicialización
-    supabase.auth.onAuthStateChange((event) => {
+    // 6. Escuchar cambios de autenticación
+    supabase.auth.onAuthStateChange(() => {
         updateHeaderUI();
     });
 
+    // 7. Inicializar
     setupDropdown();
     updateHeaderUI();
 </script>

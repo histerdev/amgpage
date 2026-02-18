@@ -1,47 +1,143 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
 ---
-<Layout title="Entrar | AMG">
-  <main class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-    <div class="max-w-md w-full bg-white p-10 rounded-[32px] shadow-2xl text-center">
-      <h2 class="text-4xl font-[900] italic uppercase tracking-tighter mb-8">Iniciar Sesión</h2>
-      <form id="login-form" class="space-y-4 text-left">
-        <input type="email" name="email" placeholder="Tu Email" required class="w-full p-4 bg-gray-50 rounded-xl outline-none">
-        <input type="password" name="password" placeholder="Contraseña" required class="w-full p-4 bg-gray-50 rounded-xl outline-none">
-        <button type="submit" class="w-full bg-black text-white py-5 rounded-xl font-black uppercase italic hover:bg-[#2ecc71] transition-all">Entrar</button>
+
+<Layout title="Iniciar Sesión | AMG">
+  <Header />
+
+  <main class="max-w-md mx-auto px-6 py-20">
+    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+      <h1 class="text-3xl font-[900] uppercase italic tracking-tighter mb-2">
+        Iniciar Sesión
+      </h1>
+      <p class="text-gray-400 text-sm mb-8">Accede a tu cuenta AMG</p>
+
+      <!-- Botón Google -->
+      <button
+        id="google-btn"
+        class="w-full flex items-center justify-center gap-3 border-2 border-gray-200 py-4 rounded-xl font-bold hover:border-black hover:bg-gray-50 transition-all mb-6"
+      >
+        <svg width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Continuar con Google
+      </button>
+
+      <!-- Separador -->
+      <div class="flex items-center gap-4 mb-6">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-xs text-gray-400 uppercase tracking-widest">o</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label class="text-xs font-black uppercase text-gray-400 tracking-widest mb-2 block">Email</label>
+          <input
+            type="email"
+            name="email"
+            required
+            autocomplete="email"
+            class="w-full border-b-2 border-gray-200 py-3 focus:border-black outline-none transition-colors"
+            placeholder="tu@email.com"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-black uppercase text-gray-400 tracking-widest mb-2 block">Contraseña</label>
+          <input
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            class="w-full border-b-2 border-gray-200 py-3 focus:border-black outline-none transition-colors"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div id="error-msg" class="hidden bg-red-50 text-red-600 p-4 rounded-lg text-sm border border-red-100"></div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full bg-black text-white py-4 rounded-xl font-[900] uppercase italic tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-50"
+        >
+          Entrar
+        </button>
       </form>
-      <p class="mt-6 text-gray-400 font-bold text-xs uppercase tracking-widest">¿No tienes cuenta? <a href="/registro" class="text-black border-b-2 border-black">Regístrate</a></p>
     </div>
   </main>
 </Layout>
+
 <script>
   import { supabase } from '../lib/supabase';
 
-  const form = document.getElementById('login-form') as HTMLFormElement;
+  const form      = document.getElementById('login-form') as HTMLFormElement;
+  const errorMsg  = document.getElementById('error-msg') as HTMLDivElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const googleBtn = document.getElementById('google-btn') as HTMLButtonElement;
 
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    
-    // 1. Intentar el login
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
+  const params     = new URLSearchParams(window.location.search);
+  const redirectTo = params.get('redirectTo') || '/';
+
+  // ── Login con Google ────────────────────────────────────────────────────
+  googleBtn.addEventListener('click', async () => {
+    googleBtn.disabled = true;
+    googleBtn.textContent = 'Redirigiendo...';
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+      },
     });
 
     if (error) {
-      alert("Error: " + error.message);
-      return;
+      googleBtn.disabled = false;
+      googleBtn.textContent = 'Continuar con Google';
     }
+    // Si no hay error, Google redirige al usuario automáticamente
+  });
 
-    // 2. FORZAR PERSISTENCIA
-    // A veces el SDK tarda ms en escribir en LocalStorage. 
-    // Guardamos manualmente para asegurar que en el index exista algo.
-    if (data.session) {
-      console.log("Sesión obtenida correctamente");
-      // Esperamos un respiro para que el SDK termine sus procesos internos
-      await new Promise(resolve => setTimeout(resolve, 800));
-      window.location.href = '/';
+  // ── Login con email/password ────────────────────────────────────────────
+  function showError(msg: string) {
+    errorMsg.textContent = `❌ ${msg}`;
+    errorMsg.classList.remove('hidden');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verificando...';
+
+    const data     = new FormData(form);
+    const email    = (data.get('email') as string).trim().toLowerCase();
+    const password = data.get('password') as string;
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showError(
+          error.message === 'Invalid login credentials'
+            ? 'Email o contraseña incorrectos'
+            : error.message
+        );
+        return;
+      }
+
+      window.location.replace(redirectTo);
+
+    } catch (err: any) {
+      showError(err?.message ?? 'Error desconocido');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Entrar';
     }
   });
 </script>

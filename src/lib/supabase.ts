@@ -1,12 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+// lib/supabase.ts
+import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true, // Esto es vital
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-});
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);

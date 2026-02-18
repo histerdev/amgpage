@@ -1,53 +1,59 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
 ---
 
 <Layout title="Panel Admin | AMG">
+  <Header />
   <main class="max-w-7xl mx-auto px-6 py-12">
+
     <div id="status-message" class="text-center py-20 font-black uppercase italic tracking-tighter text-xl">
-        Iniciando Panel...
+      Verificando acceso...
     </div>
 
     <div id="admin-content" class="hidden">
-        <div class="flex justify-between items-end mb-10">
-            <h1 class="text-5xl font-[900] italic uppercase tracking-tighter text-black">Gestión de Pedidos</h1>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest pb-2">AMG Sneakers Admin v1.1</p>
-        </div>
+      <div class="flex justify-between items-end mb-10">
+        <h1 class="text-5xl font-[900] italic uppercase tracking-tighter text-black">Gestión de Pedidos</h1>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest pb-2">AMG Sneakers Admin v1.1</p>
+      </div>
 
-        <div class="bg-white rounded-[32px] shadow-xl border border-gray-100 overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
-                        <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Pedido / Cliente</th>
-                        <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Producto</th>
-                        <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Estado Logístico</th>
-                        <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Elección Cliente</th> <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-orders-list">
-                    </tbody>
-            </table>
-        </div>
+      <div class="bg-white rounded-[32px] shadow-xl border border-gray-100 overflow-hidden">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Pedido / Cliente</th>
+              <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Producto</th>
+              <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Estado Logístico</th>
+              <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Elección Cliente</th>
+              <th class="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="admin-orders-list"></tbody>
+        </table>
+      </div>
     </div>
+
   </main>
 </Layout>
 
 <script>
   import { supabase } from '../../lib/supabase';
+  import { waitForSession } from '../../lib/auth';
 
   async function checkAccess() {
-    const status = document.getElementById('status-message');
+    const status  = document.getElementById('status-message');
     const content = document.getElementById('admin-content');
-    const list = document.getElementById('admin-orders-list');
+    const list    = document.getElementById('admin-orders-list');
 
-    console.log("Verificando sesión...");
-    const { data: { session } } = await supabase.auth.getSession();
+    // ── 1. Esperar sesión real (resuelve el race condition) ──────────────────
+    const session = await waitForSession();
 
     if (!session) {
-      if (status) status.innerHTML = "❌ NO HAY SESIÓN. <a href='/login' class='underline'>LOGUEARSE</a>";
+      window.location.replace('/login?redirectTo=/admin');
       return;
     }
 
+    // ── 2. Verificar rol admin ───────────────────────────────────────────────
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -55,80 +61,73 @@ import Layout from '../../layouts/Layout.astro';
       .single();
 
     if (profile?.role !== 'admin') {
-      if (status) status.innerHTML = `🚫 ACCESO DENEGADO. ROL: ${profile?.role}`;
+      if (status) status.innerHTML = `🚫 ACCESO DENEGADO. Tu rol es: <strong>${profile?.role ?? 'sin rol'}</strong>`;
       return;
     }
 
-    console.log("Cargando pedidos con decisiones...");
+    // ── 3. Cargar pedidos ────────────────────────────────────────────────────
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select(`
-        *,
-        order_items (*)
-      `)
+      .select(`*, order_items (*)`)
       .order('created_at', { ascending: false });
 
     if (ordersError) {
-        if (status) status.innerText = "Error al cargar pedidos.";
-        return;
+      if (status) status.innerText = `⚠️ Error al cargar pedidos: ${ordersError.message}`;
+      return;
     }
 
-    if (status) status.classList.add('hidden');
-    if (content) content.classList.remove('hidden');
+    // ── 4. Mostrar contenido ─────────────────────────────────────────────────
+    status?.classList.add('hidden');
+    content?.classList.remove('hidden');
 
-    if (list && orders) {
-      if (orders.length === 0) {
-          list.innerHTML = `<tr><td colspan="5" class="p-20 text-center font-bold text-gray-300 uppercase italic">No hay pedidos registrados aún</td></tr>`;
-          return;
-      }
+    if (!list || !orders) return;
 
-      list.innerHTML = orders.map(order => {
-        const item = order.order_items?.[0] || {};
-        
-        // --- Lógica para el estado del cliente ---
-        let decisionHtml = '';
-        if (order.client_decision === 'Reembolso') {
-            decisionHtml = `<span class="bg-red-600 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase italic animate-pulse">⚠️ Reembolso</span>`;
-        } else if (order.client_decision === 'Confirmado') {
-            decisionHtml = `<span class="bg-[#2ecc71] text-black px-3 py-1.5 rounded-xl text-[9px] font-black uppercase italic">✅ Confirmado</span>`;
-        } else if (order.client_decision === 'Cambio de par') {
-            decisionHtml = `<span class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase italic">🔄 Cambio Par</span>`;
-        } else {
-            decisionHtml = `<span class="text-gray-300 text-[9px] font-bold uppercase italic tracking-widest">Pendiente</span>`;
-        }
-
-        return `
-          <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-all">
-            <td class="p-6">
-              <div class="font-black uppercase italic text-sm">${order.customer_name || 'Sin nombre'}</div>
-              <div class="text-[10px] text-gray-400 font-bold tracking-tighter">${order.id.slice(0,8)}</div>
-            </td>
-            <td class="p-6">
-              <div class="text-[11px] font-bold uppercase text-gray-600">${item.product_name || 'Desconocido'}</div>
-              <div class="text-[9px] font-black text-gray-400 uppercase">Talla: ${item.size || '--'}</div>
-            </td>
-            <td class="p-6 text-center">
-              <span class="bg-black text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">
-                ${order.status}
-              </span>
-            </td>
-            
-            <td class="p-6 text-center">
-                ${decisionHtml}
-            </td>
-
-            <td class="p-6 text-right">
-              <button 
-                onclick="window.location.href='/admin/pedido/${order.id}'" 
-                class="bg-[#2ecc71] hover:bg-black text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase italic transition-all active:scale-95"
-              >
-                Gestionar QC
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+    if (orders.length === 0) {
+      list.innerHTML = `<tr><td colspan="5" class="p-20 text-center font-bold text-gray-300 uppercase italic">No hay pedidos registrados aún</td></tr>`;
+      return;
     }
+
+    const decisionHtml = (decision: string) => {
+      if (decision === 'Reembolso')
+        return `<span class="bg-red-600 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase italic animate-pulse">⚠️ Reembolso</span>`;
+      if (decision === 'Confirmado')
+        return `<span class="bg-[#2ecc71] text-black px-3 py-1.5 rounded-xl text-[9px] font-black uppercase italic">✅ Confirmado</span>`;
+      if (decision === 'Cambio de par')
+        return `<span class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase italic">🔄 Cambio Par</span>`;
+      return `<span class="text-gray-300 text-[9px] font-bold uppercase italic tracking-widest">Pendiente</span>`;
+    };
+
+    list.innerHTML = orders.map((order: any) => {
+      const item = order.order_items?.[0] || {};
+      return `
+        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-all">
+          <td class="p-6">
+            <div class="font-black uppercase italic text-sm">${order.customer_name || 'Sin nombre'}</div>
+            <div class="text-[10px] text-gray-400 font-bold tracking-tighter">${order.id.slice(0,8)}</div>
+          </td>
+          <td class="p-6">
+            <div class="text-[11px] font-bold uppercase text-gray-600">${item.product_name || 'Desconocido'}</div>
+            <div class="text-[9px] font-black text-gray-400 uppercase">Talla: ${item.size || '--'}</div>
+          </td>
+          <td class="p-6 text-center">
+            <span class="bg-black text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">
+              ${order.status}
+            </span>
+          </td>
+          <td class="p-6 text-center">
+            ${decisionHtml(order.client_decision)}
+          </td>
+          <td class="p-6 text-right">
+            <button
+              onclick="window.location.href='/admin/pedido/${order.id}'"
+              class="bg-[#2ecc71] hover:bg-black text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase italic transition-all active:scale-95"
+            >
+              Gestionar QC
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
   checkAccess();
