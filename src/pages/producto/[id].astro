@@ -138,8 +138,8 @@ function handlePurchase(redirect: boolean = false) {
     const priceToPay = prices[selectedQuality];
 
     const productToSave = {
-        id: `${root.dataset.id}-${selectedQuality}-${selectedSize}`,
-        productId: root.dataset.id,
+        id: `${root.dataset.id}-${selectedQuality}-${selectedSize}`,  // ← Solo para carrito local
+        productId: root.dataset.id,  // ← Esto es lo que existe en BD
         name: root.dataset.name,
         image: mainImg.src,
         size: selectedSize,        // <--- Esto es lo que leerá el carrito

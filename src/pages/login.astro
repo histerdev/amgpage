@@ -75,16 +75,17 @@ import Header from '../components/Header.astro';
 
 <script>
   import { supabase } from '../lib/supabase';
+  import { loginSchema } from '../utils/validation'
 
-  const form      = document.getElementById('login-form') as HTMLFormElement;
-  const errorMsg  = document.getElementById('error-msg') as HTMLDivElement;
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const errorMsg = document.getElementById('error-msg') as HTMLDivElement;
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
   const googleBtn = document.getElementById('google-btn') as HTMLButtonElement;
 
-  const params     = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search);
   const redirectTo = params.get('redirectTo') || '/';
 
-  // ── Login con Google ────────────────────────────────────────────────────
+  // ── Login con Google
   googleBtn.addEventListener('click', async () => {
     googleBtn.disabled = true;
     googleBtn.textContent = 'Redirigiendo...';
@@ -100,10 +101,9 @@ import Header from '../components/Header.astro';
       googleBtn.disabled = false;
       googleBtn.textContent = 'Continuar con Google';
     }
-    // Si no hay error, Google redirige al usuario automáticamente
   });
 
-  // ── Login con email/password ────────────────────────────────────────────
+  // ── Login con email/password
   function showError(msg: string) {
     errorMsg.textContent = `❌ ${msg}`;
     errorMsg.classList.remove('hidden');
@@ -115,12 +115,15 @@ import Header from '../components/Header.astro';
     submitBtn.disabled = true;
     submitBtn.textContent = 'Verificando...';
 
-    const data     = new FormData(form);
-    const email    = (data.get('email') as string).trim().toLowerCase();
+    const data = new FormData(form);
+    const email = (data.get('email') as string).trim().toLowerCase();
     const password = data.get('password') as string;
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // ✅ VALIDAR CON ZOD
+      const validated = loginSchema.parse({ email, password });
+
+      const { error } = await supabase.auth.signInWithPassword(validated);
 
       if (error) {
         showError(
@@ -134,7 +137,12 @@ import Header from '../components/Header.astro';
       window.location.replace(redirectTo);
 
     } catch (err: any) {
-      showError(err?.message ?? 'Error desconocido');
+      // Si es error de Zod
+      if (err.errors) {
+        showError(err.errors[0].message);
+      } else {
+        showError(err?.message ?? 'Error desconocido');
+      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Entrar';

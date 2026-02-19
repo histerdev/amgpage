@@ -1,161 +1,213 @@
 import type { APIRoute } from 'astro';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { supabase } from '../../lib/supabase';
-import { Resend } from 'resend';
+import { createSupabaseServerClient } from '../../lib/supabase-ssr';
+import { sendNotification } from '../../lib/notifications';
+import crypto from 'crypto';
 
-// 1. CONFIGURACIÓN DE CLIENTES
-const client = new MercadoPagoConfig({
-    accessToken: import.meta.env.MP_ACCESS_TOKEN
+// ✅ Configuración segura
+const mpClient = new MercadoPagoConfig({
+    accessToken: import.meta.env.MP_ACCESS_TOKEN!,
 });
 
-// Blindamos Resend para que no rompa el código si falta la Key
-const resendKey = import.meta.env.RESEND_API_KEY;
-const resend = new Resend(resendKey || "re_not_found");
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const MP_WEBHOOK_SECRET = import.meta.env.MP_WEBHOOK_SECRET;
 
 export const POST: APIRoute = async ({ request }) => {
     try {
-        const url = new URL(request.url);
-        // Captura de IDs de todas las formas posibles (URL o Body)
-        const topic = url.searchParams.get('topic') || url.searchParams.get('type');
-        const queryId = url.searchParams.get('id') || url.searchParams.get('data.id');
-        const body = await request.json().catch(() => ({}));
+        // 1️⃣ VALIDAR FIRMA DE MERCADO PAGO
+        const xSignature = request.headers.get('x-signature');
+        const xRequestId = request.headers.get('x-request-id');
+        
+        if (!xSignature || !xRequestId) {
+            console.warn('[SECURITY] Webhook sin headers de firma');
+            return new Response(
+                JSON.stringify({ error: 'Missing signature headers' }), 
+                { status: 401 }
+            );
+        }
 
-        const notificationType = body.type || body.topic || topic;
-        const dataId = body.data?.id || body.id || queryId;
+        const bodyText = await request.text();
 
-        console.log(`📨 Webhook Recibido: Tipo=[${notificationType}] ID=[${dataId}]`);
+        // Validar firma
+        if (!validateMercadoPagoSignature(xSignature, xRequestId, bodyText)) {
+            console.warn(`[SECURITY] Firma inválida. RequestId: ${xRequestId}`);
+            return new Response(
+                JSON.stringify({ error: 'Invalid signature' }), 
+                { status: 401 }
+            );
+        }
 
-        if (notificationType === 'payment' && dataId) {
-            const cleanId = String(dataId).trim();
+        // 2️⃣ PARSEAR BODY
+        let bodyParsed;
+        try {
+            bodyParsed = JSON.parse(bodyText);
+        } catch (e) {
+            console.error('Error parseando JSON del webhook');
+            return new Response(null, { status: 200 });
+        }
+
+        const notificationType = bodyParsed.type || bodyParsed.topic;
+        const paymentId = bodyParsed.data?.id || bodyParsed.id;
+
+        console.log(`📨 Webhook válido: tipo=[${notificationType}] paymentId=[${paymentId}]`);
+
+        // 3️⃣ PROCESAR SOLO PAGOS
+        if (notificationType === 'payment' && paymentId) {
+            const cleanId = String(paymentId).trim();
             
-            // Evitar IDs de prueba o muy cortos
-            if (cleanId === "1234567890" || cleanId.length < 5) {
+            // Filtros anti-spam
+            if (cleanId === '1234567890' || cleanId.length < 5) {
                 return new Response(null, { status: 200 });
             }
 
-            // Esperar sincronización de MP
+            // Esperar a que Mercado Pago sincronice
             await delay(2000);
-            await processPayment(cleanId);
+
+            // Procesar pago
+            await processPayment(cleanId, request);
         }
 
         return new Response(null, { status: 200 });
 
-    } catch (e: any) {
-        console.error("🔥 Error crítico en Webhook:", e.message);
+    } catch (error: any) {
+        console.error('🔥 Error crítico en webhook:', error.message);
         return new Response(null, { status: 200 });
     }
 };
 
-async function processPayment(paymentId: string) {
+/**
+ * ✅ VALIDA FIRMA DE MERCADO PAGO
+ */
+function validateMercadoPagoSignature(
+    signature: string,
+    requestId: string,
+    body: string
+): boolean {
+    if (!MP_WEBHOOK_SECRET) {
+        console.error('⚠️ MP_WEBHOOK_SECRET no configurado');
+        return false;
+    }
+
     try {
-        console.log(`🔍 Consultando pago ${paymentId}...`);
-        const payment = await new Payment(client).get({ id: paymentId });
+        const hmac = crypto.createHmac('sha256', MP_WEBHOOK_SECRET);
+        hmac.update(`${requestId}.${body}`);
+        const hash = hmac.digest('hex');
 
-        if (payment.status === 'approved') {
-            const orderId = payment.external_reference;
-            
-            if (!orderId) {
-                console.error("⚠️ El pago no tiene external_reference.");
-                return;
-            }
+        return crypto.timingSafeEqual(
+            Buffer.from(signature),
+            Buffer.from(hash)
+        );
+    } catch (error) {
+        console.error('Error validando firma:', error);
+        return false;
+    }
+}
 
-            // 1. Obtener la orden principal
-            const { data: order, error: dbError } = await supabase
-                .from('orders')
-                .select('*')
-                .eq('id', orderId)
-                .single();
+/**
+ * ✅ PROCESA PAGOS APROBADOS
+ */
+async function processPayment(paymentId: string, request: Request) {
+    try {
+        console.log(`🔍 Procesando pago ${paymentId}...`);
 
-            if (dbError || !order) {
-                console.error("❌ Orden no encontrada en DB:", dbError?.message);
-                return;
-            }
+        // 1️⃣ OBTENER PAGO DE MERCADO PAGO
+        const payment = await new Payment(mpClient).get({ id: paymentId });
 
-            // 2. Obtener los items
-            const { data: items, error: itemsError } = await supabase
-                .from('order_items')
-                .select('*')
-                .eq('order_id', orderId);
+        console.log(`💳 Estado pago: ${payment.status}`);
 
-            if (itemsError) console.error("⚠️ Error cargando items:", itemsError.message);
-
-            // 3. Actualizar estado a PAGADO
-            if (order.status !== 'PAGADO') {
-                await supabase.from('orders')
-                    .update({ status: 'PAGADO', mp_payment_id: paymentId })
-                    .eq('id', orderId);
-                console.log("💾 DB Actualizada.");
-            }
-
-            // 4. Formatear lista para Telegram
-            const itemsHtml = items?.map((i: any, index: number) => 
-                `📦 <b>Producto ${index + 1}:</b>
-👟 Modelo: ${i.product_name}
-📏 Talla: ${i.size}
-✨ Calidad: ${i.quality}
-💵 Precio: $${Number(i.price).toLocaleString('es-CL')}`
-            ).join('\n\n') || "⚠️ Sin detalle de productos";
-
-            // 5. ENVIAR TELEGRAM
-            const botToken = import.meta.env.TELEGRAM_TOKEN;
-            const chatId = import.meta.env.CHAT_ID;
-
-            if (botToken && chatId) {
-                const mensaje = `🚨 <b>VENTA CONFIRMADA - AMG SHOES</b> 🚨
-➖➖➖➖➖➖➖➖➖➖➖
-🆔 <b>ID Orden:</b> <code>${orderId}</code>
-💳 <b>ID Pago MP:</b> <code>${paymentId}</code>
-💰 <b>Total Pagado:</b> $${Number(payment.transaction_amount).toLocaleString('es-CL')}
-
-👤 <b>DATOS DEL CLIENTE:</b>
-• Nombre: ${order.customer_name}
-• Email: ${order.email}
-• Teléfono: ${order.phone || 'No indicado'}
-• Ciudad: ${order.city || 'No indicada'}
-
-📦 <b>DETALLE DEL PEDIDO:</b>
-${itemsHtml}
-
-✈️ <b>INFORMACIÓN ADUANERA:</b>
-• Declaración: Calzado Deportivo / Gift
-• Origen: International Shipping
-• Estado: 🟡 <b>Esperando preparación de QC</b>
-
-➖➖➖➖➖➖➖➖➖➖➖
-<i>Sistema de Control AMG Web</i>`;
-
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        chat_id: chatId, 
-                        text: mensaje, 
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true 
-                    })
-                });
-                console.log("✅ Notificación Telegram enviada.");
-            }
-
-            // 6. ENVIAR EMAIL (Solo si Resend está configurado)
-            if (resendKey && order.email) {
-                try {
-                    await resend.emails.send({
-                        from: 'amgsneakerscl@gmail.com', // Cambia por tu dominio verificado
-                        to: [order.email],
-                        subject: 'Confirmación de Pedido - AMG Shoes',
-                        html: `<p>Hola ${order.customer_name}, tu pago ha sido recibido con éxito. ID Orden: ${orderId}</p>`
-                    });
-                    console.log("📧 Email enviado.");
-                } catch (emailErr) {
-                    console.error("❌ Falló el envío de email:", emailErr);
-                }
-            }
-
+        if (payment.status !== 'approved') {
+            console.log(`⏭️ Pago no aprobado, ignorando`);
+            return;
         }
+
+        const orderId = payment.external_reference;
+        if (!orderId) {
+            console.error('⚠️ Pago sin external_reference');
+            return;
+        }
+
+        // 2️⃣ OBTENER ORDEN DE BD
+        const responseHeaders = new Headers();
+        const supabase = createSupabaseServerClient(request, responseHeaders);
+
+        const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+
+        if (orderError || !order) {
+            console.error('❌ Orden no encontrada:', orderError?.message);
+            return;
+        }
+
+        console.log(`✅ Orden encontrada: ${order.customer_name}`);
+
+        // 3️⃣ OBTENER ITEMS DE LA ORDEN
+        const { data: items, error: itemsError } = await supabase
+            .from('order_items')
+            .select('*')
+            .eq('order_id', orderId);
+
+        if (itemsError) {
+            console.warn('⚠️ Error obteniendo items:', itemsError.message);
+        }
+
+        // 4️⃣ ACTUALIZAR ESTADO A PAGADO
+        const { error: updateError } = await supabase
+            .from('orders')
+            .update({
+                status: 'Completado',
+                mp_payment_id: paymentId,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', orderId);
+
+        if (updateError) {
+            console.error('❌ Error actualizando orden:', updateError.message);
+            return;
+        }
+
+        console.log('💾 Orden actualizada a Completado');
+
+        // 5️⃣ OBTENER TELEGRAM_ID DEL USUARIO
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('telegram_id')
+            .eq('email', order.email)
+            .single();
+
+        // 6️⃣ ENVIAR NOTIFICACIÓN CON NUEVO SISTEMA ROBUSTO
+        console.log('📢 Iniciando sistema de notificaciones robusto...');
+        
+        const productNames = items?.map((item: any) => 
+            `${item.product_name} (Talla ${item.size})`
+        ) || [];
+
+        await sendNotification({
+            orderId,
+            type: 'payment_confirmed',
+            recipient: {
+                email: order.email,
+                telegramId: profile?.telegram_id,
+                customerName: order.customer_name,
+            },
+            data: {
+                orderNumber: orderId.slice(0, 8),
+                totalPrice: order.total_price,
+                productNames,
+            },
+        });
+
+        console.log('✅ Notificaciones encoladas exitosamente');
+
     } catch (error: any) {
         console.error(`❌ Error en processPayment:`, error.message);
     }
+}
+
+/**
+ * ✅ DELAY HELPER
+ */
+function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

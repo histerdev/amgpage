@@ -1,146 +1,312 @@
 import type { APIRoute } from 'astro';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
+import { checkoutPayloadSchema, type CheckoutPayload } from '../../utils/validation';
+import { 
+  checkRateLimitByIP, 
+  checkRateLimitByEmail, 
+  logFailedAttempt 
+} from '../../lib/rateLimit';
 
-// 1. INICIALIZACIÓN
-const mp = new MercadoPagoConfig({ accessToken: import.meta.env.MP_ACCESS_TOKEN });
+const mp = new MercadoPagoConfig({ accessToken: import.meta.env.MP_ACCESS_TOKEN! });
 
 const supabaseAdmin = createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY 
+  import.meta.env.PUBLIC_SUPABASE_URL!,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Definimos interfaces para que TypeScript esté tranquilo
-interface CartItem {
-    id: string;
-    name: string;
-    quality: string;
-    size: string;
-    quantity: number;
-    image: string;
+interface DBProduct {
+  id: string;
+  name: string;
+  price_pk: number;
+  price_g5: number;
 }
 
-interface DBProduct {
-    id: string;
-    name: string;
-    price_pk: number;
-    price_g5: number;
+interface ValidatedItem {
+  id: string;
+  title: string;
+  description: string;
+  picture_url: string;
+  quantity: number;
+  unit_price: number;
+  currency_id: string;
 }
 
 export const POST: APIRoute = async ({ request }) => {
-    try {
-        const body = await request.json();
-        const { items: cartItems, customer } = body as { items: CartItem[], customer: any };
+  try {
+    // 0️⃣ OBTENER IP DEL CLIENTE
+    const ip = request.headers.get('x-forwarded-for') || 
+               request.headers.get('x-real-ip') || 
+               request.headers.get('cf-connecting-ip') ||
+               'unknown';
+    
+    console.log(`📍 IP: ${ip}`);
 
-        if (!cartItems || cartItems.length === 0) {
-            return new Response(JSON.stringify({ error: "El carrito está vacío" }), { status: 400 });
-        }
-
-        // 2. OBTENER PRODUCTOS DE LA DB
-        const productIds = cartItems.map((i) => i.id);
-        const productNames = cartItems.map((i) => i.name);
-        
-        const { data: dbProducts, error: dbError } = await supabaseAdmin
-            .from('products')
-            .select('id, name, price_pk, price_g5')
-            .or(`id.in.(${productIds.join(',')}),name.in.("${productNames.join('","')}")`);
-
-        if (dbError || !dbProducts) {
-            console.error("Error Supabase:", dbError);
-            throw new Error("No se pudo conectar con la base de datos de productos");
-        }
-
-        const typedDbProducts = dbProducts as DBProduct[];
-
-        // 3. VALIDACIÓN Y MAPEADO DE ITEMS
-        const validatedItems = cartItems.map((cartItem) => {
-            const dbProduct = typedDbProducts.find((p) => 
-                p.id.toLowerCase() === cartItem.id?.toLowerCase() || 
-                p.name.toLowerCase() === cartItem.name?.toLowerCase()
-            );
-            
-            if (!dbProduct) {
-                throw new Error(`Producto no disponible en catálogo: ${cartItem.name}`);
-            }
-
-            const isG5 = cartItem.quality === 'G5';
-            const finalPrice = isG5 ? dbProduct.price_g5 : dbProduct.price_pk;
-
-            return {
-                id: dbProduct.id,
-                title: `${dbProduct.name} (${cartItem.quality})`,
-                description: `Talla: ${cartItem.size} - Calidad: ${cartItem.quality}`,
-                picture_url: cartItem.image,
-                quantity: Number(cartItem.quantity),
-                unit_price: Number(finalPrice),
-                currency_id: 'CLP'
-            };
-        });
-
-        // 4. CÁLCULO DE TOTAL (Aquí corregimos los errores de 'acc' e 'item')
-        const totalAmount = validatedItems.reduce((acc: number, item: any) => acc + (item.unit_price * item.quantity), 0);
-        
-        const newOrderId = crypto.randomUUID();
-
-        // Guardar Orden Principal
-        const { error: orderError } = await supabaseAdmin.from('orders').insert({
-            id: newOrderId,
-            user_id: customer.userId || null,
-            customer_name: `${customer.firstName} ${customer.lastName}`.toUpperCase(),
-            email: customer.email,
-            phone: customer.phone,
-            rut: customer.rut,
-            address: customer.address,
-            city: customer.city,
-            region: customer.region,
-            total_price: totalAmount,
-            status: 'Pendiente'
-        });
-
-        if (orderError) throw new Error("Error al registrar orden: " + orderError.message);
-
-        // Guardar Detalles (Aquí corregimos el error del segundo 'item')
-        const itemsToInsert = validatedItems.map((item: any) => ({
-            order_id: newOrderId,
-            product_name: item.title,
-            price: item.unit_price,
-            size: cartItems.find((ci) => item.title.startsWith(ci.name))?.size || 'N/A',
-            quality: item.title.includes('G5') ? 'G5' : 'PK',
-            image_url: item.picture_url
-        }));
-
-        await supabaseAdmin.from('order_items').insert(itemsToInsert);
-
-        // 5. CREAR PREFERENCIA MP
-        const preference = await new Preference(mp).create({
-            body: {
-                items: validatedItems,
-                external_reference: newOrderId,
-                payer: {
-                    email: customer.email,
-                    name: customer.firstName,
-                    surname: customer.lastName
-                },
-                notification_url: "https://amgpage.vercel.app/api/webhook",
-                back_urls: {
-                    success: "https://amgpage.vercel.app/pago-exitoso",
-                    failure: "https://amgpage.vercel.app/checkout?status=failure"
-                },
-                auto_return: "approved",
-                statement_descriptor: "AMG SNEAKERS"
-            }
-        });
-
-        return new Response(JSON.stringify({ init_point: preference.init_point }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-    } catch (error: any) {
-        console.error("❌ Pago Fallido:", error.message);
-        return new Response(JSON.stringify({ error: error.message }), { 
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+    // 1️⃣ VALIDAR MÉTODO
+    if (request.method !== 'POST') {
+      return new Response(
+        JSON.stringify({ error: 'Método no permitido' }),
+        { status: 405, headers: { 'Content-Type': 'application/json' } }
+      );
     }
+
+    // 2️⃣ PARSEAR BODY
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      console.error('JSON parse error:', e);
+      return new Response(
+        JSON.stringify({ error: 'JSON inválido' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('📥 Payload recibido:', JSON.stringify(body, null, 2));
+
+    // 3️⃣ VALIDAR CON ZOD
+    let validatedPayload: CheckoutPayload;
+    try {
+      validatedPayload = checkoutPayloadSchema.parse(body);
+      console.log('✅ Validación Zod exitosa');
+    } catch (zodError: any) {
+      console.error('❌ Error Zod:', zodError);
+      
+      let errorMessage = 'Error de validación';
+      
+      if (zodError.issues && zodError.issues.length > 0) {
+        const issue = zodError.issues[0];
+        const path = issue.path?.join('.') || 'campo desconocido';
+        errorMessage = `${path}: ${issue.message}`;
+      }
+
+      console.warn(`[Validation Error] ${errorMessage}`);
+
+      return new Response(
+        JSON.stringify({ error: errorMessage }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { items: cartItems, customer } = validatedPayload;
+
+    // 4️⃣ APLICAR RATE LIMITING ✅
+    console.log('🛡️ Verificando rate limits...');
+
+    // Rate limit por IP
+    const ipLimit = checkRateLimitByIP(ip);
+    if (!ipLimit.success) {
+      console.warn(`⚠️ Rate limit por IP excedido: ${ip}`);
+      await logFailedAttempt(ip, customer.email, 'IP rate limit exceeded');
+      
+      return new Response(
+        JSON.stringify({ 
+          error: ipLimit.message,
+          retryAfter: ipLimit.retryAfter
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Retry-After': String(ipLimit.retryAfter)
+          }
+        }
+      );
+    }
+
+    // Rate limit por Email
+    const emailLimit = checkRateLimitByEmail(customer.email);
+    if (!emailLimit.success) {
+      console.warn(`⚠️ Rate limit por email excedido: ${customer.email}`);
+      logFailedAttempt(ip, customer.email, 'Email rate limit exceeded');
+      
+      return new Response(
+        JSON.stringify({ 
+          error: emailLimit.message,
+          retryAfter: emailLimit.retryAfter
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Retry-After': String(emailLimit.retryAfter)
+          }
+        }
+      );
+    }
+
+    console.log(`✅ Rate limits OK - IP: ${ipLimit.remaining} | Email: ${emailLimit.remaining}`);
+
+    console.log(`📦 Pedido válido: ${cartItems.length} items para ${customer.email}`);
+
+    // 5️⃣ EXTRAER EL ID DEL PRODUCTO (sin talla ni calidad)
+    const productIds = cartItems.map(cartItem => {
+      let productId = cartItem.productId || cartItem.name;
+      productId = productId.replace(/-(?:PK|G5|G4|G3)-\d+$/, '');
+      return productId;
+    });
+
+    console.log('🔍 Buscando productos con IDs:', productIds);
+
+    // 6️⃣ BUSCAR EN BD
+    const { data: dbProducts, error: dbError } = await supabaseAdmin
+      .from('products')
+      .select('id, name, price_pk, price_g5')
+      .in('id', productIds);
+
+    if (dbError) {
+      console.error('DB Error:', dbError.message);
+      return new Response(
+        JSON.stringify({ error: 'Error consultando productos en BD' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!dbProducts || dbProducts.length === 0) {
+      console.error('❌ No se encontraron productos');
+      return new Response(
+        JSON.stringify({ 
+          error: `Productos no encontrados en BD. Buscados: ${productIds.join(', ')}` 
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`✅ Productos encontrados: ${dbProducts.length}`);
+
+    const typedDbProducts = dbProducts as DBProduct[];
+
+    // 7️⃣ VALIDAR Y MAPEAR ITEMS
+    const validatedItems: ValidatedItem[] = cartItems.map((cartItem, idx) => {
+      let productIdToSearch = cartItem.name;
+      
+      if (cartItem.productId) {
+        productIdToSearch = cartItem.productId
+          .replace(/-(?:PK|G5|G4|G3)-\d+$/, '');
+      }
+      
+      const dbProduct = typedDbProducts.find(
+        p => p.id.toLowerCase() === productIdToSearch.toLowerCase()
+      );
+
+      if (!dbProduct) {
+        throw new Error(`Producto no encontrado en BD: ${productIdToSearch}`);
+      }
+
+      const isG5 = cartItem.quality === 'G5';
+      const finalPrice = isG5 ? dbProduct.price_g5 : dbProduct.price_pk;
+
+      return {
+        id: dbProduct.id,
+        title: `${dbProduct.name} (${cartItem.quality})`,
+        description: `Talla: ${cartItem.size} - Calidad: ${cartItem.quality}`,
+        picture_url: cartItem.image || '',
+        quantity: cartItem.quantity,
+        unit_price: Number(finalPrice),
+        currency_id: 'CLP'
+      };
+    });
+
+    // 8️⃣ CALCULAR TOTAL
+    const totalAmount = validatedItems.reduce(
+      (sum, item) => sum + item.unit_price * item.quantity,
+      0
+    );
+
+    const newOrderId = crypto.randomUUID();
+
+    console.log(`💰 Total: $${totalAmount.toLocaleString('es-CL')}`);
+
+    // 9️⃣ GUARDAR ORDEN EN BD
+    const { error: orderError } = await supabaseAdmin
+      .from('orders')
+      .insert({
+        id: newOrderId,
+        user_id: customer.userId || null,
+        customer_name: `${customer.firstName} ${customer.lastName}`.toUpperCase(),
+        email: customer.email,
+        phone: customer.phone,
+        rut: customer.rut,
+        address: customer.address,
+        city: customer.city,
+        region: customer.region,
+        total_price: totalAmount,
+        status: 'Pendiente'
+      });
+
+    if (orderError) {
+      console.error('Order Insert Error:', orderError.message);
+      return new Response(
+        JSON.stringify({ error: 'Error guardando orden en BD' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`✅ Orden creada: ${newOrderId}`);
+
+    // 🔟 GUARDAR ITEMS
+    const itemsToInsert = validatedItems.map((item, idx) => {
+      const originalItem = cartItems[idx];
+      return {
+        order_id: newOrderId,
+        product_name: item.title,
+        price: item.unit_price,
+        quantity: item.quantity,
+        size: originalItem.size,
+        quality: originalItem.quality,
+        image_url: item.picture_url
+      };
+    });
+
+    const { error: itemsError } = await supabaseAdmin
+      .from('order_items')
+      .insert(itemsToInsert);
+
+    if (itemsError) {
+      console.error('Items Insert Error:', itemsError.message);
+    } else {
+      console.log(`✅ ${itemsToInsert.length} items guardados`);
+    }
+
+    // 1️⃣1️⃣ CREAR PREFERENCIA EN MERCADO PAGO
+    console.log('🎟️ Creando preferencia MP...');
+    
+    const preference = await new Preference(mp).create({
+      body: {
+        items: validatedItems,
+        external_reference: newOrderId,
+        payer: {
+          email: customer.email,
+          name: customer.firstName,
+          surname: customer.lastName
+        },
+        notification_url: 'https://amgpage.vercel.app/api/webhook',
+        back_urls: {
+          success: 'https://amgpage.vercel.app/pago-exitoso',  // ✅ URL CORRECTA
+          failure: 'https://amgpage.vercel.app/pago-error?error=payment_failed'  // ✅ URL CORRECTA
+        },
+        auto_return: 'approved',
+        statement_descriptor: 'AMG SNEAKERS'
+      }
+    });
+
+    if (!preference.init_point) {
+      throw new Error('No se pudo generar init_point de MP');
+    }
+
+    console.log(`✅ Preferencia MP creada: ${preference.id}`);
+
+    return new Response(
+      JSON.stringify({ init_point: preference.init_point }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error: any) {
+    console.error('❌ Error en create-payment:', error.message);
+    console.error('Stack:', error.stack);
+    return new Response(
+      JSON.stringify({ error: error.message || 'Error procesando pago' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 };

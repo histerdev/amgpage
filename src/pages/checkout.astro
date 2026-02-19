@@ -106,7 +106,6 @@ export const prerender = false;
         border-bottom-color: black;
     }
 </style>
-
 <script>
     import { supabase } from '../lib/supabase';
     import RegionesYComunas from '../data/chile';
@@ -120,6 +119,108 @@ export const prerender = false;
     const errorMsg = document.getElementById('error-message');
     const regionSelect = document.getElementById('region-select') as HTMLSelectElement;
     const ciudadSelect = document.getElementById('ciudad-select') as HTMLSelectElement;
+    const rutInput = form?.querySelector('input[name="rut"]') as HTMLInputElement;
+    const telefonoInput = form?.querySelector('input[name="telefono"]') as HTMLInputElement;
+
+    // ✅ FORMATEADOR DE RUT (EN TIEMPO REAL)
+    function formatRUT(value: string): string {
+        let clean = value.replace(/[^0-9K]/gi, '').toUpperCase();
+        
+        if (clean.length === 0) return '';
+        
+        const dv = clean.slice(-1);
+        const nums = clean.slice(0, -1);
+        
+        let formatted = '';
+        let numReverse = nums.split('').reverse().join('');
+        
+        for (let i = 0; i < numReverse.length; i++) {
+            if (i > 0 && i % 3 === 0) {
+                formatted = '.' + formatted;
+            }
+            formatted = numReverse[i] + formatted;
+        }
+        
+        return formatted + '-' + dv;
+    }
+
+    // ✅ FORMATEADOR DE TELÉFONO CHILENO (EN TIEMPO REAL)
+    function formatPhone(value: string): string {
+        let clean = value.replace(/\D/g, '');
+        
+        if (clean.startsWith('56')) {
+            clean = clean.slice(2);
+        }
+        
+        if (clean.startsWith('0')) {
+            clean = clean.slice(1);
+        }
+        
+        clean = clean.slice(-9);
+        
+        if (clean.length === 0 || !clean.startsWith('9')) {
+            return value;
+        }
+        
+        return `+56${clean}`;
+    }
+
+    // ✅ LISTENER PARA AUTO-FORMATEAR RUT AL ESCRIBIR
+    if (rutInput) {
+        rutInput.addEventListener('input', (e) => {
+            const target = e.target as HTMLInputElement;
+            let value = target.value;
+            
+            let clean = value.replace(/[^0-9K]/gi, '').toUpperCase();
+            
+            clean = clean.slice(0, 9);
+            
+            if (clean.length > 0) {
+                const dv = clean.slice(-1);
+                const nums = clean.slice(0, -1);
+                
+                let formatted = '';
+                let numReverse = nums.split('').reverse().join('');
+                
+                for (let i = 0; i < numReverse.length; i++) {
+                    if (i > 0 && i % 3 === 0) {
+                        formatted = '.' + formatted;
+                    }
+                    formatted = numReverse[i] + formatted;
+                }
+                
+                target.value = formatted + (dv ? '-' + dv : '');
+            }
+        });
+    }
+
+    // ✅ LISTENER PARA AUTO-FORMATEAR TELÉFONO AL ESCRIBIR
+    if (telefonoInput) {
+        telefonoInput.addEventListener('input', (e) => {
+            const target = e.target as HTMLInputElement;
+            let value = target.value;
+            
+            let clean = value.replace(/\D/g, '');
+            
+            clean = clean.slice(0, 15);
+            
+            if (clean.startsWith('56')) {
+                clean = clean.slice(2);
+            }
+            
+            if (clean.startsWith('0')) {
+                clean = clean.slice(1);
+            }
+            
+            clean = clean.slice(-9);
+            
+            if (clean.length > 0 && clean.startsWith('9')) {
+                target.value = `+56${clean}`;
+            } else if (clean.length > 0) {
+                target.value = clean;
+            }
+        });
+    }
 
     // 1. RENDERIZADO DEL CARRITO
     (cartItems as any).subscribe((items: any[]) => {
@@ -153,7 +254,6 @@ export const prerender = false;
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Bloquear UI
         payBtn.disabled = true;
         payBtn.innerHTML = "Procesando...";
         if (errorMsg) errorMsg.classList.add('hidden');
@@ -162,27 +262,37 @@ export const prerender = false;
             const formData = new FormData(form);
             const currentItems = (cartItems as any).get();
             
-            // Intentar obtener usuario (opcional)
+            if (!currentItems || currentItems.length === 0) {
+                throw new Error('Carrito vacío');
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             const userId = session?.user?.id || null;
 
-            // Construir payload
+            // ✅ FORMATEAR DATOS ANTES DE ENVIAR
+            const rut = (formData.get('rut') as string).trim();
+            const phone = (formData.get('telefono') as string).trim();
+            const formattedRut = formatRUT(rut);
+            const formattedPhone = formatPhone(phone);
+
             const payload = {
                 items: currentItems,
                 customer: {
-                    userId: userId, // Puede ser null
-                    firstName: formData.get('primer_nombre'),
-                    lastName: formData.get('apellido_paterno'),
-                    email: formData.get('email'),
-                    rut: formData.get('rut'),
-                    phone: formData.get('telefono'),
-                    region: formData.get('region'),
-                    city: formData.get('ciudad'),
-                    address: formData.get('direccion')
+                    userId: userId,
+                    firstName: (formData.get('primer_nombre') as string).trim(),
+                    lastName: (formData.get('apellido_paterno') as string).trim(),
+                    email: (formData.get('email') as string).trim().toLowerCase(),
+                    rut: formattedRut,
+                    phone: formattedPhone,
+                    region: formData.get('region') as string,
+                    city: formData.get('ciudad') as string,
+                    address: (formData.get('direccion') as string).trim()
                 }
             };
 
-            // Llamar al endpoint seguro
+            console.log('📤 Enviando payload:', payload);
+
+            // Llamar al endpoint
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -191,26 +301,41 @@ export const prerender = false;
 
             const result = await response.json();
 
-            if (!response.ok) throw new Error(result.error || "Error en el servidor");
-            if (!result.init_point) throw new Error("No se pudo generar el pago");
+            if (!response.ok) {
+                // ✅ MANEJAR 429 (Too Many Requests)
+                if (response.status === 429) {
+                    const retryAfter = response.headers.get('Retry-After') || result.retryAfter;
+                    const minutes = Math.ceil(retryAfter / 60);
+                    throw new Error(`Demasiados intentos. Espera ${minutes} minutos e intenta de nuevo.`);
+                }
+                
+                throw new Error(result.error || `Error ${response.status}`);
+            }
 
-            // Limpieza y Redirección
-            cartItems.set([]); 
-            localStorage.removeItem('amg-cart'); // Ajusta según tu clave
+            if (!result.init_point) {
+                throw new Error("No se pudo generar el enlace de pago");
+            }
+
+            // ✅ Limpiar carrito y redirigir
+            (cartItems as any).set([]);
+            localStorage.removeItem('amg-cart');
+            
+            console.log('✅ Redirigiendo a Mercado Pago...');
             window.location.href = result.init_point;
 
         } catch (err: any) {
-            console.error(err);
+            console.error('❌ Error checkout:', err);
             if (errorMsg) {
                 errorMsg.innerText = `⚠️ ${err.message}`;
                 errorMsg.classList.remove('hidden');
             }
+        } finally {
             payBtn.disabled = false;
-            payBtn.innerHTML = "INTENTAR NUEVAMENTE";
+            payBtn.innerHTML = "Ir a Pagar";
         }
     });
 
-    // 3. LOGICA REGIONES (Se mantiene igual, solo optimizada visualmente)
+    // 3. LÓGICA DE REGIONES
     regionSelect?.addEventListener('change', () => {
         const reg = RegionesYComunas.find(r => r.name === regionSelect.value);
         if (ciudadSelect && reg) {

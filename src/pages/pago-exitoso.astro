@@ -1,22 +1,138 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
+
+const searchParams = new URL(Astro.request.url).searchParams;
+const preferenceId = searchParams.get('preference_id');
+const merchantOrderId = searchParams.get('merchant_order_id');
+const paymentId = searchParams.get('payment_id');
+const externalReference = searchParams.get('external_reference');
+const status = searchParams.get('status') || 'approved';
+
+// Log para debugging
+console.log('✅ Pago exitoso:', { preferenceId, merchantOrderId, paymentId, externalReference, status });
 ---
 
-<Layout title="Pago Exitoso | AMG SHOES">
-    <Header />
-    <main class="max-w-xl mx-auto px-6 py-20 text-center">
-        <div class="mb-8 bg-black text-white w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-        </div>
-        <h1 class="text-4xl font-black uppercase italic tracking-tighter mb-4 text-black">PAGO CONFIRMADO</h1>
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] mb-12">Tu pedido está siendo procesado en estos momentos</p>
+<Layout title="Pago Exitoso | AMG Sneakers">
+  <Header />
+
+  <main class="min-h-screen bg-gradient-to-br from-[#2ecc71] to-[#27ae60] pt-32 pb-20">
+    <div class="max-w-2xl mx-auto px-6">
+      
+      <!-- CONTENEDOR PRINCIPAL -->
+      <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden">
         
-        <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100 text-left mb-10">
-            <p class="text-[10px] font-black uppercase text-gray-400 mb-4">Información de Seguimiento</p>
-            <p class="text-sm text-gray-700 leading-relaxed uppercase font-bold">Te mantendremos informado via Whatsapp o Correo, El tiempo para ver el QC es de 1 a 3 dias habiles y el envio 9 a 20 dias habiles (13.5 Dias promedio)</p>
+        <!-- HEADER CON ICONO -->
+        <div class="bg-gradient-to-r from-[#2ecc71] to-[#27ae60] p-12 text-center">
+          <div class="inline-block mb-6">
+            <svg class="w-20 h-20 text-white animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <h1 class="text-4xl font-black text-white uppercase tracking-tighter">
+            ¡Pago Exitoso!
+          </h1>
+          <p class="text-white/80 text-sm font-bold mt-2">Tu orden ha sido confirmada</p>
         </div>
 
-        <a href="/" class="inline-block bg-black text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px]">Volver al Inicio</a>
-    </main>
+        <!-- CONTENIDO -->
+        <div class="p-12 space-y-8">
+          
+          <!-- ORDEN ID -->
+          <div class="bg-gray-50 rounded-2xl p-6 border-2 border-gray-100">
+            <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Número de Orden</p>
+            <p class="text-2xl font-black text-gray-900 font-mono break-all">
+              {externalReference || 'N/A'}
+            </p>
+          </div>
+
+          <!-- DETALLES DE PAGO -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Payment ID -->
+            <div class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
+              <p class="text-[9px] font-black uppercase text-blue-600 mb-2">ID de Pago</p>
+              <p class="text-sm font-bold text-gray-900 font-mono">
+                {paymentId ? paymentId.slice(0, 8) + '...' : 'N/A'}
+              </p>
+            </div>
+
+            <!-- Status -->
+            <div class="bg-green-50 rounded-2xl p-4 border border-green-100">
+              <p class="text-[9px] font-black uppercase text-green-600 mb-2">Estado</p>
+              <p class="text-sm font-bold text-green-900 uppercase">
+                {status === 'approved' ? '✅ Aprobado' : status}
+              </p>
+            </div>
+          </div>
+
+          <!-- INFORMACIÓN IMPORTANTE -->
+          <div class="bg-yellow-50 rounded-2xl p-6 border-l-4 border-yellow-400">
+            <h3 class="font-black text-sm uppercase text-yellow-900 mb-2">⚠️ Importante</h3>
+            <ul class="text-[13px] text-yellow-800 space-y-2 font-bold">
+              <li>✓ Revisa tu email para la confirmación de orden</li>
+              <li>✓ El comprobante de pago te llegará en los próximos minutos</li>
+              <li>✓ Guarda el número de orden para seguimiento</li>
+            </ul>
+          </div>
+
+          <!-- PRÓXIMOS PASOS -->
+          <div class="bg-gray-50 rounded-2xl p-6">
+            <h3 class="font-black text-sm uppercase text-gray-900 mb-4">Próximos Pasos</h3>
+            <ol class="space-y-3">
+              <li class="flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#2ecc71] text-white font-black flex items-center justify-center text-sm">1</span>
+                <span class="text-sm font-bold text-gray-700">Recibirás un email de confirmación</span>
+              </li>
+              <li class="flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#2ecc71] text-white font-black flex items-center justify-center text-sm">2</span>
+                <span class="text-sm font-bold text-gray-700">Procesaremos tu orden y la empacaremos</span>
+              </li>
+              <li class="flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#2ecc71] text-white font-black flex items-center justify-center text-sm">3</span>
+                <span class="text-sm font-bold text-gray-700">Te enviaremos el rastreo de envío por email</span>
+              </li>
+            </ol>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+            <a href="/dashboard/ordenes" class="bg-[#2ecc71] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#27ae60] transition-all text-center">
+              Ver Mis Órdenes
+            </a>
+            <a href="/" class="bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all text-center">
+              Volver a Tienda
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CONTADOR DE REDIRECCIÓN -->
+      <div class="text-center mt-8">
+        <p class="text-white/70 text-sm font-bold">
+          Redirigiendo en <span id="countdown">10</span> segundos...
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Countdown de redirección automática
+    let seconds = 10;
+    const countdownEl = document.getElementById('countdown');
+
+    const interval = setInterval(() => {
+      seconds--;
+      if (countdownEl) {
+        countdownEl.innerText = String(seconds);
+      }
+
+      if (seconds === 0) {
+        clearInterval(interval);
+        // Redirigir al dashboard
+        window.location.href = '/dashboard/ordenes';
+      }
+    }, 1000);
+  </script>
 </Layout>
