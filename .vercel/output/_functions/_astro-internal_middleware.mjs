@@ -21,16 +21,18 @@ const onRequest$1 = defineMiddleware(async (context, next) => {
   const responseHeaders = new Headers();
   const supabase = createSupabaseServerClient(request, responseHeaders);
   const {
-    data: { session }
-  } = await supabase.auth.getSession();
-  if (isGuestRoute && session) {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+  const isAuthenticated = !!user && !userError;
+  if (isGuestRoute && isAuthenticated) {
     return redirect("/");
   }
-  if ((isAuthRoute || isAdminRoute) && !session) {
+  if ((isAuthRoute || isAdminRoute) && !isAuthenticated) {
     return redirect(`/login?redirectTo=${encodeURIComponent(pathname)}`);
   }
-  if (isAdminRoute && session) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
+  if (isAdminRoute && isAuthenticated) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== "admin") {
       return new Response(
         `<!DOCTYPE html>

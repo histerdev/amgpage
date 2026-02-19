@@ -1,6 +1,6 @@
 // src/middleware.ts
 // Middleware con protección REAL en el servidor
-// Lee la sesión desde cookies (no localStorage)
+// Usa getUser() que verifica el JWT contra Supabase Auth
 
 import { defineMiddleware } from "astro:middleware";
 import { createSupabaseServerClient } from "./lib/supabase-ssr";
@@ -31,31 +31,34 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const responseHeaders = new Headers();
   const supabase = createSupabaseServerClient(request, responseHeaders);
 
-  // ── Leer sesión del servidor (desde cookies) ────────────────────────────
+  // ── Verificar usuario contra el servidor de Supabase ──────────────
+  // getUser() hace una llamada real al servidor, no solo lee el JWT
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  const isAuthenticated = !!user && !userError;
 
   // ── Si ya está logueado, no mostrar login/registro ──────────────────────
-  if (isGuestRoute && session) {
+  if (isGuestRoute && isAuthenticated) {
     return redirect("/");
   }
 
   // ── Rutas autenticadas: redirigir si no hay sesión ──────────────────────
-  if ((isAuthRoute || isAdminRoute) && !session) {
+  if ((isAuthRoute || isAdminRoute) && !isAuthenticated) {
     return redirect(`/login?redirectTo=${encodeURIComponent(pathname)}`);
   }
 
   // ── Rutas admin: verificar rol en base de datos ─────────────────────────
-  if (isAdminRoute && session) {
+  if (isAdminRoute && isAuthenticated) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (profile?.role !== "admin") {
-      // Autenticado pero no admin → página de acceso denegado
       return new Response(
         `<!DOCTYPE html>
         <html lang="es">

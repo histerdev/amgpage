@@ -11,6 +11,8 @@ import {
   logFailedAttempt,
 } from "../../lib/rateLimit";
 
+export const prerender = false; // ← FIX 1: Obligatorio para endpoints API en output: 'static'
+
 const mp = new MercadoPagoConfig({
   accessToken: import.meta.env.MP_ACCESS_TOKEN!,
 });
@@ -70,11 +72,12 @@ export const POST: APIRoute = async ({ request }) => {
     let validatedPayload: CheckoutPayload;
     try {
       validatedPayload = checkoutPayloadSchema.parse(body);
-    } catch (zodError: any) {
+    } catch (zodError: unknown) {
       let errorMessage = "Error de validación";
 
-      if (zodError.issues && zodError.issues.length > 0) {
-        const issue = zodError.issues[0];
+      const err = zodError as { issues?: { path?: string[]; message: string }[] };
+      if (err.issues && err.issues.length > 0) {
+        const issue = err.issues[0];
         const path = issue.path?.join(".") || "campo desconocido";
         errorMessage = `${path}: ${issue.message}`;
       }
@@ -89,10 +92,11 @@ export const POST: APIRoute = async ({ request }) => {
 
     const { items: cartItems, customer } = validatedPayload;
 
-    // 4️⃣ APLICAR RATE LIMITING ✅
+    // 4️⃣ APLICAR RATE LIMITING
+    // FIX 2: await — ahora son async porque consultan Supabase
 
     // Rate limit por IP
-    const ipLimit = checkRateLimitByIP(ip);
+    const ipLimit = await checkRateLimitByIP(ip);
     if (!ipLimit.success) {
       console.warn(`⚠️ Rate limit por IP excedido: ${ip}`);
       await logFailedAttempt(ip, customer.email, "IP rate limit exceeded");
@@ -113,10 +117,10 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Rate limit por Email
-    const emailLimit = checkRateLimitByEmail(customer.email);
+    const emailLimit = await checkRateLimitByEmail(customer.email);
     if (!emailLimit.success) {
       console.warn(`⚠️ Rate limit por email excedido: ${customer.email}`);
-      logFailedAttempt(ip, customer.email, "Email rate limit exceeded");
+      await logFailedAttempt(ip, customer.email, "Email rate limit exceeded"); // ← FIX 3: await añadido
 
       return new Response(
         JSON.stringify({
@@ -132,6 +136,7 @@ export const POST: APIRoute = async ({ request }) => {
         },
       );
     }
+
     // 5️⃣ EXTRAER EL ID DEL PRODUCTO (sin talla ni calidad)
     const productIds = cartItems.map((cartItem) => {
       let productId = cartItem.productId || cartItem.name;
@@ -166,7 +171,7 @@ export const POST: APIRoute = async ({ request }) => {
     const typedDbProducts = dbProducts as DBProduct[];
 
     // 7️⃣ VALIDAR Y MAPEAR ITEMS
-    const validatedItems: ValidatedItem[] = cartItems.map((cartItem, idx) => {
+    const validatedItems: ValidatedItem[] = cartItems.map((cartItem) => {
       let productIdToSearch = cartItem.name;
 
       if (cartItem.productId) {
@@ -247,6 +252,18 @@ export const POST: APIRoute = async ({ request }) => {
       .from("order_items")
       .insert(itemsToInsert);
 
+    // FIX 4: itemsError ya no se ignora — si falla, rollback de la orden
+    if (itemsError) {
+      console.error("Items Insert Error:", itemsError.message);
+      // Borrar la orden huérfana para no dejar basura en BD
+      await supabaseAdmin.from("orders").delete().eq("id", newOrderId);
+      return new Response(
+        JSON.stringify({ error: "Error guardando items en BD" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    // 1️⃣1️⃣ CREAR PREFERENCIA EN MERCADO PAGO
     const preference = await new Preference(mp).create({
       body: {
         items: validatedItems,
@@ -256,16 +273,20 @@ export const POST: APIRoute = async ({ request }) => {
           name: customer.firstName,
           surname: customer.lastName,
         },
-        notification_url: `${import.meta.env.PUBLIC_SITE_URL}/api/webhook`, // ✅ DINÁMICO
+        notification_url: `${import.meta.env.PUBLIC_SITE_URL}/api/webhook`,
         back_urls: {
-          success: `${import.meta.env.PUBLIC_SITE_URL}/pago-exitoso`, // ✅ DINÁMICO
-          failure: `${import.meta.env.PUBLIC_SITE_URL}/pago-error?error=payment_failed`, // ✅ DINÁMICO
+          success: `${import.meta.env.PUBLIC_SITE_URL}/pago-exitoso`,
+          failure: `${import.meta.env.PUBLIC_SITE_URL}/pago-error?error=payment_failed`,
         },
         auto_return: "approved",
         statement_descriptor: "AMG SNEAKERS",
       },
     });
+
     if (!preference.init_point) {
+      // FIX 5: Si MP falla después de crear la orden, limpiar
+      await supabaseAdmin.from("order_items").delete().eq("order_id", newOrderId);
+      await supabaseAdmin.from("orders").delete().eq("id", newOrderId);
       throw new Error("No se pudo generar init_point de MP");
     }
 
@@ -273,11 +294,15 @@ export const POST: APIRoute = async ({ request }) => {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error: any) {
-    console.error("❌ Error en create-payment:", error.message);
-    console.error("Stack:", error.stack);
+  } catch (error: unknown) {
+    // FIX 6: error tipado como unknown en vez de any
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    const stack = error instanceof Error ? error.stack : undefined;
+    console.error("❌ Error en create-payment:", message);
+    if (stack) console.error("Stack:", stack);
+
     return new Response(
-      JSON.stringify({ error: error.message || "Error procesando pago" }),
+      JSON.stringify({ error: message || "Error procesando pago" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }

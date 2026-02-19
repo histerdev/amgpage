@@ -1,23 +1,30 @@
-/* ✅ Asegúrate que está compilado correctamente */
+/* Astro + Tailwind base */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ✅ CUSTOM STYLES - MÍNIMOS */
+/* Base styles */
 body {
   font-family: "Inter", system-ui, sans-serif;
 }
 
+/* Scrollbar — ÚNICA definición */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f5f5f5;
 }
 ::-webkit-scrollbar-thumb {
   background: #18181b;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2ecc71;
+  background: #333;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #18181b #f5f5f5;
 }

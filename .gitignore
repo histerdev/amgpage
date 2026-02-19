@@ -6,8 +6,11 @@ yarn.lock
 
 # Build outputs
 dist/
-coverage/
 .astro/
+coverage/
+
+# Vercel
+.vercel/
 
 # Development
 .env

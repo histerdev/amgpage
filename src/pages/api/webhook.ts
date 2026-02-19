@@ -1,8 +1,10 @@
 import type { APIRoute } from "astro";
 import { MercadoPagoConfig, Payment } from "mercadopago";
-import { createSupabaseServerClient } from "../../lib/supabase-ssr";
+import { createClient } from "@supabase/supabase-js";
 import { sendNotification } from "../../lib/notifications";
 import crypto from "crypto";
+
+export const prerender = false;
 
 // ✅ Configuración segura
 const mpClient = new MercadoPagoConfig({
@@ -10,6 +12,12 @@ const mpClient = new MercadoPagoConfig({
 });
 
 const MP_WEBHOOK_SECRET = import.meta.env.MP_WEBHOOK_SECRET;
+
+// ✅ Admin client para el webhook (no hay sesión de usuario)
+const supabaseAdmin = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL!,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -39,7 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
     let bodyParsed;
     try {
       bodyParsed = JSON.parse(bodyText);
-    } catch (e) {
+    } catch {
       return new Response(null, { status: 200 });
     }
 
@@ -59,12 +67,13 @@ export const POST: APIRoute = async ({ request }) => {
       await delay(2000);
 
       // Procesar pago
-      await processPayment(cleanId, request);
+      await processPayment(cleanId);
     }
 
     return new Response(null, { status: 200 });
-  } catch (error: any) {
-    console.error("🔥 Error crítico en webhook:", error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("🔥 Error crítico en webhook:", message);
     return new Response(null, { status: 200 });
   }
 };
@@ -88,16 +97,17 @@ function validateMercadoPagoSignature(
     const hash = hmac.digest("hex");
 
     return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(hash));
-  } catch (error) {
-    console.error("Error validando firma:", error);
+  } catch {
+    console.error("Error validando firma");
     return false;
   }
 }
 
 /**
  * ✅ PROCESA PAGOS APROBADOS
+ * Ahora usa supabaseAdmin (service role) en lugar del SSR client
  */
-async function processPayment(paymentId: string, request: Request) {
+async function processPayment(paymentId: string) {
   try {
     // 1️⃣ OBTENER PAGO DE MERCADO PAGO
     const payment = await new Payment(mpClient).get({ id: paymentId });
@@ -111,28 +121,26 @@ async function processPayment(paymentId: string, request: Request) {
       return;
     }
 
-    // 2️⃣ OBTENER ORDEN DE BD
-    const responseHeaders = new Headers();
-    const supabase = createSupabaseServerClient(request, responseHeaders);
-
-    const { data: order, error: orderError } = await supabase
+    // 2️⃣ OBTENER ORDEN DE BD (con admin client, bypassa RLS)
+    const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
       .select("*")
       .eq("id", orderId)
       .single();
 
     if (orderError || !order) {
+      console.error("Orden no encontrada:", orderId);
       return;
     }
 
     // 3️⃣ OBTENER ITEMS DE LA ORDEN
-    const { data: items, error: itemsError } = await supabase
+    const { data: items } = await supabaseAdmin
       .from("order_items")
       .select("*")
       .eq("order_id", orderId);
 
     // 4️⃣ ACTUALIZAR ESTADO A PAGADO
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("orders")
       .update({
         status: "Completado",
@@ -142,21 +150,23 @@ async function processPayment(paymentId: string, request: Request) {
       .eq("id", orderId);
 
     if (updateError) {
+      console.error("Error actualizando orden:", updateError.message);
       return;
     }
 
     // 5️⃣ OBTENER TELEGRAM_ID DEL USUARIO
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("telegram_id")
       .eq("email", order.email)
       .single();
 
-    // 6️⃣ ENVIAR NOTIFICACIÓN CON NUEVO SISTEMA ROBUSTO
-
+    // 6️⃣ ENVIAR NOTIFICACIÓN
     const productNames =
-      items?.map((item: any) => `${item.product_name} (Talla ${item.size})`) ||
-      [];
+      items?.map(
+        (item: { product_name: string; size: string }) =>
+          `${item.product_name} (Talla ${item.size})`,
+      ) || [];
 
     await sendNotification({
       orderId,
@@ -172,8 +182,9 @@ async function processPayment(paymentId: string, request: Request) {
         productNames,
       },
     });
-  } catch (error: any) {
-    console.error(`❌ Error en processPayment:`, error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`❌ Error en processPayment:`, message);
   }
 }
 
