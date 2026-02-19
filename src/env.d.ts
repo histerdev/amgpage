@@ -4,6 +4,9 @@ interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_URL: string;
   readonly PUBLIC_SUPABASE_ANON_KEY: string;
   
+  // Site URL (para URLs dinámicas en API routes)
+  readonly PUBLIC_SITE_URL: string;  // ✅ NUEVO
+  
   // Backend only (server-side)
   readonly SUPABASE_SERVICE_ROLE_KEY: string;
   

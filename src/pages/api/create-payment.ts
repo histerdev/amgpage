@@ -247,7 +247,7 @@ export const POST: APIRoute = async ({ request }) => {
       .from('order_items')
       .insert(itemsToInsert);
     
-    const preference = await new Preference(mp).create({
+     const preference = await new Preference(mp).create({
       body: {
         items: validatedItems,
         external_reference: newOrderId,
@@ -256,16 +256,15 @@ export const POST: APIRoute = async ({ request }) => {
           name: customer.firstName,
           surname: customer.lastName
         },
-        notification_url: 'https://amgpage.vercel.app/api/webhook',
+        notification_url: `${import.meta.env.PUBLIC_SITE_URL}/api/webhook`,  // ✅ DINÁMICO
         back_urls: {
-          success: 'https://amgpage.vercel.app/pago-exitoso',  // ✅ URL CORRECTA
-          failure: 'https://amgpage.vercel.app/pago-error?error=payment_failed'  // ✅ URL CORRECTA
+          success: `${import.meta.env.PUBLIC_SITE_URL}/pago-exitoso`,  // ✅ DINÁMICO
+          failure: `${import.meta.env.PUBLIC_SITE_URL}/pago-error?error=payment_failed`  // ✅ DINÁMICO
         },
         auto_return: 'approved',
         statement_descriptor: 'AMG SNEAKERS'
       }
     });
-
     if (!preference.init_point) {
       throw new Error('No se pudo generar init_point de MP');
     }
