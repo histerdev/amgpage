@@ -21,9 +21,19 @@ export default [
       },
     },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      // ── ESTRICTO: en e-commerce con pagos, any = bug potencial ──
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+
+      // ── REGLAS ADICIONALES PARA SEGURIDAD ──
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      'eqeqeq': ['error', 'always'],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
     },
   },
   {

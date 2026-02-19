@@ -1,6 +1,6 @@
 ---
 import Header from '../components/Header.astro';
-import Footer from '../components/footer.astro';
+import Footer from '../components/Footer.astro';
 import CartDrawer from '../components/CartDrawer.astro';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/700.css';
@@ -17,6 +17,16 @@ interface Props {
   jsonLd?: Record<string, unknown>;
 }
 
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  canonical?: string;
+  ogType?: 'website' | 'product';
+  noIndex?: boolean;
+  jsonLd?: Record<string, unknown>;  // ← AGREGAR
+}
+
 const siteUrl = 'https://amgpage.vercel.app';
 
 const {
@@ -26,29 +36,11 @@ const {
   canonical = new URL(Astro.url.pathname, siteUrl).href,
   ogType = 'website',
   noIndex = false,
-  jsonLd,
+  jsonLd,  // ← AGREGAR
 } = Astro.props;
 
 const fullTitle = `${title} | AMG Sneakers`;
 const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
-
-// Datos estructurados por defecto (Organization)
-const defaultJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "AMG Sneakers",
-  "url": siteUrl,
-  "logo": `${siteUrl}/logo-amg.webp`,
-  "description": "Gestión de sneakers premium en Chile con inspección QC real antes del envío.",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Santiago",
-    "addressCountry": "CL"
-  },
-  "sameAs": []
-};
-
-const structuredData = jsonLd || defaultJsonLd;
 ---
 
 <!DOCTYPE html>
@@ -82,8 +74,9 @@ const structuredData = jsonLd || defaultJsonLd;
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <!-- Datos Estructurados (JSON-LD) -->
-  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
-</head>
+  {jsonLd && (
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  )}</head>
 <body class="fonts-loading">
   <Header />
   <main>

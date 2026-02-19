@@ -1,10 +1,3 @@
-/**
- * ✅ TIPOS COMPARTIDOS PARA TODO EL PROYECTO
- * Centro único de verdad para estructuras de datos
- */
-
-// ── PRODUCTO ────────────────────────────────────────
-// ── PRODUCTO ────────────────────────────────────────
 export interface Product {
   id: string;
   name: string;
@@ -12,14 +5,15 @@ export interface Product {
     PK: number;
     G5: number;
   };
-  image: string | string[]; // string[] para álbum, string para imagen única
+  image: string | string[];
   tallas: string[];
   tags: string[];
-  // Campos opcionales para futuro
   description?: string;
   category?: string;
-  availability?: "available" | "low_stock" | "out_of_stock";
-  stock?: Record<string, Record<string, number>>;
+  /** Si la fábrica actualmente produce este modelo */
+  status?: "active" | "paused" | "discontinued";
+  /** Días estimados fábrica + envío a Chile */
+  estimatedDeliveryDays?: number;
 }
 
 // ── CARRITO ────────────────────────────────────────

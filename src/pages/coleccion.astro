@@ -9,15 +9,23 @@ const siluetas = ["Jordan 1", "Jordan 3", "Jordan 4", "Jordan 5", "Jordan 6", "J
 
 // Extraer todos los tags únicos para el panel avanzado
 const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
+const productFilterData = productos.map(p => ({
+  id: p.id,
+  name: p.name,
+  tags: p.tags,
+}));
+---
 ---
 
 <Layout title="Catálogo | AMG SNEAKERS">
     <main class="py-8 md:py-16 bg-white font-['Inter']">
         <div 
-            id="catalog-container" 
-            data-products={JSON.stringify(productos)}
-            class="max-w-7xl mx-auto px-4 md:px-6"
-        >
+
+<div 
+    id="catalog-container" 
+    data-products={JSON.stringify(productFilterData)}
+    class="max-w-7xl mx-auto px-4 md:px-6"
+>
             
             <div class="mb-12 space-y-8">
                 <div class="flex items-baseline gap-4">

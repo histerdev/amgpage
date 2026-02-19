@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { productos } from '../data/products';
-import { supabase } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import { productos } from '../../data/products';
+import { supabase } from '../../lib/supabase';
 
 // ✅ PROTEGER ACCESO
 const { data: { session } } = await supabase.auth.getSession();

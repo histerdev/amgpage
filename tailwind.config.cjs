@@ -1,7 +1,15 @@
 module.exports = {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
-  theme: {
-    extend: {},
+theme: {
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: '#2ecc71',
+          dark: '#27ae60',
+          light: '#a3f5c5',
+        },
+      },
+    },
   },
   plugins: [],
   // ✅ PURGE UNUSED CSS

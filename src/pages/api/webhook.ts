@@ -115,7 +115,7 @@ async function processPayment(paymentId: string) {
     if (payment.status !== "approved") {
       return;
     }
-
+    
     const orderId = payment.external_reference;
     if (!orderId) {
       return;
@@ -132,7 +132,10 @@ async function processPayment(paymentId: string) {
       console.error("Orden no encontrada:", orderId);
       return;
     }
-
+    if (order.status === "Completado" && order.mp_payment_id) {
+      console.log(`[IDEMPOTENT] Order ${orderId} already processed`);
+      return; // No procesar de nuevo
+    }
     // 3️⃣ OBTENER ITEMS DE LA ORDEN
     const { data: items } = await supabaseAdmin
       .from("order_items")

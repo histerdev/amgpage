@@ -5,10 +5,8 @@ import { productos } from '../data/products';
 export const prerender = true;  // ✅ AGREGAR
 
 // Filtramos todos los "Famosos" y los mezclamos aleatoriamente
-const destacadosHero = productos
+const famosos = productos
     .filter(p => p.tags?.includes("Famoso"))
-    .sort(() => Math.random() - 0.5) // Mezcla aleatoria
-    .slice(0, 2) // Tomamos los 2 primeros tras la mezcla
     .map(p => ({
         id: p.id,
         name: p.name,
@@ -16,6 +14,9 @@ const destacadosHero = productos
         image: p.image, 
         tags: p.tags || []
     }));
+
+// Para el build estático, tomar los 2 primeros como fallback/SSR
+const destacadosHero = famosos.slice(0, 2);
 ---
 
 <Layout title="AMG Sneakers | Alta Gama al Valor Real">
@@ -201,11 +202,14 @@ const destacadosHero = productos
 </style>
 
 <script>
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('active');
-        });
-    }, { threshold: 0.1 });
+const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); // ← Dejar de observar una vez revelado
+        }
+    });
+}, { threshold: 0.1 });
 
-    document.querySelectorAll('.reveal-init').forEach(el => revealObserver.observe(el));
+document.querySelectorAll('.reveal-init').forEach(el => revealObserver.observe(el));
 </script>

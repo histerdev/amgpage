@@ -52,7 +52,7 @@ const productJsonLd = {
     "lowPrice": lowestPrice,
     "highPrice": highestPrice,
     "priceCurrency": "CLP",
-    "availability": "https://schema.org/InStock",
+    "availability": "https://schema.org/PreOrder",
     "seller": {
       "@type": "Organization",
       "name": "AMG Sneakers"
@@ -90,12 +90,15 @@ const productJsonLd = {
               class={`thumb-btn border-2 rounded-xl aspect-square overflow-hidden bg-[#f9f9f9] transition-all ${idx === 0 ? 'border-black' : 'border-gray-100'}`}
               data-src={img}
             >
-              <img 
-                src={img} 
-                alt={`${product.name} — Vista ${idx + 1}`}
-                class="w-full h-full object-contain"
-                loading="lazy"
-              />
+       <img 
+              src={img} 
+              alt={`${product.name} — Vista ${idx + 1}`}
+              class="w-full h-full object-contain"
+              width={200}
+              height={200}
+              loading="lazy"
+              decoding="async"
+            />
             </button>
           ))}
         </div>

@@ -7,39 +7,42 @@ on:
     branches: [main]
 
 jobs:
-  lint:
+  quality:
+    name: Lint + Type Check + Test + Build
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-      
-      - run: npm install
-      - run: npm run lint
-      - run: npm run format -- --check
 
-  test:
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-      
-      - run: npm install
-      - run: npm run test:run
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
-      - run: npm install
-      - run: npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check (Astro)
+        run: npx astro check
+
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Build
+        run: npm run build
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+          PUBLIC_SITE_URL: https://amgpage.vercel.app
+          MP_ACCESS_TOKEN: ${{ secrets.MP_ACCESS_TOKEN }}
+          MP_WEBHOOK_SECRET: ${{ secrets.MP_WEBHOOK_SECRET }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLIC_WHATSAPP_NUMBER: ${{ secrets.PUBLIC_WHATSAPP_NUMBER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
