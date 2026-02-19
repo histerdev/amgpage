@@ -31,5 +31,8 @@
       "path": "/api/cron/process-notifications",
       "schedule": "0 2 * * *"
     }
-  ]
+  ],
+  "images": {
+    "disableStaticImages": true
+  }
 }
