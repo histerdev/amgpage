@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
+export const prerender = true;  // ✅ AGREGAR
 
 // Filtramos todos los "Famosos" y los mezclamos aleatoriamente
 const destacadosHero = productos

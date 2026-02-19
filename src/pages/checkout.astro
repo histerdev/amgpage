@@ -290,7 +290,6 @@ export const prerender = false;
                 }
             };
 
-            console.log('📤 Enviando payload:', payload);
 
             // Llamar al endpoint
             const response = await fetch('/api/create-payment', {
@@ -320,7 +319,6 @@ export const prerender = false;
             (cartItems as any).set([]);
             localStorage.removeItem('amg-cart');
             
-            console.log('✅ Redirigiendo a Mercado Pago...');
             window.location.href = result.init_point;
 
         } catch (err: any) {

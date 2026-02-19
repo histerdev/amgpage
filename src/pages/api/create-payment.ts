@@ -40,7 +40,6 @@ export const POST: APIRoute = async ({ request }) => {
                request.headers.get('cf-connecting-ip') ||
                'unknown';
     
-    console.log(`📍 IP: ${ip}`);
 
     // 1️⃣ VALIDAR MÉTODO
     if (request.method !== 'POST') {
@@ -62,15 +61,11 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    console.log('📥 Payload recibido:', JSON.stringify(body, null, 2));
-
     // 3️⃣ VALIDAR CON ZOD
     let validatedPayload: CheckoutPayload;
     try {
       validatedPayload = checkoutPayloadSchema.parse(body);
-      console.log('✅ Validación Zod exitosa');
     } catch (zodError: any) {
-      console.error('❌ Error Zod:', zodError);
       
       let errorMessage = 'Error de validación';
       
@@ -91,7 +86,6 @@ export const POST: APIRoute = async ({ request }) => {
     const { items: cartItems, customer } = validatedPayload;
 
     // 4️⃣ APLICAR RATE LIMITING ✅
-    console.log('🛡️ Verificando rate limits...');
 
     // Rate limit por IP
     const ipLimit = checkRateLimitByIP(ip);
@@ -134,11 +128,6 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
-
-    console.log(`✅ Rate limits OK - IP: ${ipLimit.remaining} | Email: ${emailLimit.remaining}`);
-
-    console.log(`📦 Pedido válido: ${cartItems.length} items para ${customer.email}`);
-
     // 5️⃣ EXTRAER EL ID DEL PRODUCTO (sin talla ni calidad)
     const productIds = cartItems.map(cartItem => {
       let productId = cartItem.productId || cartItem.name;
@@ -146,7 +135,6 @@ export const POST: APIRoute = async ({ request }) => {
       return productId;
     });
 
-    console.log('🔍 Buscando productos con IDs:', productIds);
 
     // 6️⃣ BUSCAR EN BD
     const { data: dbProducts, error: dbError } = await supabaseAdmin
@@ -172,7 +160,6 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    console.log(`✅ Productos encontrados: ${dbProducts.length}`);
 
     const typedDbProducts = dbProducts as DBProduct[];
 
@@ -215,7 +202,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     const newOrderId = crypto.randomUUID();
 
-    console.log(`💰 Total: $${totalAmount.toLocaleString('es-CL')}`);
 
     // 9️⃣ GUARDAR ORDEN EN BD
     const { error: orderError } = await supabaseAdmin
@@ -242,7 +228,6 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    console.log(`✅ Orden creada: ${newOrderId}`);
 
     // 🔟 GUARDAR ITEMS
     const itemsToInsert = validatedItems.map((item, idx) => {
@@ -261,15 +246,6 @@ export const POST: APIRoute = async ({ request }) => {
     const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert(itemsToInsert);
-
-    if (itemsError) {
-      console.error('Items Insert Error:', itemsError.message);
-    } else {
-      console.log(`✅ ${itemsToInsert.length} items guardados`);
-    }
-
-    // 1️⃣1️⃣ CREAR PREFERENCIA EN MERCADO PAGO
-    console.log('🎟️ Creando preferencia MP...');
     
     const preference = await new Preference(mp).create({
       body: {
@@ -293,8 +269,6 @@ export const POST: APIRoute = async ({ request }) => {
     if (!preference.init_point) {
       throw new Error('No se pudo generar init_point de MP');
     }
-
-    console.log(`✅ Preferencia MP creada: ${preference.id}`);
 
     return new Response(
       JSON.stringify({ init_point: preference.init_point }),

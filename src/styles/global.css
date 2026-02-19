@@ -1,22 +1,23 @@
+/* ✅ Asegúrate que está compilado correctamente */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  height: 100%;
-}
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+/* ✅ CUSTOM STYLES - MÍNIMOS */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-.animate-marquee {
-    display: flex;
-    width: max-content;
-    animation: marquee 25s linear infinite;
+::-webkit-scrollbar {
+  width: 8px;
 }
-
-/* Optimización para evitar saltos visuales */
-.whitespace-nowrap {
-    white-space: nowrap;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #18181b;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2ecc71;
 }

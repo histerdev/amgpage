@@ -41,14 +41,12 @@ export const POST: APIRoute = async ({ request }) => {
         try {
             bodyParsed = JSON.parse(bodyText);
         } catch (e) {
-            console.error('Error parseando JSON del webhook');
             return new Response(null, { status: 200 });
         }
 
         const notificationType = bodyParsed.type || bodyParsed.topic;
         const paymentId = bodyParsed.data?.id || bodyParsed.id;
 
-        console.log(`📨 Webhook válido: tipo=[${notificationType}] paymentId=[${paymentId}]`);
 
         // 3️⃣ PROCESAR SOLO PAGOS
         if (notificationType === 'payment' && paymentId) {
@@ -107,21 +105,17 @@ function validateMercadoPagoSignature(
  */
 async function processPayment(paymentId: string, request: Request) {
     try {
-        console.log(`🔍 Procesando pago ${paymentId}...`);
 
         // 1️⃣ OBTENER PAGO DE MERCADO PAGO
         const payment = await new Payment(mpClient).get({ id: paymentId });
 
-        console.log(`💳 Estado pago: ${payment.status}`);
 
         if (payment.status !== 'approved') {
-            console.log(`⏭️ Pago no aprobado, ignorando`);
             return;
         }
 
         const orderId = payment.external_reference;
         if (!orderId) {
-            console.error('⚠️ Pago sin external_reference');
             return;
         }
 
@@ -136,21 +130,15 @@ async function processPayment(paymentId: string, request: Request) {
             .single();
 
         if (orderError || !order) {
-            console.error('❌ Orden no encontrada:', orderError?.message);
             return;
         }
 
-        console.log(`✅ Orden encontrada: ${order.customer_name}`);
 
         // 3️⃣ OBTENER ITEMS DE LA ORDEN
         const { data: items, error: itemsError } = await supabase
             .from('order_items')
             .select('*')
             .eq('order_id', orderId);
-
-        if (itemsError) {
-            console.warn('⚠️ Error obteniendo items:', itemsError.message);
-        }
 
         // 4️⃣ ACTUALIZAR ESTADO A PAGADO
         const { error: updateError } = await supabase
@@ -163,11 +151,9 @@ async function processPayment(paymentId: string, request: Request) {
             .eq('id', orderId);
 
         if (updateError) {
-            console.error('❌ Error actualizando orden:', updateError.message);
             return;
         }
 
-        console.log('💾 Orden actualizada a Completado');
 
         // 5️⃣ OBTENER TELEGRAM_ID DEL USUARIO
         const { data: profile } = await supabase
@@ -177,7 +163,6 @@ async function processPayment(paymentId: string, request: Request) {
             .single();
 
         // 6️⃣ ENVIAR NOTIFICACIÓN CON NUEVO SISTEMA ROBUSTO
-        console.log('📢 Iniciando sistema de notificaciones robusto...');
         
         const productNames = items?.map((item: any) => 
             `${item.product_name} (Talla ${item.size})`
@@ -198,7 +183,6 @@ async function processPayment(paymentId: string, request: Request) {
             },
         });
 
-        console.log('✅ Notificaciones encoladas exitosamente');
 
     } catch (error: any) {
         console.error(`❌ Error en processPayment:`, error.message);

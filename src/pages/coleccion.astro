@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
+export const prerender = true;  // ✅ AGREGAR
 
 // Lista de siluetas para los botones principales
 const siluetas = ["Jordan 1", "Jordan 3", "Jordan 4", "Jordan 5", "Jordan 6", "Jordan 7", "Jordan 8", "Jordan 9", "Jordan 11", "Jordan 12", "Jordan 13", "Dunk", "Travis Scott"];

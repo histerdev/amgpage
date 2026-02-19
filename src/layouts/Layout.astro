@@ -1,51 +1,91 @@
 ---
 interface Props {
-    title: string;
+  title: string;
+  description?: string;
+  image?: string;
+  url?: string;
 }
 
-const { title } = Astro.props;
-import '../styles/global.css'; 
+const {
+  title,
+  description = 'AMG Sneakers - Réplicas Premium de Zapatillas de Diseño',
+  image = 'https://amgpage.vercel.app/og-image.png',
+  url = 'https://amgpage.vercel.app',
+} = Astro.props;
+
 import CartDrawer from '../components/CartDrawer.astro';
 import Footer from '../components/footer.astro';
+import '../styles/global.css';
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="es" class="scroll-smooth">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{title} | AMG Sneakers</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="bg-white text-black antialiased selection:bg-[#2ecc71] selection:text-white flex flex-col min-h-screen">
-        
-        <div class="flex-grow">
-            <slot />
-        </div>
+  <head>
+    <!-- ✅ META BÁSICOS -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | AMG Sneakers</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={url} />
+    
+    <!-- ✅ OPEN GRAPH (Redes Sociales) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:url" content={url} />
+    <meta property="og:site_name" content="AMG Sneakers" />
+    
+    <!-- ✅ TWITTER CARDS -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    
+    <!-- ✅ FAVICON -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#000000" />
+    
+    <!-- ✅ SECURITY HEADERS -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    
+    <!-- ✅ GOOGLE FONTS (async, no bloqueante) -->
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" 
+      rel="stylesheet"
+    />
+    
+    <!-- ✅ TAILWIND (Compilado, NO CDN) -->
+    <link rel="stylesheet" href={new URL('../styles/global.css', import.meta.url).pathname}>
+  </head>
+  
+  <body class="bg-white text-black antialiased selection:bg-[#2ecc71] selection:text-white flex flex-col min-h-screen">
+    <div class="flex-grow">
+      <slot />
+    </div>
 
-        <Footer />
-
-        <CartDrawer />
-
-    </body>
+    <Footer />
+    <CartDrawer />
+  </body>
 </html>
 
 <style is:global>
-    body {
-        font-family: 'Inter', sans-serif;
-    }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #18181b;
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #2ecc71;
-    }
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #18181b;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2ecc71;
+  }
 </style>

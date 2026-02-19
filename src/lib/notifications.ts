@@ -26,7 +26,6 @@ interface NotificationPayload {
  */
 export async function sendNotification(payload: NotificationPayload) {
   try {
-    console.log(`📢 Enviando notificación: ${payload.type} para orden ${payload.orderId}`);
 
     // 1️⃣ INTENTAR TELEGRAM
     const telegramSent = await sendTelegramNotification(payload);
@@ -93,15 +92,12 @@ async function sendTelegramNotification(payload: NotificationPayload): Promise<b
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('❌ Error Telegram:', error);
       return false;
     }
 
-    console.log('✅ Notificación Telegram enviada');
     return true;
 
   } catch (error: any) {
-    console.error('❌ Error en Telegram:', error.message);
     return false;
   }
 }
@@ -122,15 +118,12 @@ async function sendEmailNotification(payload: NotificationPayload): Promise<bool
     });
 
     if (!response.ok) {
-      console.error('❌ Error enviando email');
       return false;
     }
 
-    console.log('✅ Notificación Email enviada');
     return true;
 
   } catch (error: any) {
-    console.error('❌ Error en Email:', error.message);
     return false;
   }
 }
@@ -153,14 +146,11 @@ async function enqueueFallbackNotification(payload: NotificationPayload) {
       });
 
     if (error) {
-      console.error('Error encolando notificación:', error);
       return;
     }
 
-    console.log('✅ Notificación encolada para reintentos');
 
   } catch (error: any) {
-    console.error('Error en enqueueFallbackNotification:', error);
   }
 }
 
@@ -169,7 +159,6 @@ async function enqueueFallbackNotification(payload: NotificationPayload) {
  */
 export async function processNotificationQueue() {
   try {
-    console.log('⏳ Procesando cola de notificaciones...');
 
     // Obtener notificaciones pendientes
     const { data: queuedNotifications, error } = await supabaseAdmin
@@ -185,11 +174,9 @@ export async function processNotificationQueue() {
     }
 
     if (!queuedNotifications || queuedNotifications.length === 0) {
-      console.log('ℹ️ No hay notificaciones pendientes');
       return;
     }
 
-    console.log(`📨 Procesando ${queuedNotifications.length} notificaciones...`);
 
     for (const item of queuedNotifications) {
       const payload = item.payload as NotificationPayload;
@@ -205,7 +192,6 @@ export async function processNotificationQueue() {
           .update({ status: 'sent' })
           .eq('id', item.id);
 
-        console.log(`✅ Reintento exitoso para orden ${payload.orderId}`);
       } else {
         // Si aún falla, enviar por email como fallback
         const emailSuccess = await sendEmailNotification(payload);
@@ -216,7 +202,6 @@ export async function processNotificationQueue() {
             .update({ status: 'sent', retry_count: retryCount + 1 })
             .eq('id', item.id);
 
-          console.log(`✅ Email enviado como fallback para orden ${payload.orderId}`);
         } else {
           // Incrementar reintentos
           const nextRetry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos más
@@ -281,10 +266,8 @@ La notificación falló después de 3 reintentos.
       }),
     });
 
-    console.log('✅ Alerta de admin enviada');
 
   } catch (error: any) {
-    console.error('Error enviando alerta a admin:', error);
   }
 }
 

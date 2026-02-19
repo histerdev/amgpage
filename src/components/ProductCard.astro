@@ -1,10 +1,9 @@
 ---
-// ProductCard.astro
 interface Props {
   id: string;
   name: string;
-  prices: { PK: number; G5: number; };
-  image: string | string[]; 
+  prices: { PK: number; G5: number };
+  image: string | string[];
   tags: string[];
 }
 
@@ -30,13 +29,18 @@ const tagsData = tags.map(t => t.toLowerCase()).join('|');
   </div>
 
   <a href={productUrl} class="aspect-square overflow-hidden bg-[#fbfbfb] flex items-center justify-center p-10 relative cursor-pointer">
-    <img src={mainImage} alt={name} class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 z-10" loading="lazy" />
+    <img 
+      src={mainImage} 
+      alt={`${name} - Réplica Premium de Sneaker`}
+      class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 z-10" 
+      loading="lazy"
+    />
   </a>
 
   <div class="p-6 flex flex-col flex-grow">
     <div class="flex items-center gap-1.5 mb-3">
         <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71] animate-pulse"></span>
-        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Disponible</span>
+        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Disponible</span>
     </div>
 
     <a href={productUrl}>
@@ -48,7 +52,7 @@ const tagsData = tags.map(t => t.toLowerCase()).join('|');
     <div class="mt-auto flex flex-col gap-4">
       <div class="flex items-baseline gap-2">
         <span class="text-2xl font-black text-slate-900">${displayPrice}</span>
-        <span class="text-[10px] font-bold text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded">G5</span>
+        <span class="text-[10px] font-bold text-zinc-500 uppercase bg-zinc-100 px-2 py-0.5 rounded">G5</span>
       </div>
 
       <a 

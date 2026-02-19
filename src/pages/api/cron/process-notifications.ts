@@ -8,7 +8,6 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   try {
-    console.log('🔄 Iniciando proceso de cola de notificaciones...');
     await processNotificationQueue();
 
     return new Response(
