@@ -2,25 +2,25 @@
 // Middleware con protección REAL en el servidor
 // Lee la sesión desde cookies (no localStorage)
 
-import { defineMiddleware } from 'astro:middleware';
-import { createSupabaseServerClient } from './lib/supabase-ssr';
+import { defineMiddleware } from "astro:middleware";
+import { createSupabaseServerClient } from "./lib/supabase-ssr";
 
 // Rutas que requieren estar autenticado
-const AUTH_ROUTES = ['/perfil', '/pedidos'];
+const AUTH_ROUTES = ["/perfil", "/pedidos"];
 
 // Rutas que requieren rol de admin
-const ADMIN_ROUTES = ['/admin'];
+const ADMIN_ROUTES = ["/admin"];
 
 // Rutas de login (redirigen al inicio si ya está autenticado)
-const GUEST_ONLY_ROUTES = ['/login', '/registro'];
+const GUEST_ONLY_ROUTES = ["/login", "/registro"];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, redirect, request } = context;
   const pathname = url.pathname;
 
-  const isAuthRoute  = AUTH_ROUTES.some(r => pathname.startsWith(r));
-  const isAdminRoute = ADMIN_ROUTES.some(r => pathname.startsWith(r));
-  const isGuestRoute = GUEST_ONLY_ROUTES.some(r => pathname.startsWith(r));
+  const isAuthRoute = AUTH_ROUTES.some((r) => pathname.startsWith(r));
+  const isAdminRoute = ADMIN_ROUTES.some((r) => pathname.startsWith(r));
+  const isGuestRoute = GUEST_ONLY_ROUTES.some((r) => pathname.startsWith(r));
 
   // Si es ruta pública, pasar directo
   if (!isAuthRoute && !isAdminRoute && !isGuestRoute) {
@@ -32,11 +32,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = createSupabaseServerClient(request, responseHeaders);
 
   // ── Leer sesión del servidor (desde cookies) ────────────────────────────
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // ── Si ya está logueado, no mostrar login/registro ──────────────────────
   if (isGuestRoute && session) {
-    return redirect('/');
+    return redirect("/");
   }
 
   // ── Rutas autenticadas: redirigir si no hay sesión ──────────────────────
@@ -47,12 +49,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // ── Rutas admin: verificar rol en base de datos ─────────────────────────
   if (isAdminRoute && session) {
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
       .single();
 
-    if (profile?.role !== 'admin') {
+    if (profile?.role !== "admin") {
       // Autenticado pero no admin → página de acceso denegado
       return new Response(
         `<!DOCTYPE html>
@@ -76,7 +78,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
           </div>
         </body>
         </html>`,
-        { status: 403, headers: { 'Content-Type': 'text/html' } }
+        { status: 403, headers: { "Content-Type": "text/html" } },
       );
     }
   }
@@ -86,8 +88,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Copiar cookies de sesión actualizadas a la respuesta final
   responseHeaders.forEach((value, key) => {
-    if (key.toLowerCase() === 'set-cookie') {
-      response.headers.append('set-cookie', value);
+    if (key.toLowerCase() === "set-cookie") {
+      response.headers.append("set-cookie", value);
     }
   });
 

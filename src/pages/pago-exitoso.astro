@@ -1,10 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
 
 const searchParams = new URL(Astro.request.url).searchParams;
-const preferenceId = searchParams.get('preference_id');
-const merchantOrderId = searchParams.get('merchant_order_id');
 const paymentId = searchParams.get('payment_id');
 const externalReference = searchParams.get('external_reference');
 const status = searchParams.get('status') || 'approved';
@@ -13,7 +10,6 @@ const status = searchParams.get('status') || 'approved';
 ---
 
 <Layout title="Pago Exitoso | AMG Sneakers">
-  <Header />
 
   <main class="min-h-screen bg-gradient-to-br from-[#2ecc71] to-[#27ae60] pt-32 pb-20">
     <div class="max-w-2xl mx-auto px-6">

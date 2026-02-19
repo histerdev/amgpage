@@ -1,19 +1,17 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import vercel from '@astrojs/vercel';  // ✅ Cambio: de '/serverless' a sin ruta
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  integrations: [tailwind()],
+  site: 'https://amgpage.vercel.app',
+  integrations: [
+    tailwind(),
+  ],
   output: 'static',
   adapter: vercel(),
   vite: {
     build: {
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: true,
-        },
-      },
+      minify: true,
     },
   },
 });

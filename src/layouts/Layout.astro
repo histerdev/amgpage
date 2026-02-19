@@ -1,91 +1,65 @@
 ---
+import Header from '../components/Header.astro';
+import Footer from '../components/footer.astro';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/inter/900.css';
+import '../styles/global.css';
+
 interface Props {
   title: string;
-  description?: string;
-  image?: string;
-  url?: string;
 }
 
-const {
-  title,
-  description = 'AMG Sneakers - Réplicas Premium de Zapatillas de Diseño',
-  image = 'https://amgpage.vercel.app/og-image.png',
-  url = 'https://amgpage.vercel.app',
-} = Astro.props;
-
-import CartDrawer from '../components/CartDrawer.astro';
-import Footer from '../components/footer.astro';
-import '../styles/global.css';
+const { title } = Astro.props;
 ---
 
-<!doctype html>
-<html lang="es" class="scroll-smooth">
-  <head>
-    <!-- ✅ META BÁSICOS -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} | AMG Sneakers</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={url} />
-    
-    <!-- ✅ OPEN GRAPH (Redes Sociales) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={image} />
-    <meta property="og:url" content={url} />
-    <meta property="og:site_name" content="AMG Sneakers" />
-    
-    <!-- ✅ TWITTER CARDS -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={image} />
-    
-    <!-- ✅ FAVICON -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#000000" />
-    
-    <!-- ✅ SECURITY HEADERS -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
-    
-    <!-- ✅ GOOGLE FONTS (async, no bloqueante) -->
-    <link 
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" 
-      rel="stylesheet"
-    />
-    
-    <!-- ✅ TAILWIND (Compilado, NO CDN) -->
-    <link rel="stylesheet" href={new URL('../styles/global.css', import.meta.url).pathname}>
-  </head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} | AMG Sneakers</title>
   
-  <body class="bg-white text-black antialiased selection:bg-[#2ecc71] selection:text-white flex flex-col min-h-screen">
-    <div class="flex-grow">
-      <slot />
-    </div>
+  <!-- Meta tags -->
+  <meta name="description" content="AMG Sneakers - Réplicas premium de calidad. PK e G5 certificados. Envío a toda Chile." />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content="AMG Sneakers - Réplicas premium de calidad" />
+  <meta property="og:image" content="https://amgpage.vercel.app/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  
+  <!-- Preconnect para Google Fonts (ya no necesarios con @fontsource) -->
+  <meta http-equiv="x-ua-compatible" content="IE=edge" />
+</head>
+<body>
+  <Header />
+  <slot />
+  <Footer />
+  
+  <style is:global>
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #000 #f5f5f5;
+    }
 
-    <Footer />
-    <CartDrawer />
-  </body>
+    *::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background: #000;
+      border-radius: 4px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: #333;
+    }
+  </style>
+</body>
 </html>
-
-<style is:global>
-  body {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #18181b;
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #2ecc71;
-  }
-</style>

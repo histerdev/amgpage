@@ -2,41 +2,39 @@ import {
   createServerClient,
   parseCookieHeader,
   serializeCookieHeader,
-} from '@supabase/ssr';
+} from "@supabase/ssr";
 
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY!;
 
 export function createSupabaseServerClient(
   request: Request,
-  responseHeaders: Headers
+  responseHeaders: Headers,
 ) {
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       async getAll() {
-        const cookies = parseCookieHeader(
-          request.headers.get('cookie') ?? ''
-        );
+        const cookies = parseCookieHeader(request.headers.get("cookie") ?? "");
 
         if (!cookies) return null;
 
         return cookies.map((c) => ({
           name: c.name,
-          value: c.value ?? '',
+          value: c.value ?? "",
         }));
       },
 
       async setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
           responseHeaders.append(
-            'Set-Cookie',
+            "Set-Cookie",
             serializeCookieHeader(name, value, {
               ...options,
               httpOnly: true,
               secure: import.meta.env.PROD,
-              sameSite: 'lax',
-              path: '/',
-            })
+              sameSite: "lax",
+              path: "/",
+            }),
           );
         });
       },

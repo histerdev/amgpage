@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import { productos } from '../data/products';
 import { supabase } from '../lib/supabase';
 
-
 // ✅ PROTEGER ACCESO
 const { data: { session } } = await supabase.auth.getSession();
 
@@ -35,187 +34,177 @@ const listaProductos = (productos || []) as Producto[];
 ---
 
 <Layout title="SQL Admin | AMG SNEAKERS">
-  <main class="max-w-7xl mx-auto px-6 py-20">
-    <h1 class="text-5xl font-[900] uppercase italic tracking-tighter mb-12">
-      🔒 Base de Datos (ADMIN ONLY)
-    </h1>
-    
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-12">
-      <p class="text-sm font-bold text-yellow-800">
-        ⚠️ Esta página solo es visible para administradores
-      </p>
-    </div>
-    <main class="min-h-screen bg-zinc-950 text-white p-4 md:p-8 font-mono">
-        <div class="max-w-6xl mx-auto">
-            <header class="mb-8 border-b border-zinc-800 pb-6 flex justify-between items-end">
-                <div>
-                    <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">AMG DB MANAGER</h1>
-                    <p class="text-zinc-500 text-xs mt-2 uppercase">Gestión de Catálogo en Supabase</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-[10px] text-zinc-500 block uppercase font-bold">Total en Archivo</span>
-                    <span class="text-2xl font-black text-white">{listaProductos.length} PARES</span>
-                </div>
-            </header>
-
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1 space-y-4">
-                    <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xs font-black uppercase text-zinc-400">1. Seleccionar</h2>
-                            <span id="counter-checked" class="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded-md font-bold">0 Seleccionados</span>
-                        </div>
-                        
-                        <div class="flex gap-2 mb-4">
-                            <button id="select-all" class="flex-1 text-[10px] bg-zinc-800 py-2 rounded-xl hover:bg-white hover:text-black transition-all font-bold">TODOS</button>
-                            <button id="select-none" class="flex-1 text-[10px] bg-zinc-800 py-2 rounded-xl hover:bg-white hover:text-black transition-all font-bold">NINGUNO</button>
-                        </div>
-
-                        <div class="space-y-2 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar" id="checkbox-list">
-                            {listaProductos.map((p) => (
-                                <label class="flex items-center gap-3 p-3 bg-zinc-950 rounded-xl border border-zinc-800 cursor-pointer hover:border-zinc-500 transition-all group">
-                                    <input type="checkbox" class="prod-check w-4 h-4 accent-green-500" value={p.id} data-name={p.name} data-pk={p.prices.PK} data-g5={p.prices.G5} />
-                                    <div class="flex flex-col overflow-hidden">
-                                        <span class="text-[10px] uppercase font-black text-zinc-400 group-hover:text-white truncate">{p.name}</span>
-                                        <span class="text-[8px] text-zinc-600 uppercase italic">{p.id}</span>
-                                    </div>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <button id="btn-replace" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-black p-4 rounded-2xl transition-all uppercase leading-tight shadow-lg shadow-red-900/20">
-                            Borrar DB y<br/>Reponer Selección
-                        </button>
-                        <button id="btn-upsert" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-black p-4 rounded-2xl transition-all uppercase leading-tight">
-                            Actualizar/Añadir<br/>Seleccionados
-                        </button>
-                        <button id="btn-all" class="bg-white text-black text-[10px] font-black p-4 rounded-2xl transition-all uppercase leading-tight">
-                            Generar Todo el<br/>Catálogo
-                        </button>
-                    </div>
-
-                    <div class="relative bg-zinc-900 border border-zinc-800 rounded-[32px] p-6 min-h-[460px] flex flex-col">
-                        <div class="flex justify-between items-center mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">SQL Output</span>
-                                <span id="sql-stats" class="text-[9px] bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full font-bold hidden"></span>
-                            </div>
-                            <button id="copy-btn" class="bg-zinc-800 text-white text-[10px] px-4 py-1 rounded-full font-black uppercase hover:bg-white hover:text-black transition-all">Copiar Código</button>
-                        </div>
-                        
-                        <div class="flex-1 bg-zinc-950 rounded-2xl p-4 border border-zinc-800 overflow-hidden">
-                            <pre class="text-[11px] text-green-400 leading-relaxed overflow-y-auto h-[350px] custom-scrollbar whitespace-pre-wrap font-mono"><code id="sql-display">-- Selecciona productos y una opción de arriba</code></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <main class="min-h-screen bg-zinc-950 text-white p-4 md:p-8 font-mono">
+    <div class="max-w-6xl mx-auto">
+      <header class="mb-8 border-b border-zinc-800 pb-6 flex justify-between items-end">
+        <div>
+          <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">AMG DB MANAGER</h1>
+          <p class="text-zinc-500 text-xs mt-2 uppercase">Gestión de Catálogo en Supabase</p>
         </div>
-    </main>
+        <div class="text-right">
+          <span class="text-[10px] text-zinc-500 block uppercase font-bold">Total en Archivo</span>
+          <span class="text-2xl font-black text-white">{listaProductos.length} PARES</span>
+        </div>
+      </header>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1 space-y-4">
+          <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xs font-black uppercase text-zinc-400">1. Seleccionar</h2>
+              <span id="counter-checked" class="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded-md font-bold">0 Seleccionados</span>
+            </div>
+            
+            <div class="flex gap-2 mb-4">
+              <button id="select-all" class="flex-1 text-[10px] bg-zinc-800 py-2 rounded-xl hover:bg-white hover:text-black transition-all font-bold">TODOS</button>
+              <button id="select-none" class="flex-1 text-[10px] bg-zinc-800 py-2 rounded-xl hover:bg-white hover:text-black transition-all font-bold">NINGUNO</button>
+            </div>
+
+            <div class="space-y-2 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar" id="checkbox-list">
+              {listaProductos.map((p) => (
+                <label class="flex items-center gap-3 p-3 bg-zinc-950 rounded-xl border border-zinc-800 cursor-pointer hover:border-zinc-500 transition-all group">
+                  <input type="checkbox" class="prod-check w-4 h-4 accent-green-500" value={p.id} data-name={p.name} data-pk={p.prices.PK} data-g5={p.prices.G5} />
+                  <div class="flex flex-col overflow-hidden">
+                    <span class="text-[10px] uppercase font-black text-zinc-400 group-hover:text-white truncate">{p.name}</span>
+                    <span class="text-[8px] text-zinc-600 uppercase italic">{p.id}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button id="btn-replace" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-black p-4 rounded-2xl transition-all uppercase leading-tight shadow-lg shadow-red-900/20">
+              Borrar DB y<br/>Reponer Selección
+            </button>
+            <button id="btn-upsert" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-black p-4 rounded-2xl transition-all uppercase leading-tight">
+              Actualizar/Añadir<br/>Seleccionados
+            </button>
+            <button id="btn-all" class="bg-white text-black text-[10px] font-black p-4 rounded-2xl transition-all uppercase leading-tight">
+              Generar Todo el<br/>Catálogo
+            </button>
+          </div>
+
+          <div class="relative bg-zinc-900 border border-zinc-800 rounded-[32px] p-6 min-h-[460px] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">SQL Output</span>
+                <span id="sql-stats" class="text-[9px] bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full font-bold hidden"></span>
+              </div>
+              <button id="copy-btn" class="bg-zinc-800 text-white text-[10px] px-4 py-1 rounded-full font-black uppercase hover:bg-white hover:text-black transition-all">Copiar Código</button>
+            </div>
+            
+            <div class="flex-1 bg-zinc-950 rounded-2xl p-4 border border-zinc-800 overflow-hidden">
+              <pre class="text-[11px] text-green-400 leading-relaxed overflow-y-auto h-[350px] custom-scrollbar whitespace-pre-wrap font-mono"><code id="sql-display">-- Selecciona productos y una opción de arriba</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 </Layout>
 
 <script>
-    const sqlDisplay = document.getElementById('sql-display');
-    const sqlStats = document.getElementById('sql-stats');
-    const copyBtn = document.getElementById('copy-btn');
-    const counterChecked = document.getElementById('counter-checked');
-    const checkboxes = document.querySelectorAll('.prod-check') as NodeListOf<HTMLInputElement>;
+  const sqlDisplay = document.getElementById('sql-display');
+  const sqlStats = document.getElementById('sql-stats');
+  const copyBtn = document.getElementById('copy-btn');
+  const counterChecked = document.getElementById('counter-checked');
+  const checkboxes = document.querySelectorAll('.prod-check') as NodeListOf<HTMLInputElement>;
 
-    // Actualizar contador de checkboxes
-    function updateCheckCounter() {
-        const count = Array.from(checkboxes).filter(i => i.checked).length;
-        if (counterChecked) counterChecked.innerText = `${count} Seleccionados`;
+  // Actualizar contador de checkboxes
+  function updateCheckCounter() {
+    const count = Array.from(checkboxes).filter(i => i.checked).length;
+    if (counterChecked) counterChecked.innerText = `${count} Seleccionados`;
+  }
+
+  checkboxes.forEach(cb => cb.addEventListener('change', updateCheckCounter));
+
+  function getSelectedData() {
+    return Array.from(checkboxes)
+      .filter(i => i.checked)
+      .map(i => ({
+        id: i.value,
+        name: i.dataset.name?.replace(/'/g, "''"),
+        pk: i.dataset.pk,
+        g5: i.dataset.g5
+      }));
+  }
+
+  function generateSQL(data: any[], deleteFirst = false) {
+    if (data.length === 0) return "-- ERROR: No hay productos seleccionados";
+
+    // Limpiar duplicados por ID
+    const uniqueData = data.filter((item, index, self) =>
+      index === self.findIndex((t) => t.id === item.id)
+    );
+
+    let sql = `-- AMG SNEAKERS - GENERACIÓN AUTOMÁTICA\n`;
+    sql += `-- Total de pares: ${uniqueData.length}\n\n`;
+
+    if (deleteFirst) {
+      sql += "TRUNCATE TABLE products;\n\n";
     }
 
-    checkboxes.forEach(cb => cb.addEventListener('change', updateCheckCounter));
-
-    function getSelectedData() {
-        return Array.from(checkboxes)
-            .filter(i => i.checked)
-            .map(i => ({
-                id: i.value,
-                name: i.dataset.name?.replace(/'/g, "''"),
-                pk: i.dataset.pk,
-                g5: i.dataset.g5
-            }));
+    sql += "INSERT INTO products (id, name, price_pk, price_g5)\nVALUES\n";
+    sql += uniqueData.map(p => `('${p.id}', '${p.name}', ${p.pk}, ${p.g5})`).join(',\n');
+    sql += "\nON CONFLICT (id) DO UPDATE SET \n  name = EXCLUDED.name, \n  price_pk = EXCLUDED.price_pk, \n  price_g5 = EXCLUDED.price_g5;";
+    
+    // Actualizar el badge de stats
+    if (sqlStats) {
+      sqlStats.innerText = `${uniqueData.length} PARES GENERADOS`;
+      sqlStats.classList.remove('hidden');
     }
 
-    function generateSQL(data: any[], deleteFirst = false) {
-        if (data.length === 0) return "-- ERROR: No hay productos seleccionados";
+    return sql;
+  }
 
-        // Limpiar duplicados por ID
-        const uniqueData = data.filter((item, index, self) =>
-            index === self.findIndex((t) => t.id === item.id)
-        );
-
-        let sql = `-- AMG SNEAKERS - GENERACIÓN AUTOMÁTICA\n`;
-        sql += `-- Total de pares: ${uniqueData.length}\n\n`;
-
-        if (deleteFirst) {
-            sql += "TRUNCATE TABLE products;\n\n";
-        }
-
-        sql += "INSERT INTO products (id, name, price_pk, price_g5)\nVALUES\n";
-        sql += uniqueData.map(p => `('${p.id}', '${p.name}', ${p.pk}, ${p.g5})`).join(',\n');
-        sql += "\nON CONFLICT (id) DO UPDATE SET \n  name = EXCLUDED.name, \n  price_pk = EXCLUDED.price_pk, \n  price_g5 = EXCLUDED.price_g5;";
-        
-        // Actualizar el badge de stats
-        if (sqlStats) {
-            sqlStats.innerText = `${uniqueData.length} PARES GENERADOS`;
-            sqlStats.classList.remove('hidden');
-        }
-
-        return sql;
+  // Botones
+  document.getElementById('btn-replace')?.addEventListener('click', () => {
+    const data = getSelectedData();
+    if(data.length > 0 && confirm(`¿Borrar base de datos y subir ${data.length} pares?`)) {
+      if (sqlDisplay) sqlDisplay.innerText = generateSQL(data, true);
     }
+  });
 
-    // Botones
-    document.getElementById('btn-replace')?.addEventListener('click', () => {
-        const data = getSelectedData();
-        if(data.length > 0 && confirm(`¿Borrar base de datos y subir ${data.length} pares?`)) {
-            if (sqlDisplay) sqlDisplay.innerText = generateSQL(data, true);
-        }
-    });
+  document.getElementById('btn-upsert')?.addEventListener('click', () => {
+    const data = getSelectedData();
+    if (sqlDisplay) sqlDisplay.innerText = generateSQL(data, false);
+  });
 
-    document.getElementById('btn-upsert')?.addEventListener('click', () => {
-        const data = getSelectedData();
-        if (sqlDisplay) sqlDisplay.innerText = generateSQL(data, false);
-    });
+  document.getElementById('btn-all')?.addEventListener('click', () => {
+    const allData = Array.from(checkboxes).map(i => ({
+      id: i.value,
+      name: i.dataset.name?.replace(/'/g, "''"),
+      pk: i.dataset.pk,
+      g5: i.dataset.g5
+    }));
+    if (sqlDisplay) sqlDisplay.innerText = generateSQL(allData, false);
+  });
 
-    document.getElementById('btn-all')?.addEventListener('click', () => {
-        const allData = Array.from(checkboxes).map(i => ({
-            id: i.value,
-            name: i.dataset.name?.replace(/'/g, "''"),
-            pk: i.dataset.pk,
-            g5: i.dataset.g5
-        }));
-        if (sqlDisplay) sqlDisplay.innerText = generateSQL(allData, false);
-    });
+  // Selección rápida
+  document.getElementById('select-all')?.addEventListener('click', () => {
+    checkboxes.forEach(c => c.checked = true);
+    updateCheckCounter();
+  });
+  document.getElementById('select-none')?.addEventListener('click', () => {
+    checkboxes.forEach(c => c.checked = false);
+    updateCheckCounter();
+  });
 
-    // Selección rápida
-    document.getElementById('select-all')?.addEventListener('click', () => {
-        checkboxes.forEach(c => c.checked = true);
-        updateCheckCounter();
-    });
-    document.getElementById('select-none')?.addEventListener('click', () => {
-        checkboxes.forEach(c => c.checked = false);
-        updateCheckCounter();
-    });
-
-    // Copiar
-    copyBtn?.addEventListener('click', () => {
-        if (sqlDisplay) {
-            navigator.clipboard.writeText(sqlDisplay.innerText);
-            copyBtn.innerText = "¡COPIADO!";
-            setTimeout(() => copyBtn.innerText = "COPIAR CÓDIGO", 2000);
-        }
-    });
+  // Copiar
+  copyBtn?.addEventListener('click', () => {
+    if (sqlDisplay) {
+      navigator.clipboard.writeText(sqlDisplay.innerText);
+      copyBtn.innerText = "¡COPIADO!";
+      setTimeout(() => copyBtn.innerText = "COPIAR CÓDIGO", 2000);
+    }
+  });
 </script>
 
 <style>
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 </style>

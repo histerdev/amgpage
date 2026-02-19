@@ -33,7 +33,7 @@ function cleanupExpiredEntries() {
 function checkRateLimit(
   key: string,
   maxRequests: number,
-  windowMs: number
+  windowMs: number,
 ): RateLimitResult {
   cleanupExpiredEntries();
 
@@ -121,13 +121,13 @@ const failedAttemptsLog: string[] = [];
 export function logFailedAttempt(
   ip: string,
   email: string,
-  reason: string
+  reason: string,
 ): void {
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] IP: ${ip} | Email: ${email} | Reason: ${reason}`;
-  
+
   failedAttemptsLog.push(logEntry);
-  
+
   // Guardar solo los últimos 1000 intentos fallidos
   if (failedAttemptsLog.length > 1000) {
     failedAttemptsLog.shift();

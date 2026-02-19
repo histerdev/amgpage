@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /.env*
+Disallow: /login
+Disallow: /registro
+
+Sitemap: https://amgpage.vercel.app/sitemap.xml

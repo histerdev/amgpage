@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
 export const prerender = true;  // ✅ AGREGAR
@@ -20,7 +19,6 @@ const destacadosHero = productos
 ---
 
 <Layout title="AMG Sneakers | Alta Gama al Valor Real">
-    <Header />
     
     <main class="bg-white overflow-x-hidden">
         <section class="relative pt-12 pb-32 min-h-[90vh] flex items-center">

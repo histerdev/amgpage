@@ -18,7 +18,7 @@ export interface Product {
   images?: string[];
   category: string;
   tags: string[];
-  availability: 'available' | 'low_stock' | 'out_of_stock';
+  availability: "available" | "low_stock" | "out_of_stock";
   stock?: Record<string, Record<string, number>>; // { size: { quality: count } }
 }
 
@@ -30,7 +30,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   size: string;
-  quality: 'PK' | 'G5' | 'G4' | 'G3';
+  quality: "PK" | "G5" | "G4" | "G3";
   image: string;
 }
 
@@ -78,7 +78,7 @@ export interface Order {
   city: string;
   address: string;
   total_price: number;
-  status: 'Pendiente' | 'Completado' | 'Cancelado' | 'Enviado';
+  status: "Pendiente" | "Completado" | "Cancelado" | "Enviado";
   client_decision?: string;
   mp_payment_id?: string;
   order_items: OrderItem[];
@@ -90,9 +90,13 @@ export interface Order {
 export interface Notification {
   id: string;
   order_id: string;
-  notification_type: 'order_created' | 'payment_confirmed' | 'qc_ready' | 'order_shipped';
-  status: 'pending' | 'sent' | 'failed' | 'retrying';
-  channel: 'telegram' | 'email';
+  notification_type:
+    | "order_created"
+    | "payment_confirmed"
+    | "qc_ready"
+    | "order_shipped";
+  status: "pending" | "sent" | "failed" | "retrying";
+  channel: "telegram" | "email";
   recipient: string;
   message?: string;
   error_message?: string;
@@ -103,7 +107,7 @@ export interface Notification {
 
 export interface NotificationPayload {
   orderId: string;
-  type: 'order_created' | 'payment_confirmed' | 'qc_ready' | 'order_shipped';
+  type: "order_created" | "payment_confirmed" | "qc_ready" | "order_shipped";
   recipient: {
     email: string;
     telegramId?: string;
@@ -123,7 +127,7 @@ export interface UserProfile {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   telegram_id?: string;
   created_at: string;
   updated_at: string;
@@ -140,7 +144,15 @@ export interface ApiResponse<T> {
 // ── PAGO (MERCADO PAGO) ────────────────────────────
 export interface PaymentData {
   id: string;
-  status: 'pending' | 'approved' | 'authorized' | 'in_process' | 'rejected' | 'cancelled' | 'refunded' | 'charged_back';
+  status:
+    | "pending"
+    | "approved"
+    | "authorized"
+    | "in_process"
+    | "rejected"
+    | "cancelled"
+    | "refunded"
+    | "charged_back";
   external_reference: string;
   transaction_amount: number;
   payer: {

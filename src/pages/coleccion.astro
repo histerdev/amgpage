@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
 export const prerender = true;  // ✅ AGREGAR
@@ -13,7 +12,6 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
 ---
 
 <Layout title="Catálogo | AMG SNEAKERS">
-    <Header />
     <main class="py-8 md:py-16 bg-white font-['Inter']">
         <div 
             id="catalog-container" 
@@ -122,8 +120,8 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
             const matchesSearch = name.includes(currentSearch.toLowerCase());
 
             // Validación de Silueta
-            let matchesSilhouette = currentSilhouette === 'all' || 
-                tags.some((t: string) => t === currentSilhouette || t.startsWith(currentSilhouette + " "));
+            const matchesSilhouette = currentSilhouette === 'all' || 
+            tags.some((t: string) => t === currentSilhouette || t.startsWith(currentSilhouette + " "));
 
             // Validación de Tags Avanzados
             const matchesAdvancedTags = selectedTags.length === 0 || 
