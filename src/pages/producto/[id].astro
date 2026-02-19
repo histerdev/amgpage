@@ -29,8 +29,14 @@ const albumImages = Array.isArray(product.image) ? product.image : [product.imag
       
       <div class="space-y-4">
         <div class="bg-[#f9f9f9] rounded-[40px] aspect-square flex items-center justify-center border border-gray-100 overflow-hidden">
-          <img id="main-product-image" src={initialImage} alt={product.name} class="w-full h-full object-contain p-6" />
-        </div>
+<img 
+  id="main-product-image" 
+  src={initialImage} 
+  alt={product.name} 
+  class="w-full h-full object-contain p-6"
+  width={1280}
+  height={1280}
+/>        </div>
         <div class="grid grid-cols-6 gap-2">
           {albumImages.map((img) => (
             <button class="thumb-btn border-2 border-gray-100 rounded-xl aspect-square overflow-hidden bg-[#f9f9f9]" data-src={img}>
