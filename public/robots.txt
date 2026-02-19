@@ -2,8 +2,12 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-Disallow: /.env*
 Disallow: /login
 Disallow: /registro
+Disallow: /checkout
+Disallow: /pago-exitoso
+Disallow: /pago-error
+Disallow: /perfil
+Disallow: /pedidos
 
-Sitemap: https://amgpage.vercel.app/sitemap.xml
+Sitemap: https://amgpage.vercel.app/sitemap-index.xml

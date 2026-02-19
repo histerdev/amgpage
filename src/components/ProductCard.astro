@@ -5,13 +5,16 @@ interface Props {
   prices: { PK: number; G5: number };
   image: string | string[];
   tags: string[];
+  tallas?: string[];
 }
 
 const { id, name, prices, image, tags = [] } = Astro.props;
 const productUrl = `/producto/${id}`;
 const mainImage = Array.isArray(image) ? image[0] : image;
-const g5PriceValue = prices?.G5 || 0;
-const displayPrice = new Intl.NumberFormat('es-CL').format(g5PriceValue);
+
+// Mostrar el precio más bajo como "desde"
+const lowestPrice = Math.min(prices.PK, prices.G5);
+const displayPrice = new Intl.NumberFormat('es-CL').format(lowestPrice);
 const tagsData = tags.map(t => t.toLowerCase()).join('|');
 ---
 
@@ -21,7 +24,7 @@ const tagsData = tags.map(t => t.toLowerCase()).join('|');
   data-tags={tagsData}
 >
   <div class="absolute top-4 left-4 z-20 flex flex-wrap gap-1.5 max-w-[80%]">
-    {tags.map((t) => (
+    {tags.slice(0, 3).map((t) => (
       <span class="bg-black/90 backdrop-blur-md text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg tracking-wider">
         {t}
       </span>
@@ -30,13 +33,13 @@ const tagsData = tags.map(t => t.toLowerCase()).join('|');
 
   <a href={productUrl} class="aspect-square overflow-hidden bg-[#fbfbfb] flex items-center justify-center p-10 relative cursor-pointer">
     <img 
-  src={mainImage} 
-  alt={`${name} - Réplica Premium de Sneaker`}
-  class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 z-10" 
-  loading="lazy"
-  width={1280}
-  height={1280}
-/>
+      src={mainImage} 
+      alt={`${name} — Sneaker premium disponible en AMG Sneakers Chile`}
+      class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 z-10" 
+      loading="lazy"
+      width={640}
+      height={640}
+    />
   </a>
 
   <div class="p-6 flex flex-col flex-grow">
@@ -53,8 +56,9 @@ const tagsData = tags.map(t => t.toLowerCase()).join('|');
 
     <div class="mt-auto flex flex-col gap-4">
       <div class="flex items-baseline gap-2">
+        <span class="text-[10px] font-bold text-zinc-400 uppercase">Desde</span>
         <span class="text-2xl font-black text-slate-900">${displayPrice}</span>
-        <span class="text-[10px] font-bold text-zinc-500 uppercase bg-zinc-100 px-2 py-0.5 rounded">G5</span>
+        <span class="text-[10px] font-bold text-zinc-500 uppercase bg-zinc-100 px-2 py-0.5 rounded">CLP</span>
       </div>
 
       <a 

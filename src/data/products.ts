@@ -1,4 +1,7 @@
-export const productos = [
+import type { Product } from "../types";
+
+
+export const productos: Product[] = [
   // --- JORDAN 1 ---
   {
     id: "jordan-1-black-toe",
@@ -1142,17 +1145,6 @@ export const productos = [
     ),
     tallas: ["38", "39", "40", "41", "42", "43", "44", "45"],
     tags: ["Jordan 13", "Retro", "Negro", "Clásico"],
-  },
-  {
-    id: "jordan-4-retro-black-cat",
-    name: "Jordan 4 Retro Black Cat",
-    prices: {
-      PK: 97990,
-      G5: 79500,
-    },
-    image: "/productos/black-cat.avif",
-    tallas: ["38", "39", "40", "41", "42", "43", "44", "45"],
-    tags: ["Jordan 4", "Famoso"],
   },
   {
     id: "bape-low-shark",

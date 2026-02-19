@@ -57,8 +57,9 @@ export async function sendNotification(payload: NotificationPayload) {
     }
 
     return telegramSent;
-  } catch (error: any) {
-    console.error("❌ Error en sendNotification:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Error en sendNotification:", message);
     return false;
   }
 }
@@ -94,24 +95,34 @@ async function sendTelegramNotification(
     );
 
     if (!response.ok) {
-      const error = await response.json();
+      const errorBody = await response.text();
+      console.error(`Telegram API error: ${response.status} - ${errorBody}`);
       return false;
     }
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Telegram notification error:", message);
     return false;
   }
 }
 
 /**
  * ✅ ENVIAR VÍA EMAIL (FALLBACK)
+ * Usa URL absoluta porque se ejecuta en el servidor (webhook)
  */
 async function sendEmailNotification(
   payload: NotificationPayload,
 ): Promise<boolean> {
   try {
-    const response = await fetch("/api/send-email", {
+    const siteUrl = import.meta.env.PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      console.error("⚠️ PUBLIC_SITE_URL no configurado para email fallback");
+      return false;
+    }
+
+    const response = await fetch(`${siteUrl}/api/send-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -122,11 +133,15 @@ async function sendEmailNotification(
     });
 
     if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`Email fallback failed: ${response.status} - ${errorBody}`);
       return false;
     }
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Email notification error:", message);
     return false;
   }
 }
@@ -136,21 +151,22 @@ async function sendEmailNotification(
  */
 async function enqueueFallbackNotification(payload: NotificationPayload) {
   try {
-    // Guardar en tabla de cola de reintentos
     const { error } = await supabaseAdmin.from("notification_queue").insert({
       order_id: payload.orderId,
       notification_type: payload.type,
       payload: payload,
       status: "queued",
-      next_retry_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutos
+      next_retry_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       retry_count: 0,
     });
 
     if (error) {
+      console.error("Error encolando notificación:", error.message);
       return;
     }
-  } catch (error: any) {
-    console.error("Error in notifications:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error in enqueueFallbackNotification:", message);
   }
 }
 
@@ -159,7 +175,6 @@ async function enqueueFallbackNotification(payload: NotificationPayload) {
  */
 export async function processNotificationQueue() {
   try {
-    // Obtener notificaciones pendientes
     const { data: queuedNotifications, error } = await supabaseAdmin
       .from("notification_queue")
       .select("*")
@@ -184,7 +199,6 @@ export async function processNotificationQueue() {
       const telegramSuccess = await sendTelegramNotification(payload);
 
       if (telegramSuccess) {
-        // Marcar como enviado
         await supabaseAdmin
           .from("notification_queue")
           .update({ status: "sent" })
@@ -199,8 +213,7 @@ export async function processNotificationQueue() {
             .update({ status: "sent", retry_count: retryCount + 1 })
             .eq("id", item.id);
         } else {
-          // Incrementar reintentos
-          const nextRetry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos más
+          const nextRetry = new Date(Date.now() + 10 * 60 * 1000);
 
           await supabaseAdmin
             .from("notification_queue")
@@ -215,15 +228,15 @@ export async function processNotificationQueue() {
             `⚠️ Reintento ${retryCount + 1}/3 fallido para orden ${payload.orderId}`,
           );
 
-          // Alertar a admin si fallan todos los reintentos
           if (retryCount + 1 >= 3) {
             await alertAdminFailedNotification(payload);
           }
         }
       }
     }
-  } catch (error: any) {
-    console.error("❌ Error en processNotificationQueue:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Error en processNotificationQueue:", message);
   }
 }
 
@@ -260,8 +273,9 @@ La notificación falló después de 3 reintentos.
         parse_mode: "Markdown",
       }),
     });
-  } catch (error: any) {
-    console.error("Error in notifications:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error in alertAdminFailedNotification:", message);
   }
 }
 
@@ -325,8 +339,9 @@ export async function getNotificationStatus(orderId: string) {
     }
 
     return notifications || [];
-  } catch (error: any) {
-    console.error("Error en getNotificationStatus:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error en getNotificationStatus:", message);
     return [];
   }
 }

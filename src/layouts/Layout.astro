@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/700.css';
 import '@fontsource/inter/900.css';
@@ -13,6 +14,7 @@ interface Props {
   canonical?: string;
   ogType?: 'website' | 'product';
   noIndex?: boolean;
+  jsonLd?: Record<string, unknown>;
 }
 
 const siteUrl = 'https://amgpage.vercel.app';
@@ -24,10 +26,29 @@ const {
   canonical = new URL(Astro.url.pathname, siteUrl).href,
   ogType = 'website',
   noIndex = false,
+  jsonLd,
 } = Astro.props;
 
 const fullTitle = `${title} | AMG Sneakers`;
 const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
+
+// Datos estructurados por defecto (Organization)
+const defaultJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AMG Sneakers",
+  "url": siteUrl,
+  "logo": `${siteUrl}/logo-amg.webp`,
+  "description": "Gestión de sneakers premium en Chile con inspección QC real antes del envío.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Santiago",
+    "addressCountry": "CL"
+  },
+  "sameAs": []
+};
+
+const structuredData = jsonLd || defaultJsonLd;
 ---
 
 <!DOCTYPE html>
@@ -59,12 +80,46 @@ const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Datos Estructurados (JSON-LD) -->
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 </head>
-<body>
+<body class="fonts-loading">
   <Header />
   <main>
     <slot />
   </main>
   <Footer />
+  <CartDrawer />
 </body>
 </html>
+
+<style is:global>
+  .fonts-loading {
+    opacity: 0;
+  }
+  .fonts-ready {
+    opacity: 1;
+    transition: opacity 0.1s ease-in;
+  }
+</style>
+
+<script>
+  async function waitForFonts() {
+    try {
+      await document.fonts.ready;
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-ready');
+    } catch {
+      document.body.classList.remove('fonts-loading');
+      document.body.classList.add('fonts-ready');
+    }
+  }
+
+  const fallbackTimeout = setTimeout(() => {
+    document.body.classList.remove('fonts-loading');
+    document.body.classList.add('fonts-ready');
+  }, 800);
+
+  waitForFonts().then(() => clearTimeout(fallbackTimeout));
+</script>

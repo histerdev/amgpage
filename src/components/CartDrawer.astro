@@ -25,6 +25,13 @@
 <script>
     import { isCartOpen, cartItems, removeFromCart } from '../store/cartStore';
 
+    // ✅ SANITIZAR HTML para prevenir XSS
+    function escapeHTML(str: string): string {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
     // Seleccionar elementos del DOM
     const drawer = document.getElementById('cart-drawer');
     const overlay = document.getElementById('cart-overlay');
@@ -34,13 +41,11 @@
     const checkoutBtn = document.getElementById('checkout-btn');
 
     // 1. GESTIÓN DE APERTURA Y CIERRE
-    // Usamos 'as any' para evitar que TS proteste por el origen del Store JS
     (isCartOpen as any).subscribe((open: boolean) => {
         if (!drawer || !overlay) return;
         
         if (open) {
             overlay.classList.remove('hidden');
-            // Pequeño delay para que la transición CSS funcione
             setTimeout(() => {
                 overlay.classList.add('opacity-100');
                 drawer.classList.remove('translate-x-full');
@@ -48,15 +53,13 @@
         } else {
             overlay.classList.remove('opacity-100');
             drawer.classList.add('translate-x-full');
-            // Esperamos a que termine la animación para ocultar el overlay
             setTimeout(() => {
                 overlay.classList.add('hidden');
             }, 500);
         }
     });
 
-    // 2. RENDERIZADO DINÁMICO DE PRODUCTOS
-    // Solución definitiva al error 'never[]': Forzamos el tipado a any[]
+    // 2. RENDERIZADO DINÁMICO DE PRODUCTOS (✅ SANITIZADO contra XSS)
     (cartItems as any).subscribe((items: any[]) => {
         if (!content || !totalEl) return;
         
@@ -73,14 +76,15 @@
             return;
         }
 
-        // Generar el HTML de cada producto
+        // Generar el HTML de cada producto (sanitizado)
         content.innerHTML = items.map((item: any) => {
-            // Normalización de datos (Sopabase usa product_name / Local usa name)
-            const nombre = item.name || item.product_name || "PRODUCTO AMG";
-            const imagen = item.image || item.image_url || "/placeholder.jpg";
+            const nombre = escapeHTML(item.name || item.product_name || "PRODUCTO AMG");
+            const imagen = escapeHTML(item.image || item.image_url || "/placeholder.jpg");
             const precio = Number(item.price) || 0;
             const cantidad = Number(item.quantity) || 1;
-            const itemId = item.id || item.product_id;
+            const talla = escapeHTML(String(item.size || 'N/A'));
+            const calidad = escapeHTML(String(item.quality || 'TOP'));
+            const itemId = escapeHTML(String(item.id || item.product_id || ''));
 
             return `
                 <div class="flex gap-4 items-center border-b border-zinc-50 pb-4 group animate-in fade-in slide-in-from-right-4 duration-300">
@@ -89,8 +93,8 @@
                         <h4 class="font-black uppercase italic text-[11px] leading-tight mb-1 text-black">${nombre}</h4>
                         
                         <div class="flex gap-2 mb-1">
-                            <span class="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter">EU: ${item.size || 'N/A'}</span>
-                            <span class="bg-black text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">${item.quality || 'TOP'}</span>
+                            <span class="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter">EU: ${talla}</span>
+                            <span class="bg-black text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">${calidad}</span>
                         </div>
                         
                         <p class="text-[9px] text-zinc-400 font-extrabold uppercase tracking-tighter">Unidades: ${cantidad}</p>
@@ -129,7 +133,6 @@
     overlay?.addEventListener('click', () => isCartOpen.set(false));
 
     checkoutBtn?.addEventListener('click', () => {
-        // Obtenemos los items actuales para validar antes de ir al checkout
         const currentItems = (cartItems as any).get();
         if (currentItems.length > 0) {
             window.location.href = '/checkout';

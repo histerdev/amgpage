@@ -1,23 +1,21 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+export const prerender = false; // ← OBLIGATORIO: usa Astro.request.url
+
 const searchParams = new URL(Astro.request.url).searchParams;
 const paymentId = searchParams.get('payment_id');
 const externalReference = searchParams.get('external_reference');
 const status = searchParams.get('status') || 'approved';
-
-// Log para debugging
 ---
 
-<Layout title="Pago Exitoso | AMG Sneakers">
+<Layout title="Pago Exitoso | AMG Sneakers" noIndex={true}>
 
   <main class="min-h-screen bg-gradient-to-br from-[#2ecc71] to-[#27ae60] pt-32 pb-20">
     <div class="max-w-2xl mx-auto px-6">
       
-      <!-- CONTENEDOR PRINCIPAL -->
       <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden">
         
-        <!-- HEADER CON ICONO -->
         <div class="bg-gradient-to-r from-[#2ecc71] to-[#27ae60] p-12 text-center">
           <div class="inline-block mb-6">
             <svg class="w-20 h-20 text-white animate-bounce" fill="currentColor" viewBox="0 0 20 20">
@@ -30,10 +28,8 @@ const status = searchParams.get('status') || 'approved';
           <p class="text-white/80 text-sm font-bold mt-2">Tu orden ha sido confirmada</p>
         </div>
 
-        <!-- CONTENIDO -->
         <div class="p-12 space-y-8">
           
-          <!-- ORDEN ID -->
           <div class="bg-gray-50 rounded-2xl p-6 border-2 border-gray-100">
             <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Número de Orden</p>
             <p class="text-2xl font-black text-gray-900 font-mono break-all">
@@ -41,9 +37,7 @@ const status = searchParams.get('status') || 'approved';
             </p>
           </div>
 
-          <!-- DETALLES DE PAGO -->
           <div class="grid grid-cols-2 gap-4">
-            <!-- Payment ID -->
             <div class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
               <p class="text-[9px] font-black uppercase text-blue-600 mb-2">ID de Pago</p>
               <p class="text-sm font-bold text-gray-900 font-mono">
@@ -51,7 +45,6 @@ const status = searchParams.get('status') || 'approved';
               </p>
             </div>
 
-            <!-- Status -->
             <div class="bg-green-50 rounded-2xl p-4 border border-green-100">
               <p class="text-[9px] font-black uppercase text-green-600 mb-2">Estado</p>
               <p class="text-sm font-bold text-green-900 uppercase">
@@ -60,7 +53,6 @@ const status = searchParams.get('status') || 'approved';
             </div>
           </div>
 
-          <!-- INFORMACIÓN IMPORTANTE -->
           <div class="bg-yellow-50 rounded-2xl p-6 border-l-4 border-yellow-400">
             <h3 class="font-black text-sm uppercase text-yellow-900 mb-2">⚠️ Importante</h3>
             <ul class="text-[13px] text-yellow-800 space-y-2 font-bold">
@@ -70,7 +62,6 @@ const status = searchParams.get('status') || 'approved';
             </ul>
           </div>
 
-          <!-- PRÓXIMOS PASOS -->
           <div class="bg-gray-50 rounded-2xl p-6">
             <h3 class="font-black text-sm uppercase text-gray-900 mb-4">Próximos Pasos</h3>
             <ol class="space-y-3">
@@ -89,10 +80,9 @@ const status = searchParams.get('status') || 'approved';
             </ol>
           </div>
 
-          <!-- BOTONES DE ACCIÓN -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-            <a href="/dashboard/ordenes" class="bg-[#2ecc71] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#27ae60] transition-all text-center">
-              Ver Mis Órdenes
+            <a href="/pedidos" class="bg-[#2ecc71] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#27ae60] transition-all text-center">
+              Ver Mis Pedidos
             </a>
             <a href="/" class="bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all text-center">
               Volver a Tienda
@@ -102,7 +92,6 @@ const status = searchParams.get('status') || 'approved';
         </div>
       </div>
 
-      <!-- CONTADOR DE REDIRECCIÓN -->
       <div class="text-center mt-8">
         <p class="text-white/70 text-sm font-bold">
           Redirigiendo en <span id="countdown">10</span> segundos...
@@ -113,7 +102,6 @@ const status = searchParams.get('status') || 'approved';
   </main>
 
   <script>
-    // Countdown de redirección automática
     let seconds = 10;
     const countdownEl = document.getElementById('countdown');
 
@@ -125,8 +113,7 @@ const status = searchParams.get('status') || 'approved';
 
       if (seconds === 0) {
         clearInterval(interval);
-        // Redirigir al dashboard
-        window.location.href = '/dashboard/ordenes';
+        window.location.href = '/pedidos';
       }
     }, 1000);
   </script>

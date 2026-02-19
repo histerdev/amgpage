@@ -1,18 +1,22 @@
 ---
 // Footer.astro
+const currentYear = new Date().getFullYear();
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER || '56912345678';
 ---
 <footer class="bg-zinc-950 text-white pt-20 pb-10">
     <div class="max-w-7xl mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             
             <div class="col-span-1 md:col-span-1">
-<img 
-  src="/logo-amg-white.webp" 
-  alt="AMG" 
-  class="h-12 w-auto mb-6 opacity-90"
-  width={960}
-  height={960}
->                <p class="text-zinc-500 text-[11px] leading-relaxed uppercase font-bold tracking-widest">
+                <img 
+                  src="/logo-amg-white.webp" 
+                  alt="AMG Sneakers" 
+                  class="h-12 w-auto mb-6 opacity-90"
+                  width={960}
+                  height={960}
+                  loading="lazy"
+                />
+                <p class="text-zinc-500 text-[11px] leading-relaxed uppercase font-bold tracking-widest">
                     Curadores de alta gama. <br/>
                     Gestionamos los mejores batches <br/>
                     del mercado global hacia Chile.
@@ -33,7 +37,11 @@
                 <ul class="space-y-4 text-xs font-bold uppercase italic tracking-tighter text-zinc-400">
                     <li><a href="/faq" class="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
                     <li><a href="/terminos-y-condiciones" class="hover:text-white transition-colors">Términos del Servicio</a></li>
-                    <li><a href="https://wa.me/tu_numero" class="hover:text-[#2ecc71] transition-colors italic">Contacto WhatsApp</a></li>
+                    <li>
+                        <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="hover:text-[#2ecc71] transition-colors italic">
+                            Contacto WhatsApp
+                        </a>
+                    </li>
                 </ul>
             </div>
 
@@ -52,18 +60,17 @@
 
         <hr class="border-zinc-900 mb-10">
 
-        <div class="flex flex-col md:row items-center justify-between gap-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex gap-6">
                 <div class="flex gap-2 opacity-30 grayscale hover:grayscale-0 transition-all">
-<!-- ✅ DESPUÉS -->
-<img src="/icons/visa.webp" alt="Visa" class="h-4" width={80} height={32}>
-<img src="/icons/mastercard.webp" alt="Master" class="h-4" width={96} height={80}>
-<img src="/icons/mercadopago.webp" class="h-4 text-white" alt="Mercado Pago" width={96} height={64}>
+                    <img src="/icons/visa.webp" alt="Visa" class="h-4" width={80} height={32} loading="lazy" />
+                    <img src="/icons/mastercard.webp" alt="Mastercard" class="h-4" width={96} height={80} loading="lazy" />
+                    <img src="/icons/mercadopago.webp" alt="Mercado Pago" class="h-4" width={96} height={64} loading="lazy" />
                 </div>
             </div>
             
             <p class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">
-                © 2026 AMG SNEAKERS CHILE - TODOS LOS DERECHOS RESERVADOS.
+                © {currentYear} AMG SNEAKERS CHILE - TODOS LOS DERECHOS RESERVADOS.
             </p>
         </div>
     </div>

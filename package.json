@@ -1,10 +1,10 @@
 {
   "type": "module",
-  "name": "astro-tailwind-app",
+  "name": "amgpage",
   "engines": {
     "node": "20.x"
   },
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "optimize-images": "node scripts/optimize-images.js",

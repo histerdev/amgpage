@@ -4,22 +4,22 @@
  */
 
 // ── PRODUCTO ────────────────────────────────────────
+// ── PRODUCTO ────────────────────────────────────────
 export interface Product {
   id: string;
   name: string;
-  description: string;
   prices: {
     PK: number;
     G5: number;
-    G4: number;
-    G3: number;
   };
-  image: string;
-  images?: string[];
-  category: string;
+  image: string | string[]; // string[] para álbum, string para imagen única
+  tallas: string[];
   tags: string[];
-  availability: "available" | "low_stock" | "out_of_stock";
-  stock?: Record<string, Record<string, number>>; // { size: { quality: count } }
+  // Campos opcionales para futuro
+  description?: string;
+  category?: string;
+  availability?: "available" | "low_stock" | "out_of_stock";
+  stock?: Record<string, Record<string, number>>;
 }
 
 // ── CARRITO ────────────────────────────────────────

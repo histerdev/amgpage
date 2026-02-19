@@ -27,28 +27,31 @@
         
         <div class="flex-shrink-0">
             <a href="/">
-<img 
-  src="/logo-amg.webp" 
-  alt="AMG" 
-  class="h-8 md:h-16 w-auto object-contain"
-  width={960}
-  height={960}
->            </a>
+                <img 
+                    src="/logo-amg.webp" 
+                    alt="AMG Sneakers — Inicio" 
+                    class="h-8 md:h-16 w-auto object-contain"
+                    width={960}
+                    height={960}
+                />
+            </a>
         </div>
 
+        <!-- ✅ Buscador funcional — redirige a /coleccion?q=... -->
         <div class="flex-grow max-w-xl hidden md:block">
-            <div class="relative group">
+            <form action="/coleccion" method="get" class="relative group">
                 <input 
-                    type="text" 
+                    type="text"
+                    name="q"
                     placeholder="Buscar en AMG Sneakers..." 
                     class="w-full bg-gray-100 border-none rounded-full py-3 px-6 pr-12 text-sm focus:bg-white focus:ring-2 focus:ring-black transition-all outline-none"
                 />
-                <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-black transition-colors">
+                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-black transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </button>
-            </div>
+            </form>
         </div>
 
         <div class="flex items-center gap-4 md:gap-8">
@@ -120,6 +123,7 @@
 <script>
     import { supabase } from '../lib/supabase';
     import { isCartOpen, loadCartFromDB, cartItems } from '../store/cartStore';
+    import type { CartItem } from '../types';
 
     // 1. Manejo del Dropdown
     function setupDropdown() {
@@ -146,11 +150,9 @@
         const adminOption = document.getElementById('admin-only-option');
 
         if (session) {
-            // Mostrar menú de usuario, ocultar el de invitado
             guestMenu?.classList.add('hidden');
             userMenu?.classList.remove('hidden');
 
-            // Mostrar nombre del usuario
             if (nameDisplay) {
                 const fullName = session.user.user_metadata?.full_name
                     || session.user.email?.split('@')[0]
@@ -158,7 +160,6 @@
                 nameDisplay.innerText = fullName.toUpperCase();
             }
 
-            // Verificar rol admin en la tabla profiles
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
@@ -173,7 +174,6 @@
 
             await loadCartFromDB();
         } else {
-            // Sin sesión: mostrar menú de invitado
             guestMenu?.classList.remove('hidden');
             userMenu?.classList.add('hidden');
             adminOption?.classList.add('hidden');
@@ -181,8 +181,8 @@
         }
     }
 
-    // 3. Contador del carrito
-    (cartItems as any).subscribe((items: any[]) => {
+    // 3. ✅ Contador del carrito — FIX: readonly CartItem[] para nanostores
+    cartItems.subscribe((items: readonly CartItem[]) => {
         const countEl = document.getElementById('cart-count');
         if (countEl) {
             const total = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
@@ -196,7 +196,7 @@
         isCartOpen.set(true);
     });
 
-    // 5. Botón cerrar sesión (siempre disponible en menu-user)
+    // 5. Botón cerrar sesión
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.href = '/';
