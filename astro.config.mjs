@@ -3,14 +3,9 @@ import tailwind from '@astrojs/tailwind';
 import vercel from '@astrojs/vercel/serverless';
 
 export default defineConfig({
-  image: {
-    service: { entrypoint: 'astro/assets/services/noop' }
-  },
   integrations: [tailwind()],
   output: 'static',
-  adapter: vercel({
-    imageService: false  // ✅ DESACTIVA optimización de imágenes
-  }),
+  adapter: vercel(),
   vite: {
     build: {
       minify: 'terser',

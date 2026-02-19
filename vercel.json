@@ -1,4 +1,9 @@
 {
+  "buildCommand": "astro build",
+  "outputDirectory": "dist",
+  "env": {
+    "DISABLE_IMAGE_OPTIMIZATION": "true"
+  },
   "headers": [
     {
       "source": "/(.*)",
