@@ -21,6 +21,20 @@ const supabaseAdmin = createClient(
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return new Response(JSON.stringify({ error: "Invalid content-type" }), {
+        status: 415,
+      });
+    }
+
+    const contentLength = Number(request.headers.get("content-length") || "0");
+    if (contentLength > 200_000) {
+      return new Response(JSON.stringify({ error: "Payload too large" }), {
+        status: 413,
+      });
+    }
+
     // 1️⃣ VALIDAR FIRMA DE MERCADO PAGO
     const xSignature = request.headers.get("x-signature");
     const xRequestId = request.headers.get("x-request-id");
@@ -115,7 +129,15 @@ async function processPayment(paymentId: string) {
     if (payment.status !== "approved") {
       return;
     }
-    
+
+    if (payment.status_detail === "accredited" && payment.status !== "approved") {
+      return;
+    }
+
+    if (payment.metadata?.integration_source && payment.metadata.integration_source !== "checkout_pro") {
+      return;
+    }
+
     const orderId = payment.external_reference;
     if (!orderId) {
       return;

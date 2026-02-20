@@ -107,13 +107,21 @@ export const prerender = false;
     import { supabase } from '../lib/supabase';
     import RegionesYComunas from '../data/chile';
     import { cartItems } from '../store/cartStore';
+    import type { CartItem } from '../types';
 
-    // ELEMENTOS DEL DOM
+    type CheckoutItem = CartItem & { product_name?: string; image_url?: string };
+
+    const cartStore = cartItems as unknown as {
+        subscribe: (callback: (items: CheckoutItem[]) => void) => void;
+        get: () => CheckoutItem[];
+        set: (items: CheckoutItem[]) => void;
+    };
+
     const listContainer = document.getElementById('checkout-products-list');
     const totalEl = document.getElementById('sum-price');
     const form = document.getElementById('checkout-form') as HTMLFormElement;
-    const payBtn = document.getElementById('pay-button') as HTMLButtonElement;
-    const errorMsg = document.getElementById('error-message');
+    const payBtn = document.getElementById('pay-button') as HTMLButtonElement | null;
+    const errorMsg = document.getElementById('error-message') as HTMLDivElement | null;
     const regionSelect = document.getElementById('region-select') as HTMLSelectElement;
     const ciudadSelect = document.getElementById('ciudad-select') as HTMLSelectElement;
     const rutInput = form?.querySelector('input[name="rut"]') as HTMLInputElement;
@@ -226,8 +234,7 @@ export const prerender = false;
         });
     }
 
-    // 1. RENDERIZADO DEL CARRITO (✅ SANITIZADO contra XSS)
-    (cartItems as any).subscribe((items: any[]) => {
+    cartStore.subscribe((items: CheckoutItem[]) => {
         if (!listContainer || !totalEl) return;
 
         if (items.length === 0) {
@@ -239,7 +246,7 @@ export const prerender = false;
 
         if (payBtn) payBtn.disabled = false;
 
-        listContainer.innerHTML = items.map((item: any) => {
+        listContainer.innerHTML = items.map((item) => {
             const nombre = escapeHTML(item.name || item.product_name || 'PRODUCTO');
             const imagen = escapeHTML(item.image || item.image_url || '/placeholder.jpg');
             const talla = escapeHTML(String(item.size || 'N/A'));
@@ -253,52 +260,84 @@ export const prerender = false;
                         <p class="font-black text-[10px] uppercase truncate">${nombre}</p>
                         <p class="text-[9px] font-bold text-gray-400">Talla: ${talla}</p>
                     </div>
-                    <p class="font-black text-xs">$${(precio * cantidad).toLocaleString('es-CL')}</p>
+                    <p class="font-black text-xs">${(precio * cantidad).toLocaleString('es-CL')}</p>
                 </div>
             `;
         }).join('');
 
-        const total = items.reduce((acc: number, item: any) => acc + ((Number(item.price) || 0) * (Number(item.quantity) || 1)), 0);
-        totalEl.innerText = `$${total.toLocaleString('es-CL')}`;
+        const total = items.reduce((acc, item) => acc + ((Number(item.price) || 0) * (Number(item.quantity) || 1)), 0);
+        totalEl.innerText = `${total.toLocaleString('es-CL')}`;
     });
 
     // 2. MANEJO DEL SUBMIT (PAGO)
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        payBtn.disabled = true;
-        payBtn.innerHTML = "Procesando...";
+        if (payBtn) {
+            payBtn.disabled = true;
+            payBtn.innerHTML = "Procesando...";
+        }
         if (errorMsg) errorMsg.classList.add('hidden');
 
         try {
             const formData = new FormData(form);
-            const currentItems = (cartItems as any).get();
-            
+            const currentItems = cartStore.get();
+
             if (!currentItems || currentItems.length === 0) {
                 throw new Error('Carrito vacío');
+            }
+
+            if (currentItems.some(item => !item.id || !item.name || !item.price || (item.quantity || 0) < 1)) {
+                throw new Error('Carrito inválido');
             }
 
             const { data: { session } } = await supabase.auth.getSession();
             const userId = session?.user?.id || null;
 
-            // ✅ FORMATEAR DATOS ANTES DE ENVIAR
             const rut = (formData.get('rut') as string).trim();
             const phone = (formData.get('telefono') as string).trim();
             const formattedRut = formatRUT(rut);
             const formattedPhone = formatPhone(phone);
 
+            const firstName = (formData.get('primer_nombre') as string).trim();
+            const lastName = (formData.get('apellido_paterno') as string).trim();
+            const email = (formData.get('email') as string).trim().toLowerCase();
+            const region = String(formData.get('region') || '').trim();
+            const city = String(formData.get('ciudad') || '').trim();
+            const address = (formData.get('direccion') as string).trim();
+
+            if (!firstName || !lastName || !email || !address) {
+                throw new Error('Completa todos los campos obligatorios');
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                throw new Error('Email inválido');
+            }
+
+            if (!/^\d{1,2}\.\d{3}\.\d{3}-[0-9K]$/i.test(formattedRut)) {
+                throw new Error('RUT inválido');
+            }
+
+            if (!/^\+56\d{9}$/.test(formattedPhone)) {
+                throw new Error('Teléfono inválido');
+            }
+
+            if (!region || !city) {
+                throw new Error('Selecciona región y comuna');
+            }
+
             const payload = {
                 items: currentItems,
                 customer: {
                     userId: userId,
-                    firstName: (formData.get('primer_nombre') as string).trim(),
-                    lastName: (formData.get('apellido_paterno') as string).trim(),
-                    email: (formData.get('email') as string).trim().toLowerCase(),
+                    firstName,
+                    lastName,
+                    email,
                     rut: formattedRut,
                     phone: formattedPhone,
-                    region: formData.get('region') as string,
-                    city: formData.get('ciudad') as string,
-                    address: (formData.get('direccion') as string).trim()
+                    region,
+                    city,
+                    address,
                 }
             };
 
@@ -327,7 +366,7 @@ export const prerender = false;
             }
 
             // ✅ Limpiar carrito y redirigir
-            (cartItems as any).set([]);
+            cartStore.set([]);
             localStorage.removeItem('amg-cart');
             
             window.location.href = result.init_point;
@@ -340,8 +379,10 @@ export const prerender = false;
                 errorMsg.classList.remove('hidden');
             }
         } finally {
-            payBtn.disabled = false;
-            payBtn.innerHTML = "Ir a Pagar";
+            if (payBtn) {
+                payBtn.disabled = false;
+                payBtn.innerHTML = "Ir a Pagar";
+            }
         }
     });
 

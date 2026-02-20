@@ -39,19 +39,47 @@ interface ValidatedItem {
   currency_id: string;
 }
 
+const SITE_URL = import.meta.env.PUBLIC_SITE_URL;
+const ALLOWED_ORIGINS = new Set([
+  SITE_URL,
+  "http://localhost:4321",
+].filter(Boolean));
+
+function getClientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+
+  return (
+    request.headers.get("x-real-ip") ||
+    request.headers.get("cf-connecting-ip") ||
+    "unknown"
+  );
+}
+
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return true;
+  return ALLOWED_ORIGINS.has(origin);
+}
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // 0️⃣ OBTENER IP DEL CLIENTE
-    const ip =
-      request.headers.get("x-forwarded-for") ||
-      request.headers.get("x-real-ip") ||
-      request.headers.get("cf-connecting-ip") ||
-      "unknown";
+    const ip = getClientIp(request);
 
     // 1️⃣ VALIDAR MÉTODO
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "Método no permitido" }), {
         status: 405,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const origin = request.headers.get("origin");
+    if (!isAllowedOrigin(origin)) {
+      return new Response(JSON.stringify({ error: "Origen no permitido" }), {
+        status: 403,
         headers: { "Content-Type": "application/json" },
       });
     }

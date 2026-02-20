@@ -115,4 +115,18 @@ const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}
   }, 800);
 
   waitForFonts().then(() => clearTimeout(fallbackTimeout));
+
+  const revealEls = document.querySelectorAll('.reveal-init');
+  if (revealEls.length > 0) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    revealEls.forEach((el) => revealObserver.observe(el));
+  }
 </script>

@@ -43,6 +43,12 @@ import Layout from '../../layouts/Layout.astro';
     const content = document.getElementById('admin-content');
     const list    = document.getElementById('admin-orders-list');
 
+    const escapeHTML = (value: unknown) => {
+      const div = document.createElement('div');
+      div.textContent = String(value ?? '');
+      return div.innerHTML;
+    };
+
     // ── 1. Esperar sesión real (resuelve el race condition) ──────────────────
     const session = await waitForSession();
 
@@ -59,7 +65,7 @@ import Layout from '../../layouts/Layout.astro';
       .single();
 
     if (profile?.role !== 'admin') {
-      if (status) status.innerHTML = `🚫 ACCESO DENEGADO. Tu rol es: <strong>${profile?.role ?? 'sin rol'}</strong>`;
+      if (status) status.textContent = `🚫 ACCESO DENEGADO. Tu rol es: ${profile?.role ?? 'sin rol'}`;
       return;
     }
 
@@ -97,27 +103,36 @@ import Layout from '../../layouts/Layout.astro';
 
     list.innerHTML = orders.map((order: any) => {
       const item = order.order_items?.[0] || {};
+      const safeCustomer = escapeHTML(order.customer_name || 'Sin nombre');
+      const safeOrderId = escapeHTML(String(order.id || ''));
+      const safeOrderIdShort = escapeHTML(String(order.id || '').slice(0, 8));
+      const safeProduct = escapeHTML(item.product_name || 'Desconocido');
+      const safeSize = escapeHTML(item.size || '--');
+      const safeStatus = escapeHTML(order.status || '');
+      const safeDecision = decisionHtml(order.client_decision);
+      const safeHrefId = encodeURIComponent(String(order.id || ''));
+
       return `
         <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-all">
           <td class="p-6">
-            <div class="font-black uppercase italic text-sm">${order.customer_name || 'Sin nombre'}</div>
-            <div class="text-[10px] text-gray-400 font-bold tracking-tighter">${order.id.slice(0,8)}</div>
+            <div class="font-black uppercase italic text-sm">${safeCustomer}</div>
+            <div class="text-[10px] text-gray-400 font-bold tracking-tighter">${safeOrderIdShort || safeOrderId}</div>
           </td>
           <td class="p-6">
-            <div class="text-[11px] font-bold uppercase text-gray-600">${item.product_name || 'Desconocido'}</div>
-            <div class="text-[9px] font-black text-gray-400 uppercase">Talla: ${item.size || '--'}</div>
+            <div class="text-[11px] font-bold uppercase text-gray-600">${safeProduct}</div>
+            <div class="text-[9px] font-black text-gray-400 uppercase">Talla: ${safeSize}</div>
           </td>
           <td class="p-6 text-center">
             <span class="bg-black text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">
-              ${order.status}
+              ${safeStatus}
             </span>
           </td>
           <td class="p-6 text-center">
-            ${decisionHtml(order.client_decision)}
+            ${safeDecision}
           </td>
           <td class="p-6 text-right">
             <button
-              onclick="window.location.href='/admin/pedido/${order.id}'"
+              onclick="window.location.href='/admin/pedido/${safeHrefId}'"
               class="bg-[#2ecc71] hover:bg-black text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase italic transition-all active:scale-95"
             >
               Gestionar QC

@@ -19,6 +19,7 @@ import Layout from '../layouts/Layout.astro';
           <input type="password" name="password" placeholder="Contraseña" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
           <input type="password" name="confirm_password" placeholder="Confirmar" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
         </div>
+        <div id="error-message" class="hidden bg-red-50 text-red-600 p-4 rounded-lg text-sm border border-red-100"></div>
         <button type="submit" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase italic tracking-widest hover:bg-[#2ecc71] transition-all transform active:scale-95 shadow-xl">
           Finalizar Registro
         </button>
@@ -31,41 +32,51 @@ import Layout from '../layouts/Layout.astro';
 <script>
   import { supabase } from '../lib/supabase';
 
-  const form = document.getElementById('signup-form') as HTMLFormElement;
-  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-  const errorMsg = document.getElementById('error-message') as HTMLDivElement;
+  const form = document.getElementById('register-form') as HTMLFormElement | null;
+  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+  const errorMsg = document.getElementById('error-message') as HTMLDivElement | null;
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+    if (!form) return;
+
     const formData = new FormData(form);
-    const email = (formData.get('email') as string).trim();
+    const fullName = (formData.get('full_name') as string).trim();
+    const phone = (formData.get('phone') as string).trim();
+    const email = (formData.get('email') as string).trim().toLowerCase();
     const password = (formData.get('password') as string).trim();
-    const confirmPassword = (formData.get('confirm-password') as string).trim();
+    const confirmPassword = (formData.get('confirm_password') as string).trim();
 
     // ✅ VALIDACIÓN DE CONTRASEÑA
     if (password.length < 8) {
-      errorMsg!.textContent = 'La contraseña debe tener mínimo 8 caracteres';
-      errorMsg!.classList.remove('hidden');
+      if (errorMsg) {
+        errorMsg.textContent = 'La contraseña debe tener mínimo 8 caracteres';
+        errorMsg.classList.remove('hidden');
+      }
       return;
     }
 
     if (password !== confirmPassword) {
-      errorMsg!.textContent = 'Las contraseñas no coinciden';
-      errorMsg!.classList.remove('hidden');
+      if (errorMsg) {
+        errorMsg.textContent = 'Las contraseñas no coinciden';
+        errorMsg.classList.remove('hidden');
+      }
       return;
     }
 
-    // Validar que tenga mayúscula, minúscula y número
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      errorMsg!.textContent = 'La contraseña debe contener mayúsculas, minúsculas y números';
-      errorMsg!.classList.remove('hidden');
+      if (errorMsg) {
+        errorMsg.textContent = 'La contraseña debe contener mayúsculas, minúsculas y números';
+        errorMsg.classList.remove('hidden');
+      }
       return;
     }
 
-    submitBtn!.disabled = true;
-    submitBtn!.textContent = 'Registrando...';
-    errorMsg!.classList.add('hidden');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Registrando...';
+    }
+    if (errorMsg) errorMsg.classList.add('hidden');
 
     try {
       const { error } = await supabase.auth.signUp({
@@ -73,22 +84,34 @@ import Layout from '../layouts/Layout.astro';
         password,
         options: {
           emailRedirectTo: `${location.origin}/auth/callback`,
-        }
+          data: {
+            full_name: fullName,
+            phone,
+          },
+        },
       });
 
       if (error) {
-        errorMsg!.textContent = error.message;
-        errorMsg!.classList.remove('hidden');
-        submitBtn!.disabled = false;
-        submitBtn!.textContent = 'Registrarse';
+        if (errorMsg) {
+          errorMsg.textContent = error.message;
+          errorMsg.classList.remove('hidden');
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Registrarse';
+        }
       } else {
         window.location.href = '/login?registered=true';
       }
     } catch {
-      errorMsg!.textContent = 'Error inesperado. Intenta de nuevo.';
-      errorMsg!.classList.remove('hidden');
-      submitBtn!.disabled = false;
-      submitBtn!.textContent = 'Registrarse';
+      if (errorMsg) {
+        errorMsg.textContent = 'Error inesperado. Intenta de nuevo.';
+        errorMsg.classList.remove('hidden');
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Registrarse';
+      }
     }
   });
 </script>

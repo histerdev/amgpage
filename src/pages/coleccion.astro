@@ -9,21 +9,13 @@ const siluetas = ["Jordan 1", "Jordan 3", "Jordan 4", "Jordan 5", "Jordan 6", "J
 
 // Extraer todos los tags únicos para el panel avanzado
 const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
-const productFilterData = productos.map(p => ({
-  id: p.id,
-  name: p.name,
-  tags: p.tags,
-}));
 ---
 ---
 
 <Layout title="Catálogo | AMG SNEAKERS">
     <main class="py-8 md:py-16 bg-white font-['Inter']">
         <div 
-
-<div 
     id="catalog-container" 
-    data-products={JSON.stringify(productFilterData)}
     class="max-w-7xl mx-auto px-4 md:px-6"
 >
             
@@ -94,58 +86,54 @@ const productFilterData = productos.map(p => ({
 </style>
 
 <script>
-    // 1. SELECTORES
     const container = document.getElementById('catalog-container');
-    const productsData = JSON.parse(container?.dataset.products || '[]');
-    
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
     const silhouetteBtns = document.querySelectorAll('.silhouette-btn');
     const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
     const toggleAdvanced = document.getElementById('toggle-advanced');
     const advancedPanel = document.getElementById('advanced-panel');
-    const productWrappers = document.querySelectorAll('.product-wrapper');
     const noResults = document.getElementById('no-results');
 
-    let currentSilhouette = 'all';
-    let selectedTags: string[] = []; 
-    let currentSearch = '';
+    const productWrappers = Array.from(document.querySelectorAll('.product-wrapper')) as HTMLElement[];
+    const products = productWrappers.map((wrapper) => {
+        const card = wrapper.querySelector('.product-item') as HTMLElement | null;
+        const name = card?.dataset.name || '';
+        const tags = (card?.dataset.tags || '').split('|').filter(Boolean);
+        return { wrapper, name, tags };
+    });
 
-    // 2. FUNCIÓN DE FILTRADO (Lógica de Cliente)
+    let currentSilhouette = 'all';
+    let selectedTags: string[] = [];
+    let currentSearch = '';
+    let filterRaf = 0;
+
     function applyFilters() {
         let visibleCount = 0;
+        const searchValue = currentSearch.toLowerCase();
 
-        productWrappers.forEach(wrapper => {
-            const el = wrapper as HTMLElement;
-            const productId = el.dataset.productId;
-            const product = productsData.find((p: any) => p.id === productId);
+        products.forEach(({ wrapper, name, tags }) => {
+            const matchesSearch = name.includes(searchValue);
+            const matchesSilhouette = currentSilhouette === 'all' ||
+                tags.some((t) => t === currentSilhouette || t.startsWith(currentSilhouette + ' '));
+            const matchesAdvancedTags = selectedTags.length === 0 ||
+                selectedTags.every((st) => tags.includes(st));
 
-            if (!product) return;
-
-            const name = product.name.toLowerCase();
-            const tags = product.tags.map((t: string) => t.toLowerCase());
-
-            // Validación de Búsqueda
-            const matchesSearch = name.includes(currentSearch.toLowerCase());
-
-            // Validación de Silueta
-            const matchesSilhouette = currentSilhouette === 'all' || 
-            tags.some((t: string) => t === currentSilhouette || t.startsWith(currentSilhouette + " "));
-
-            // Validación de Tags Avanzados
-            const matchesAdvancedTags = selectedTags.length === 0 || 
-                selectedTags.every(st => tags.includes(st));
-
-            if (matchesSearch && matchesSilhouette && matchesAdvancedTags) {
-                el.style.display = 'block';
-                visibleCount++;
-            } else {
-                el.style.display = 'none';
-            }
+            const isVisible = matchesSearch && matchesSilhouette && matchesAdvancedTags;
+            wrapper.hidden = !isVisible;
+            if (isVisible) visibleCount++;
         });
 
         if (noResults) {
             noResults.classList.toggle('hidden', visibleCount > 0);
         }
+    }
+
+    function scheduleFilters() {
+        if (filterRaf) cancelAnimationFrame(filterRaf);
+        filterRaf = requestAnimationFrame(() => {
+            filterRaf = 0;
+            applyFilters();
+        });
     }
 
     // 3. EVENT LISTENERS
@@ -164,7 +152,7 @@ const productFilterData = productos.map(p => ({
             clickedBtn.classList.add('active', 'bg-black', 'text-white', 'border-black');
             
             currentSilhouette = clickedBtn.dataset.filter || 'all';
-            applyFilters();
+            scheduleFilters();
         });
     });
 
@@ -173,12 +161,12 @@ const productFilterData = productos.map(p => ({
             selectedTags = Array.from(tagCheckboxes)
                 .filter(i => (i as HTMLInputElement).checked)
                 .map(i => (i as HTMLInputElement).value);
-            applyFilters();
+            scheduleFilters();
         });
     });
 
     searchInput?.addEventListener('input', (e) => {
         currentSearch = (e.target as HTMLInputElement).value;
-        applyFilters();
+        scheduleFilters();
     });
 </script>

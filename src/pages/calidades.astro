@@ -88,12 +88,3 @@ import Layout from '../layouts/Layout.astro';
     .reveal-init.active { opacity: 1; transform: translateY(0); }
 </style>
 
-<script>
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('active');
-        });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.reveal-init').forEach(el => revealObserver.observe(el));
-</script>
