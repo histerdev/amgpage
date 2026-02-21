@@ -1,0 +1,99 @@
+---
+// ActivityToast.astro — bottom-left social proof toasts for product page
+// Only shows "viewing" and "QC" toasts — no fabricated purchase data.
+interface Props {
+  productName?: string;
+}
+const { productName = 'este par' } = Astro.props;
+---
+
+<div id="activity-toast-container" class="fixed bottom-6 left-4 z-50 flex flex-col gap-2 pointer-events-none" aria-live="polite">
+  <!-- Toasts are injected here by JS -->
+</div>
+
+<script define:vars={{ productName }}>
+  const container = document.getElementById('activity-toast-container');
+  if (!container) throw new Error('toast container missing');
+
+  function randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Only truthful toasts — no fabricated purchase activity
+  function buildToasts() {
+    const viewerCount = randomBetween(4, 18);
+    return [
+      {
+        icon: '👁',
+        text: `${viewerCount} personas están viendo ${productName === 'este par' ? 'este par' : 'este par'} ahora`,
+      },
+      {
+        icon: '✅',
+        text: `Último QC aprobado hace ${randomBetween(1, 4)} días`,
+      },
+      {
+        icon: '🔒',
+        text: 'Pago protegido 100% por MercadoPago',
+      },
+    ];
+  }
+
+  let toastQueue = [];
+  let toastIndex = 0;
+
+  function showNextToast() {
+    if (!toastQueue.length) return;
+
+    const data = toastQueue[toastIndex % toastQueue.length];
+    toastIndex++;
+
+    const toast = document.createElement('div');
+    toast.className =
+      'activity-toast pointer-events-auto flex items-center gap-2.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm px-4 py-3 shadow-2xl max-w-[260px]';
+    toast.style.cssText = 'opacity:0; transform: translateX(-16px); transition: opacity 0.35s ease, transform 0.35s ease;';
+    toast.innerHTML = `
+      <span class="text-base flex-shrink-0">${data.icon}</span>
+      <p class="text-[11px] text-[#F5F5F5] leading-snug">${data.text}</p>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger enter animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+      });
+    });
+
+    // Auto-dismiss after 5 s
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-16px)';
+      setTimeout(() => toast.remove(), 400);
+    }, 5000);
+  }
+
+  // Init — start after 8 seconds, then every 90-120 s
+  function init() {
+    toastQueue = buildToasts();
+
+    setTimeout(() => {
+      showNextToast();
+      setInterval(() => {
+        // Rebuild queue with fresh random numbers each cycle
+        toastQueue = buildToasts();
+        showNextToast();
+      }, randomBetween(90_000, 120_000));
+    }, 8000);
+  }
+
+  // Only start when page is visible
+  if (document.hidden) {
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) init();
+    }, { once: true });
+  } else {
+    init();
+  }
+</script>

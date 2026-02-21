@@ -1,0 +1,128 @@
+---
+// QualityModal.astro — "¿Qué significa Grado PK?" explainer modal
+---
+
+<!-- Trigger button (rendered inline, styled like a link) -->
+<button
+  id="open-quality-modal-btn"
+  class="inline-flex items-center gap-1 text-[10px] text-[#888888] hover:text-[#F5F5F5] uppercase tracking-widest font-semibold transition-colors cursor-pointer bg-transparent border-none"
+  aria-haspopup="dialog"
+  aria-controls="quality-modal"
+>
+  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+  </svg>
+  ¿Qué significa Grado PK?
+</button>
+
+<!-- Modal overlay -->
+<div
+  id="quality-modal"
+  class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+  style="display:none;"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="quality-modal-title"
+>
+  <!-- Backdrop -->
+  <div id="quality-modal-backdrop" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+  <!-- Panel -->
+  <div class="relative z-10 w-full max-w-sm bg-[#111111] border border-[#2A2A2A] rounded-sm overflow-hidden shadow-2xl">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-5 border-b border-[#2A2A2A]">
+      <h2 id="quality-modal-title" class="text-sm font-bold text-[#F5F5F5] uppercase tracking-wide">
+        Guía de Calidades AMG
+      </h2>
+      <button
+        id="close-quality-modal-btn"
+        class="text-[#888888] hover:text-[#F5F5F5] transition-colors bg-transparent border-none cursor-pointer"
+        aria-label="Cerrar"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Grades -->
+    <div class="px-6 py-5 space-y-5">
+
+      <!-- G5 -->
+      <div class="opacity-60">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-bold text-[#888888] uppercase tracking-widest">G5 Estándar</span>
+          <span class="text-[10px] text-[#888888]">Entrada</span>
+        </div>
+        <div class="h-2 bg-[#2A2A2A] rounded-full overflow-hidden">
+          <div class="h-full bg-[#888888] rounded-full" style="width: 55%;"></div>
+        </div>
+        <p class="text-[10px] text-[#888888] mt-1.5 leading-relaxed">
+          Materiales básicos. Buena relación precio/calidad para uso casual.
+        </p>
+      </div>
+
+      <!-- PK — highlighted -->
+      <div class="bg-[#0D1F10] border border-[#16A34A]/30 rounded-sm p-4 relative overflow-hidden">
+        <div class="absolute -top-8 -right-8 w-24 h-24 bg-[#16A34A] rounded-full blur-3xl opacity-20 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-1.5 relative z-10">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold text-[#F5F5F5] uppercase tracking-widest">PK Industrial</span>
+            <span class="inline-block bg-[#16A34A] text-black text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
+              Estándar AMG
+            </span>
+          </div>
+          <span class="text-[10px] text-[#16A34A] font-semibold relative z-10">Máximo</span>
+        </div>
+        <div class="h-2 bg-[#2A2A2A] rounded-full overflow-hidden relative z-10">
+          <div class="h-full bg-[#16A34A] rounded-full transition-all duration-1000" style="width: 100%;"></div>
+        </div>
+        <p class="text-[10px] text-[#888888] mt-1.5 leading-relaxed relative z-10">
+          Materiales <strong class="text-[#F5F5F5]">idénticos a producción original</strong>. Mismo molde, mismas costuras, mismo peso. Es el único estándar que enviamos.
+        </p>
+      </div>
+
+      <!-- What PK means -->
+      <div class="space-y-2">
+        <p class="text-[10px] font-bold text-[#888888] uppercase tracking-widest">¿Por qué solo PK?</p>
+        <p class="text-xs text-[#888888] leading-relaxed">
+          "PK" significa <em class="text-[#F5F5F5] not-italic font-semibold">Perfect Kick</em> — la denominación de la industria para el máximo nivel de fabricación. En AMG solo gestionamos pares PK porque creemos que si no es perfecto, no debería enviarse.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="px-6 pb-5">
+      <button
+        id="close-quality-modal-btn-2"
+        class="w-full py-3 bg-[#16A34A] hover:bg-[#22C55E] text-black font-bold text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer"
+      >
+        Entendido
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal     = document.getElementById('quality-modal') as HTMLElement;
+  const backdrop  = document.getElementById('quality-modal-backdrop') as HTMLElement;
+  const openBtn   = document.getElementById('open-quality-modal-btn');
+  const closeBtn  = document.getElementById('close-quality-modal-btn');
+  const closeBtn2 = document.getElementById('close-quality-modal-btn-2');
+
+  function openModal() {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  openBtn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  closeBtn2?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+</script>

@@ -1,0 +1,96 @@
+---
+// WhatsAppChatBubbles.astro — social proof section styled as WA chats
+---
+
+<section class="py-20 bg-[#111111] border-y border-[#2A2A2A]">
+  <div class="max-w-5xl mx-auto px-6">
+
+    <div class="text-center mb-12">
+      <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-3">Social Proof</p>
+      <h2 class="text-3xl lg:text-4xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;">
+        Lo que preguntan nuestros clientes
+      </h2>
+      <p class="text-[#888888] text-sm mt-3">Respuestas reales a las dudas reales.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+      {[
+        {
+          customerMsg: '¿De verdad me mandan fotos antes de enviar?',
+          amgMsg: 'Sí, fotos y video del par específico que va a ser tuyo. Si algo no te convence, lo cambiamos o te devolvemos. Sin drama.',
+        },
+        {
+          customerMsg: '¿Y si aduana me lo retiene?',
+          amgMsg: 'Cubierto por nuestro seguro. Te mandamos otro sin costo y sin trámites de tu parte. Es nuestro riesgo, no el tuyo.',
+        },
+        {
+          customerMsg: 'No confío mucho en tiendas online de esto...',
+          amgMsg: 'Entendemos. Por eso pagas por MercadoPago, no por transferencia. Ellos protegen tu plata. Nosotros cuidamos el par.',
+        },
+        {
+          customerMsg: '¿Hay alguien real ahí?',
+          amgMsg: 'Sí, puedes escribirnos ahora mismo y te respondemos. No somos un bot ni una cuenta de Instagram fantasma.',
+        },
+      ].map(({ customerMsg, amgMsg }) => (
+        <div class="bg-[#0A0A0A] border border-[#2A2A2A] rounded-sm overflow-hidden">
+          <!-- Chat header -->
+          <div class="flex items-center gap-3 px-4 py-3 bg-[#128C7E] border-b border-[#075E54]">
+            <div class="w-8 h-8 rounded-full bg-[#075E54] flex items-center justify-center flex-shrink-0">
+              <span class="text-xs font-bold text-white">A</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-white">AMG Sneakers</p>
+              <p class="text-[9px] text-green-200">en línea</p>
+            </div>
+            <!-- WA icon -->
+            <svg class="w-4 h-4 text-white ml-auto opacity-80" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+          </div>
+
+          <!-- Chat body -->
+          <div class="p-4 space-y-3 min-h-[120px] flex flex-col justify-end" style="background: #0d1117 url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\");">
+            <!-- Customer bubble (white/light, right) -->
+            <div class="flex justify-end">
+              <div class="bg-[#dcf8c6] text-[#111111] px-3 py-2 rounded-tl-xl rounded-bl-xl rounded-tr-sm rounded-br-xl max-w-[80%]">
+                <p class="text-[11px] leading-snug">{customerMsg}</p>
+                <p class="text-[9px] text-gray-500 text-right mt-1">Tú</p>
+              </div>
+            </div>
+            <!-- AMG bubble (green, left) -->
+            <div class="flex justify-start">
+              <div class="bg-[#128C7E] text-white px-3 py-2 rounded-tl-sm rounded-bl-xl rounded-tr-xl rounded-br-xl max-w-[85%]">
+                <p class="text-[11px] leading-snug">{amgMsg}</p>
+                <div class="flex items-center justify-end gap-1 mt-1">
+                  <p class="text-[9px] text-green-200">AMG</p>
+                  <svg class="w-3 h-3 text-green-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-10 text-center">
+      <p class="text-xs text-[#888888] mb-4">¿Tienes otra duda? Escríbenos tú también.</p>
+      <a
+        href={`https://wa.me/${import.meta.env.PUBLIC_WHATSAPP_NUMBER || '56912345678'}?text=Hola%20AMG%2C%20tengo%20una%20pregunta`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2.5 bg-[#128C7E] hover:bg-[#0d6b5f] text-white px-6 py-3 rounded-sm font-bold text-xs uppercase tracking-widest transition-colors"
+      >
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Preguntarnos por WhatsApp
+      </a>
+    </div>
+
+  </div>
+</section>

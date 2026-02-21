@@ -1,0 +1,144 @@
+---
+import Layout from '../layouts/Layout.astro';
+export const prerender = false;
+---
+
+<Layout
+  title="Mis Pares Guardados | AMG Sneakers"
+  description="Tus pares favoritos guardados en AMG Sneakers."
+  noIndex={true}
+>
+  <main class="bg-[#0A0A0A] pt-24 pb-20 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6">
+
+      <!-- Header -->
+      <div class="mb-10">
+        <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-2">Tu Colección</p>
+        <h1 class="text-3xl lg:text-4xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;">
+          Pares Guardados
+          <span class="block w-12 h-0.5 bg-[#16A34A] mt-3"></span>
+        </h1>
+      </div>
+
+      <!-- Empty state (shown by default, JS hides if items exist) -->
+      <div id="wishlist-empty" class="py-24 text-center space-y-5">
+        <div class="text-5xl">🤍</div>
+        <p class="text-[#F5F5F5] font-semibold text-lg">Aún no has guardado ningún par</p>
+        <p class="text-[#888888] text-sm max-w-xs mx-auto">
+          Haz click en el corazón en cualquier par del catálogo para guardarlo aquí.
+        </p>
+        <a
+          href="/coleccion"
+          class="inline-flex items-center gap-2 mt-2 bg-[#16A34A] hover:bg-[#22C55E] text-black font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-sm transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+          Explorar catálogo
+        </a>
+      </div>
+
+      <!-- Grid (populated by JS) -->
+      <div id="wishlist-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 hidden"></div>
+
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { wishlist, toggleWishlist, loadWishlistFromDB } from '../store/wishlistStore';
+
+  const emptyEl = document.getElementById('wishlist-empty') as HTMLElement;
+  const gridEl  = document.getElementById('wishlist-grid') as HTMLElement;
+
+  const fmt = (n: number) => new Intl.NumberFormat('es-CL').format(n);
+
+  function renderGrid(items: typeof wishlist extends { get(): infer T } ? T : never) {
+    if (!items.length) {
+      emptyEl.classList.remove('hidden');
+      gridEl.classList.add('hidden');
+      gridEl.innerHTML = '';
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    gridEl.classList.remove('hidden');
+
+    gridEl.innerHTML = items.map(item => `
+      <article class="group relative bg-[#111111] border border-[#2A2A2A] rounded-[2px] overflow-hidden flex flex-col h-full transition-all duration-200">
+
+        <!-- Heart / remove -->
+        <button
+          data-remove-id="${item.id}"
+          class="wl-remove-btn absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-[#2A2A2A] flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-black/80 transition-all"
+          aria-label="Quitar de guardados"
+          title="Quitar de guardados"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </button>
+
+        <!-- Image -->
+        <a href="/producto/${item.id}" class="aspect-square overflow-hidden bg-[#1A1A1A] flex items-center justify-center p-8 relative cursor-pointer block">
+          <img
+            src="${item.image}"
+            alt="${item.name} — AMG Sneakers Chile"
+            class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+        </a>
+
+        <!-- Details -->
+        <div class="p-5 flex flex-col flex-grow border-t border-[#2A2A2A]">
+          <a href="/producto/${item.id}">
+            <h2 class="text-sm font-semibold text-[#F5F5F5] leading-snug mb-3 group-hover:text-[#22C55E] transition-colors duration-200 line-clamp-2">
+              ${item.name}
+            </h2>
+          </a>
+          <div class="mt-auto space-y-3">
+            <div>
+              <p class="text-xl font-bold text-[#16A34A]">$${fmt(item.pricePK)}</p>
+              <p class="text-[10px] text-[#888888] uppercase tracking-wider">Precio de Gestión</p>
+            </div>
+            <a
+              href="/producto/${item.id}"
+              class="flex items-center justify-center gap-1.5 w-full py-3 border border-[#2A2A2A] text-[#F5F5F5] text-[11px] font-semibold uppercase tracking-wider hover:border-[#16A34A] hover:text-[#16A34A] transition-all duration-200 rounded-sm"
+            >
+              Ver Par
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    // Bind remove buttons
+    gridEl.querySelectorAll<HTMLElement>('.wl-remove-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = btn.dataset.removeId!;
+        const current = wishlist.get();
+        const item = current.find(w => w.id === id);
+        if (item) {
+          await toggleWishlist(item);
+          // Dispatch so other hearts on the page update
+          window.dispatchEvent(new CustomEvent('wishlist-change', { detail: { id, saved: false } }));
+        }
+      });
+    });
+  }
+
+  // Initial render
+  loadWishlistFromDB().then(() => {
+    renderGrid(wishlist.get());
+  });
+
+  // Re-render on external changes (e.g. heart toggle on another tab)
+  wishlist.subscribe(renderGrid);
+
+  // Also re-render when custom event fires
+  window.addEventListener('wishlist-change', () => renderGrid(wishlist.get()));
+</script>

@@ -2,171 +2,163 @@
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { productos } from '../data/products';
-export const prerender = true;  // ✅ AGREGAR
+export const prerender = true;
 
-// Lista de siluetas para los botones principales
 const siluetas = ["Jordan 1", "Jordan 3", "Jordan 4", "Jordan 5", "Jordan 6", "Jordan 7", "Jordan 8", "Jordan 9", "Jordan 11", "Jordan 12", "Jordan 13", "Dunk", "Travis Scott"];
-
-// Extraer todos los tags únicos para el panel avanzado
 const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
 ---
----
 
-<Layout title="Catálogo | AMG SNEAKERS">
-    <main class="py-8 md:py-16 bg-white font-['Inter']">
-        <div 
-    id="catalog-container" 
-    class="max-w-7xl mx-auto px-4 md:px-6"
+<Layout
+  title="Catálogo | AMG Sneakers"
+  description="Catálogo completo de AMG Sneakers Chile. Pares premium calidad PK y G5. Filtro por silueta, color y colaboración."
 >
-            
-            <div class="mb-12 space-y-8">
-                <div class="flex items-baseline gap-4">
-                    <h1 class="text-6xl md:text-8xl font-[950] uppercase italic tracking-tighter leading-none text-black">DROPS</h1>
-                    <span class="text-sm font-bold bg-black text-white px-3 py-1 rounded-full">{productos.length} PARES</span>
-                </div>
-                
-                <div class="sticky top-4 z-40 bg-white/90 backdrop-blur-xl p-4 rounded-[32px] border border-gray-100 shadow-xl shadow-black/5 space-y-4">
-                    <input 
-                        type="text" 
-                        id="search-input" 
-                        placeholder="BUSCAR POR NOMBRE O COLOR..." 
-                        class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-black rounded-2xl px-8 py-5 outline-none font-bold uppercase text-xs tracking-widest transition-all" 
-                    />
+  <main class="bg-[#0A0A0A] pt-24 pb-20 min-h-screen">
+    <div id="catalog-container" class="max-w-7xl mx-auto px-4 md:px-6">
 
-                    <div class="flex overflow-x-auto gap-2 pb-2 no-scrollbar">
-                        <button class="silhouette-btn active bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all border-2 border-black" data-filter="all">TODOS</button>
-                        {siluetas.map(s => (
-                            <button class="silhouette-btn bg-gray-100 text-gray-500 px-6 py-3 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all border-2 border-transparent hover:border-black hover:text-black" data-filter={s.toLowerCase()}>
-                                {s}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button id="toggle-advanced" class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#2ecc71] transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                        Filtros Avanzados (Colores / Estilos)
-                    </button>
-                </div>
-
-                <div id="advanced-panel" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 p-6 bg-gray-50 rounded-3xl border border-gray-200">
-                    {todosLosTags.map(tag => (
-                        <label class="flex items-center gap-2 p-3 bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-black transition-all">
-                            <input type="checkbox" class="tag-checkbox w-4 h-4 accent-black" value={tag.toLowerCase()} />
-                            <span class="text-[9px] font-black uppercase tracking-tighter text-gray-600">{tag}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-                {productos.map((prod) => (
-                    <div class="product-wrapper" data-product-id={prod.id}>
-                        <ProductCard {...prod} />
-                    </div>
-                ))}
-            </div>
-
-            <div id="no-results" class="hidden text-center py-40">
-                <p class="text-gray-400 font-black uppercase italic text-2xl">No hay coincidencias en el stock.</p>
-            </div>
+      <!-- Header -->
+      <div class="mb-12">
+        <div class="flex items-baseline gap-4 mb-8">
+          <h1 class="text-5xl md:text-7xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.04em;">
+            Catálogo
+          </h1>
+          <span class="text-xs font-semibold bg-[#16A34A] text-black px-3 py-1 rounded-full uppercase tracking-widest">
+            {productos.length} pares
+          </span>
         </div>
-    </main>
+
+        <!-- Filter bar -->
+        <div class="sticky top-[80px] z-40 bg-[#0A0A0A]/95 backdrop-blur-md pb-4 space-y-3">
+
+          <!-- Search -->
+          <div class="relative">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Buscar por nombre o color..."
+              class="w-full bg-[#111111] border border-[#2A2A2A] focus:border-[#16A34A] rounded-sm pl-11 pr-4 py-3.5 outline-none text-xs text-[#F5F5F5] placeholder:text-[#888888] uppercase tracking-wider transition-colors"
+            />
+          </div>
+
+          <!-- Silhouette buttons -->
+          <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar">
+            <button class="silhouette-btn flex-shrink-0 px-4 py-2 rounded-sm text-[10px] font-semibold uppercase tracking-widest whitespace-nowrap transition-all duration-200 bg-[#16A34A] text-black border border-[#16A34A]" data-filter="all">
+              Todos
+            </button>
+            {siluetas.map(s => (
+              <button class="silhouette-btn flex-shrink-0 px-4 py-2 rounded-sm text-[10px] font-semibold uppercase tracking-widest whitespace-nowrap transition-all duration-200 bg-transparent text-[#888888] border border-[#2A2A2A] hover:border-[#888888] hover:text-[#F5F5F5]" data-filter={s.toLowerCase()}>
+                {s}
+              </button>
+            ))}
+          </div>
+
+          <!-- Advanced filters toggle -->
+          <div>
+            <button id="toggle-advanced" class="flex items-center gap-2 text-[10px] text-[#888888] hover:text-[#16A34A] uppercase tracking-widest font-semibold transition-colors cursor-pointer bg-transparent border-none">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+              </svg>
+              Filtros avanzados
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Advanced panel -->
+        <div id="advanced-panel" class="hidden bg-[#111111] border border-[#2A2A2A] rounded-sm p-4 mb-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            {todosLosTags.map(tag => (
+              <label class="flex items-center gap-2 p-2.5 bg-[#1A1A1A] border border-[#2A2A2A] hover:border-[#16A34A] rounded-sm cursor-pointer transition-colors">
+                <input type="checkbox" class="tag-checkbox w-3.5 h-3.5 accent-[#16A34A]" value={tag.toLowerCase()} />
+                <span class="text-[9px] font-semibold uppercase tracking-wider text-[#888888]">{tag}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Product grid -->
+      <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {productos.map((prod) => (
+          <div class="product-wrapper" data-product-id={prod.id}>
+            <ProductCard {...prod} />
+          </div>
+        ))}
+      </div>
+
+      <!-- No results -->
+      <div id="no-results" class="hidden text-center py-32">
+        <p class="text-[#888888] text-sm mb-2">Sin resultados para tu búsqueda.</p>
+        <p class="text-[10px] text-[#888888] uppercase tracking-widest">Intenta con otro término.</p>
+      </div>
+
+    </div>
+  </main>
 </Layout>
 
 <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    .silhouette-btn.active {
-        background-color: black !important;
-        color: white !important;
-        border-color: black !important;
-        transform: translateY(-2px);
-    }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
 <script>
-    const container = document.getElementById('catalog-container');
-    const searchInput = document.getElementById('search-input') as HTMLInputElement;
-    const silhouetteBtns = document.querySelectorAll('.silhouette-btn');
-    const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
-    const toggleAdvanced = document.getElementById('toggle-advanced');
-    const advancedPanel = document.getElementById('advanced-panel');
-    const noResults = document.getElementById('no-results');
+  const searchInput     = document.getElementById('search-input') as HTMLInputElement;
+  const silhouetteBtns  = document.querySelectorAll('.silhouette-btn');
+  const tagCheckboxes   = document.querySelectorAll('.tag-checkbox');
+  const toggleAdvanced  = document.getElementById('toggle-advanced');
+  const advancedPanel   = document.getElementById('advanced-panel');
+  const noResults       = document.getElementById('no-results');
 
-    const productWrappers = Array.from(document.querySelectorAll('.product-wrapper')) as HTMLElement[];
-    const products = productWrappers.map((wrapper) => {
-        const card = wrapper.querySelector('.product-item') as HTMLElement | null;
-        const name = card?.dataset.name || '';
-        const tags = (card?.dataset.tags || '').split('|').filter(Boolean);
-        return { wrapper, name, tags };
+  const productWrappers = Array.from(document.querySelectorAll('.product-wrapper')) as HTMLElement[];
+  const products = productWrappers.map(wrapper => {
+    const card = wrapper.querySelector('.product-item') as HTMLElement | null;
+    return { wrapper, name: card?.dataset.name || '', tags: (card?.dataset.tags || '').split('|').filter(Boolean) };
+  });
+
+  let currentSilhouette = 'all';
+  let selectedTags: string[] = [];
+  let currentSearch = '';
+  let filterRaf = 0;
+
+  function applyFilters() {
+    let count = 0;
+    const q = currentSearch.toLowerCase();
+    products.forEach(({ wrapper, name, tags }) => {
+      const ok =
+        name.includes(q) &&
+        (currentSilhouette === 'all' || tags.some(t => t === currentSilhouette || t.startsWith(currentSilhouette + ' '))) &&
+        (selectedTags.length === 0 || selectedTags.every(st => tags.includes(st)));
+      wrapper.hidden = !ok;
+      if (ok) count++;
     });
+    noResults?.classList.toggle('hidden', count > 0);
+  }
 
-    let currentSilhouette = 'all';
-    let selectedTags: string[] = [];
-    let currentSearch = '';
-    let filterRaf = 0;
+  function schedule() {
+    if (filterRaf) cancelAnimationFrame(filterRaf);
+    filterRaf = requestAnimationFrame(() => { filterRaf = 0; applyFilters(); });
+  }
 
-    function applyFilters() {
-        let visibleCount = 0;
-        const searchValue = currentSearch.toLowerCase();
+  toggleAdvanced?.addEventListener('click', () => advancedPanel?.classList.toggle('hidden'));
 
-        products.forEach(({ wrapper, name, tags }) => {
-            const matchesSearch = name.includes(searchValue);
-            const matchesSilhouette = currentSilhouette === 'all' ||
-                tags.some((t) => t === currentSilhouette || t.startsWith(currentSilhouette + ' '));
-            const matchesAdvancedTags = selectedTags.length === 0 ||
-                selectedTags.every((st) => tags.includes(st));
-
-            const isVisible = matchesSearch && matchesSilhouette && matchesAdvancedTags;
-            wrapper.hidden = !isVisible;
-            if (isVisible) visibleCount++;
-        });
-
-        if (noResults) {
-            noResults.classList.toggle('hidden', visibleCount > 0);
-        }
-    }
-
-    function scheduleFilters() {
-        if (filterRaf) cancelAnimationFrame(filterRaf);
-        filterRaf = requestAnimationFrame(() => {
-            filterRaf = 0;
-            applyFilters();
-        });
-    }
-
-    // 3. EVENT LISTENERS
-    toggleAdvanced?.addEventListener('click', () => {
-        advancedPanel?.classList.toggle('hidden');
+  silhouetteBtns.forEach(btn => btn.addEventListener('click', () => {
+    silhouetteBtns.forEach(b => {
+      b.className = 'silhouette-btn flex-shrink-0 px-4 py-2 rounded-sm text-[10px] font-semibold uppercase tracking-widest whitespace-nowrap transition-all duration-200 bg-transparent text-[#888888] border border-[#2A2A2A] hover:border-[#888888] hover:text-[#F5F5F5]';
     });
+    btn.className = 'silhouette-btn flex-shrink-0 px-4 py-2 rounded-sm text-[10px] font-semibold uppercase tracking-widest whitespace-nowrap transition-all duration-200 bg-[#16A34A] text-black border border-[#16A34A]';
+    currentSilhouette = (btn as HTMLElement).dataset.filter || 'all';
+    schedule();
+  }));
 
-    silhouetteBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            silhouetteBtns.forEach(b => {
-                b.classList.remove('active', 'bg-black', 'text-white', 'border-black');
-                b.classList.add('bg-gray-100', 'text-gray-500', 'border-transparent');
-            });
+  tagCheckboxes.forEach(cb => cb.addEventListener('change', () => {
+    selectedTags = Array.from(tagCheckboxes).filter(i => (i as HTMLInputElement).checked).map(i => (i as HTMLInputElement).value);
+    schedule();
+  }));
 
-            const clickedBtn = btn as HTMLElement;
-            clickedBtn.classList.add('active', 'bg-black', 'text-white', 'border-black');
-            
-            currentSilhouette = clickedBtn.dataset.filter || 'all';
-            scheduleFilters();
-        });
-    });
-
-    tagCheckboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-            selectedTags = Array.from(tagCheckboxes)
-                .filter(i => (i as HTMLInputElement).checked)
-                .map(i => (i as HTMLInputElement).value);
-            scheduleFilters();
-        });
-    });
-
-    searchInput?.addEventListener('input', (e) => {
-        currentSearch = (e.target as HTMLInputElement).value;
-        scheduleFilters();
-    });
+  searchInput?.addEventListener('input', e => {
+    currentSearch = (e.target as HTMLInputElement).value;
+    schedule();
+  });
 </script>

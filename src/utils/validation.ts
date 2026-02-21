@@ -105,13 +105,15 @@ export const checkoutCustomerSchema = z.object({
 
 // ── ITEM DEL CARRITO ────────────────────────────────────────────
 export const cartItemSchema = z.object({
-  productId: z // ✅ AGREGAR ESTO
-    .string()
-    .optional(),
+  // productId is the base product slug used for DB lookup (e.g. "jordan-1-chicago")
+  productId: z.string().optional(),
+
+  // id is the cart-item key: a product slug optionally suffixed with quality/size
+  // (e.g. "jordan-1-chicago-PK-44"). NOT a UUID — do NOT add .uuid() here.
   id: z
     .string()
     .min(1, "ID de producto requerido")
-    .uuid("ID de producto inválido"),
+    .max(255, "ID de producto demasiado largo"),
 
   name: z.string().min(1, "Nombre de producto requerido").max(255),
 

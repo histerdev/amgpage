@@ -1,12 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { productos } from '../../data/products';
-import { supabase } from '../../lib/supabase';
+import { createSupabaseServerClient } from '../../lib/supabase-ssr';
 
-// ✅ PROTEGER ACCESO
-const { data: { session } } = await supabase.auth.getSession();
+// SECURITY FIX: Use getUser() via SSR server client — verifies JWT server-side
+// instead of getSession() which only reads the local cookie without verification.
+const responseHeaders = new Headers();
+const supabase = createSupabaseServerClient(Astro.request, responseHeaders);
 
-if (!session) {
+const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+if (!user || userError) {
   return Astro.redirect('/login');
 }
 
@@ -14,7 +18,7 @@ if (!session) {
 const { data: profile } = await supabase
   .from('profiles')
   .select('role')
-  .eq('id', session.user.id)
+  .eq('id', user.id)
   .single();
 
 if (profile?.role !== 'admin') {

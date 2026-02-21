@@ -323,14 +323,15 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: unknown) {
-    // FIX 6: error tipado como unknown en vez de any
+    // SECURITY FIX: Log detailed error server-side only; return a generic message to the client
+    // to prevent leaking internal error details (DB errors, product ID formats, etc.)
     const message = error instanceof Error ? error.message : "Error desconocido";
     const stack = error instanceof Error ? error.stack : undefined;
     console.error("❌ Error en create-payment:", message);
     if (stack) console.error("Stack:", stack);
 
     return new Response(
-      JSON.stringify({ error: message || "Error procesando pago" }),
+      JSON.stringify({ error: "Error procesando el pago. Por favor inténtalo de nuevo." }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }

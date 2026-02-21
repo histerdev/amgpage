@@ -1,0 +1,58 @@
+---
+// TrustPaymentBlock.astro — "¿Cómo está protegido tu pago?" expandable accordion
+---
+
+<details
+  id="trust-payment-block"
+  class="tpb-details group bg-[#111111] border border-[#2A2A2A] rounded-sm overflow-hidden transition-all open:border-[#16A34A]/40"
+>
+  <summary class="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none">
+    <span class="flex items-center gap-2.5">
+      <span class="text-base">🔒</span>
+      <span class="text-xs font-bold text-[#F5F5F5] uppercase tracking-wide">¿Cómo está protegido tu pago?</span>
+    </span>
+    <svg
+      class="w-4 h-4 text-[#888888] flex-shrink-0 transition-transform duration-200 group-open:rotate-180"
+      fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
+    >
+      <path d="M19 9l-7 7-7-7"/>
+    </svg>
+  </summary>
+
+  <div class="px-5 pb-5 pt-1 border-t border-[#2A2A2A]">
+    <ol class="space-y-3.5 mt-3">
+      {[
+        {
+          num: '1',
+          text: 'Pagas por MercadoPago — nunca por transferencia directa. Ellos protegen tu compra.',
+        },
+        {
+          num: '2',
+          text: 'Si el QC falla, no se envía. Punto. Recibes fotos antes de que el par salga.',
+        },
+        {
+          num: '3',
+          text: 'Si aduana retiene el paquete, te mandamos otro sin costo ni trámites de tu parte.',
+        },
+        {
+          num: '4',
+          text: 'Tienes el comprobante de pago y los registros de QC para cualquier reclamo.',
+        },
+      ].map((item) => (
+        <li class="flex gap-3 items-start">
+          <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#16A34A] text-black text-[9px] font-black flex items-center justify-center mt-0.5">
+            {item.num}
+          </span>
+          <p class="text-xs text-[#888888] leading-relaxed">{item.text}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="mt-4 pt-4 border-t border-[#2A2A2A] flex items-center gap-2">
+      <svg class="w-3.5 h-3.5 text-[#16A34A] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.537 3.204a1 1 0 00-1.414-1.414l-3.293 3.293-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      <p class="text-[10px] text-[#16A34A] font-semibold">Tu dinero está protegido en cada paso del proceso.</p>
+    </div>
+  </div>
+</details>

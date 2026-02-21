@@ -1,120 +1,168 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-export const prerender = false; // ← OBLIGATORIO: usa Astro.request.url
+export const prerender = false;
 
 const searchParams = new URL(Astro.request.url).searchParams;
-const paymentId = searchParams.get('payment_id');
+const paymentId       = searchParams.get('payment_id');
 const externalReference = searchParams.get('external_reference');
-const status = searchParams.get('status') || 'approved';
+const status          = searchParams.get('status') || 'approved';
+const whatsappNumber  = import.meta.env.PUBLIC_WHATSAPP_NUMBER || '56912345678';
+const whatsappMsg     = encodeURIComponent(`Hola AMG, quiero seguir mi pedido ${externalReference || ''}`);
 ---
 
 <Layout title="Pago Exitoso | AMG Sneakers" noIndex={true}>
-
-  <main class="min-h-screen bg-gradient-to-br from-[#2ecc71] to-[#27ae60] pt-32 pb-20">
+  <main class="bg-[#0A0A0A] min-h-screen pt-24 pb-20">
     <div class="max-w-2xl mx-auto px-6">
-      
-      <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden">
-        
-        <div class="bg-gradient-to-r from-[#2ecc71] to-[#27ae60] p-12 text-center">
-          <div class="inline-block mb-6">
-            <svg class="w-20 h-20 text-white animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+
+      <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm overflow-hidden">
+
+        <!-- ── Animated success header ── -->
+        <div class="bg-[#0D1F10] border-b border-[#16A34A]/20 p-12 text-center">
+          <!-- Animated checkmark -->
+          <div class="w-20 h-20 rounded-full bg-[#16A34A] flex items-center justify-center mx-auto mb-6 success-check" style="animation: checkPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;">
+            <svg class="w-10 h-10 text-black" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
             </svg>
           </div>
-          <h1 class="text-4xl font-black text-white uppercase tracking-tighter">
-            ¡Pago Exitoso!
+          <h1 class="text-3xl font-bold text-[#F5F5F5] mb-2" style="font-family: 'Space Grotesk', sans-serif;">
+            ¡Tu gestión está en marcha!
           </h1>
-          <p class="text-white/80 text-sm font-bold mt-2">Tu orden ha sido confirmada</p>
+          <p class="text-[#888888] text-sm">Pago procesado correctamente por MercadoPago</p>
         </div>
 
-        <div class="p-12 space-y-8">
-          
-          <div class="bg-gray-50 rounded-2xl p-6 border-2 border-gray-100">
-            <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Número de Orden</p>
-            <p class="text-2xl font-black text-gray-900 font-mono break-all">
-              {externalReference || 'N/A'}
-            </p>
+        <div class="p-8 space-y-8">
+
+          <!-- Order reference -->
+          <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm p-4">
+            <p class="text-[10px] font-semibold text-[#888888] uppercase tracking-widest mb-2">Número de Orden</p>
+            <p class="text-lg font-bold text-[#F5F5F5] font-mono break-all">{externalReference || 'N/D'}</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
-              <p class="text-[9px] font-black uppercase text-blue-600 mb-2">ID de Pago</p>
-              <p class="text-sm font-bold text-gray-900 font-mono">
-                {paymentId ? paymentId.slice(0, 8) + '...' : 'N/A'}
-              </p>
+          <!-- Status grid -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm p-4">
+              <p class="text-[9px] font-semibold text-[#888888] uppercase tracking-widest mb-1">ID de Pago</p>
+              <p class="text-xs font-mono text-[#F5F5F5]">{paymentId ? paymentId.slice(0, 8) + '...' : 'N/D'}</p>
             </div>
-
-            <div class="bg-green-50 rounded-2xl p-4 border border-green-100">
-              <p class="text-[9px] font-black uppercase text-green-600 mb-2">Estado</p>
-              <p class="text-sm font-bold text-green-900 uppercase">
-                {status === 'approved' ? '✅ Aprobado' : status}
-              </p>
+            <div class="bg-[#0D1F10] border border-[#16A34A]/20 rounded-sm p-4">
+              <p class="text-[9px] font-semibold text-[#888888] uppercase tracking-widest mb-1">Estado</p>
+              <p class="text-xs font-bold text-[#16A34A] uppercase">{status === 'approved' ? '✓ Aprobado' : status}</p>
             </div>
           </div>
 
-          <div class="bg-yellow-50 rounded-2xl p-6 border-l-4 border-yellow-400">
-            <h3 class="font-black text-sm uppercase text-yellow-900 mb-2">⚠️ Importante</h3>
-            <ul class="text-[13px] text-yellow-800 space-y-2 font-bold">
-              <li>✓ Revisa tu email para la confirmación de orden</li>
-              <li>✓ El comprobante de pago te llegará en los próximos minutos</li>
-              <li>✓ Guarda el número de orden para seguimiento</li>
-            </ul>
-          </div>
-
-          <div class="bg-gray-50 rounded-2xl p-6">
-            <h3 class="font-black text-sm uppercase text-gray-900 mb-4">Próximos Pasos</h3>
-            <ol class="space-y-3">
-              <li class="flex gap-4 items-start">
-                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#2ecc71] text-white font-black flex items-center justify-center text-sm">1</span>
-                <span class="text-sm font-bold text-gray-700">Recibirás un email de confirmación</span>
-              </li>
-              <li class="flex gap-4 items-start">
-                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#2ecc71] text-white font-black flex items-center justify-center text-sm">2</span>
-                <span class="text-sm font-bold text-gray-700">Procesaremos tu orden y la empacaremos</span>
-              </li>
-              <li class="flex gap-4 items-start">
-                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-[#2ecc71] text-white font-black flex items-center justify-center text-sm">3</span>
-                <span class="text-sm font-bold text-gray-700">Te enviaremos el rastreo de envío por email</span>
-              </li>
+          <!-- ── Visual timeline ── -->
+          <div>
+            <h3 class="text-xs font-bold text-[#888888] uppercase tracking-widest mb-5">¿Qué pasa ahora?</h3>
+            <ol class="space-y-0">
+              {[
+                {
+                  icon: '📋',
+                  step: 'Hoy',
+                  label: 'Recibimos tu pedido',
+                  desc: 'Comenzamos a gestionar la búsqueda de tu par en origen.',
+                  done: true,
+                },
+                {
+                  icon: '📸',
+                  step: 'En 2–5 días',
+                  label: 'Te enviamos el QC',
+                  desc: 'Fotos y video HD del par específico que será tuyo. Tú das el ok.',
+                  done: false,
+                },
+                {
+                  icon: '✈️',
+                  step: 'Tras tu aprobación',
+                  label: 'Sale desde origen',
+                  desc: 'El par sale hacia Chile con seguimiento completo.',
+                  done: false,
+                },
+                {
+                  icon: '📦',
+                  step: 'En 9–20 días hábiles',
+                  label: 'Llega a tu puerta',
+                  desc: 'Envío directo a tu domicilio. Seguro aduanero incluido.',
+                  done: false,
+                },
+              ].map((item, i, arr) => (
+                <li class="flex gap-4 items-start">
+                  <!-- Timeline line -->
+                  <div class="flex flex-col items-center flex-shrink-0">
+                    <div class={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${item.done ? 'bg-[#16A34A]' : 'bg-[#1A1A1A] border border-[#2A2A2A]'}`}>
+                      {item.icon}
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div class="w-px h-8 bg-[#2A2A2A] my-1"></div>
+                    )}
+                  </div>
+                  <!-- Content -->
+                  <div class="pb-4">
+                    <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-widest">{item.step}</p>
+                    <p class="text-sm font-semibold text-[#F5F5F5] mt-0.5">{item.label}</p>
+                    <p class="text-xs text-[#888888] leading-relaxed mt-0.5">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
             </ol>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-            <a href="/pedidos" class="bg-[#2ecc71] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#27ae60] transition-all text-center">
-              Ver Mis Pedidos
+          <!-- WhatsApp follow-up -->
+          <a
+            href={`https://wa.me/${whatsappNumber}?text=${whatsappMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2.5 w-full py-3.5 bg-[#128C7E] hover:bg-[#0d6b5f] text-white rounded-sm font-bold text-xs uppercase tracking-widest transition-colors"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            Seguir mi pedido por WhatsApp
+          </a>
+
+          <!-- CTAs -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <a href="/pedidos" class="bg-[#16A34A] hover:bg-[#22C55E] text-black py-3.5 rounded-sm font-bold uppercase text-xs tracking-widest transition-colors text-center">
+              Ver mis pedidos
             </a>
-            <a href="/" class="bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all text-center">
-              Volver a Tienda
+            <a href="/coleccion" class="border border-[#2A2A2A] hover:border-[#888888] text-[#F5F5F5] py-3.5 rounded-sm font-semibold uppercase text-xs tracking-widest transition-colors text-center">
+              Seguir comprando
             </a>
+          </div>
+
+          <!-- ── Referral seed ── -->
+          <div class="bg-[#0D1F10] border border-[#16A34A]/20 rounded-sm p-5 text-center">
+            <p class="text-base mb-1">🎁</p>
+            <p class="text-xs font-bold text-[#F5F5F5] mb-1">¿Conoces a alguien que quiera un par?</p>
+            <p class="text-[11px] text-[#888888] leading-relaxed">
+              Comparte AMG y ambos ganan <strong class="text-[#16A34A]">$5.000 CLP</strong> en su próxima compra.<br/>
+              Pronto habilitaremos el sistema de referidos —<span class="text-[#F5F5F5]"> ¡ya guardaremos tu cuenta.</span>
+            </p>
           </div>
 
         </div>
       </div>
 
-      <div class="text-center mt-8">
-        <p class="text-white/70 text-sm font-bold">
-          Redirigiendo en <span id="countdown">10</span> segundos...
-        </p>
-      </div>
-
+      <p class="text-center text-[#888888] text-xs mt-6">
+        Redirigiendo a tus pedidos en <span id="countdown">10</span> segundos...
+      </p>
     </div>
   </main>
-
-  <script>
-    let seconds = 10;
-    const countdownEl = document.getElementById('countdown');
-
-    const interval = setInterval(() => {
-      seconds--;
-      if (countdownEl) {
-        countdownEl.innerText = String(seconds);
-      }
-
-      if (seconds === 0) {
-        clearInterval(interval);
-        window.location.href = '/pedidos';
-      }
-    }, 1000);
-  </script>
 </Layout>
+
+<style>
+  @keyframes checkPop {
+    0%   { opacity: 0; transform: scale(0.5); }
+    60%  { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+</style>
+
+<script>
+  let seconds = 10;
+  const countdownEl = document.getElementById('countdown');
+  const interval = setInterval(() => {
+    seconds--;
+    if (countdownEl) countdownEl.textContent = String(seconds);
+    if (seconds === 0) { clearInterval(interval); window.location.href = '/pedidos'; }
+  }, 1000);
+</script>

@@ -16,6 +16,13 @@ export const prerender = false;
     import { supabase } from '../lib/supabase';
     import { waitForSession } from '../lib/auth';
 
+    // SECURITY FIX: Escape all user/DB-sourced strings before injecting into innerHTML.
+    function escapeHTML(str: unknown): string {
+        const div = document.createElement('div');
+        div.textContent = String(str ?? '');
+        return div.innerHTML;
+    }
+
     interface OrderItem {
         id: string;
         product_name: string;
@@ -70,52 +77,90 @@ export const prerender = false;
             return;
         }
 
-        list.innerHTML = (orders as Order[]).map((order: Order) => `
-            <div class="bg-white rounded-[40px] border border-gray-100 shadow-xl overflow-hidden mb-8">
-                <div class="p-6 bg-black text-white flex justify-between items-center">
-                    <span class="text-[10px] font-black uppercase italic text-[#2ecc71]">${order.status}</span>
-                    <span class="text-[10px] font-black opacity-40">#${order.id.slice(0,8)}</span>
-                </div>
+        list.innerHTML = (orders as Order[]).map((order: Order) => {
+            // SECURITY FIX: Escape all DB-sourced values before injecting into innerHTML.
+            const safeStatus   = escapeHTML(order.status);
+            const safeId       = escapeHTML(order.id);
+            const safeIdShort  = escapeHTML(order.id.slice(0, 8));
+            const safeDecision = escapeHTML(order.client_decision);
+            const safeOrderId  = encodeURIComponent(order.id);
 
-                <div class="p-8 space-y-8">
-                    ${order.order_items.map((item: OrderItem) => `
-                        <div class="grid md:grid-cols-2 gap-6 border-b border-gray-50 pb-8 last:border-0 last:pb-0">
-                            <div class="flex gap-4">
-                                <img src="${item.image_url}" class="w-24 h-24 object-contain bg-gray-50 rounded-2xl" />
-                                <div>
-                                    <h3 class="font-black uppercase italic text-sm">${item.product_name}</h3>
-                                    <p class="text-[9px] font-bold text-gray-400">TALLA: ${item.size}</p>
-                                    <div class="mt-2 p-3 bg-zinc-50 rounded-xl italic text-[11px] text-zinc-500">
-                                        "${item.item_notes || 'Sin mensaje adicional.'}"
-                                    </div>
+            const itemsHtml = order.order_items.map((item: OrderItem) => {
+                const safeName   = escapeHTML(item.product_name);
+                const safeSize   = escapeHTML(item.size);
+                const safeNotes  = escapeHTML(item.item_notes || 'Sin mensaje adicional.');
+                const safeImg    = escapeHTML(item.image_url);
+                const imgsHtml   = (item.qc_images || []).map((img: string) => {
+                    const safeUrl = escapeHTML(img);
+                    return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="aspect-square rounded-lg overflow-hidden"><img src="${safeUrl}" class="w-full h-full object-cover" /></a>`;
+                }).join('') || '<p class="col-span-4 text-[9px] uppercase font-black text-gray-300 py-10 text-center">QC en proceso...</p>';
+
+                return `
+                    <div class="grid md:grid-cols-2 gap-6 border-b border-gray-50 pb-8 last:border-0 last:pb-0">
+                        <div class="flex gap-4">
+                            <img src="${safeImg}" class="w-24 h-24 object-contain bg-gray-50 rounded-2xl" />
+                            <div>
+                                <h3 class="font-black uppercase italic text-sm">${safeName}</h3>
+                                <p class="text-[9px] font-bold text-gray-400">TALLA: ${safeSize}</p>
+                                <div class="mt-2 p-3 bg-zinc-50 rounded-xl italic text-[11px] text-zinc-500">
+                                    &ldquo;${safeNotes}&rdquo;
                                 </div>
                             </div>
-                            <div class="grid grid-cols-4 gap-2">
-                                ${(item.qc_images || []).map((img: string) => `
-                                    <a href="${img}" target="_blank" class="aspect-square rounded-lg overflow-hidden">
-                                        <img src="${img}" class="w-full h-full object-cover" />
-                                    </a>
-                                `).join('') || '<p class="col-span-4 text-[9px] uppercase font-black text-gray-300 py-10 text-center">QC en proceso...</p>'}
-                            </div>
                         </div>
-                    `).join('')}
-                </div>
+                        <div class="grid grid-cols-4 gap-2">${imgsHtml}</div>
+                    </div>`;
+            }).join('');
 
-                <div class="p-6 bg-zinc-50 flex justify-center border-t border-gray-100">
-                    ${!order.client_decision ? `
-                        <div class="flex gap-4">
-                            <button onclick="window.makeDecision('${order.id}', 'Confirmado')" class="bg-black text-white px-8 py-3 rounded-full font-black uppercase italic text-[10px]">Aprobar Todo</button>
-                            <button onclick="window.makeDecision('${order.id}', 'Reembolso')" class="border border-red-200 text-red-500 px-8 py-3 rounded-full font-black uppercase italic text-[10px]">Reembolso</button>
-                        </div>
-                    ` : `
-                        <p class="font-black uppercase italic text-sm">Decisión: ${order.client_decision}</p>
-                    `}
-                </div>
-            </div>
-        `).join('');
+            const decisionHtml = !order.client_decision
+                ? `<div class="flex gap-4">
+                    <button data-order-id="${safeOrderId}" data-decision="Confirmado" class="decision-btn bg-black text-white px-8 py-3 rounded-full font-black uppercase italic text-[10px]">Aprobar Todo</button>
+                    <button data-order-id="${safeOrderId}" data-decision="Reembolso" class="decision-btn border border-red-200 text-red-500 px-8 py-3 rounded-full font-black uppercase italic text-[10px]">Reembolso</button>
+                  </div>`
+                : `<p class="font-black uppercase italic text-sm">Decisión: ${safeDecision}</p>`;
+
+            return `
+                <div class="bg-white rounded-[40px] border border-gray-100 shadow-xl overflow-hidden mb-8">
+                    <div class="p-6 bg-black text-white flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase italic text-[#2ecc71]">${safeStatus}</span>
+                        <span class="text-[10px] font-black opacity-40">#${safeIdShort}</span>
+                    </div>
+                    <div class="p-8 space-y-8">${itemsHtml}</div>
+                    <div class="p-6 bg-zinc-50 flex justify-center border-t border-gray-100">${decisionHtml}</div>
+                </div>`;
+        }).join('');
+
+        // SECURITY FIX: Use event delegation instead of inline onclick to prevent XSS.
+        list.addEventListener('click', async (e: Event) => {
+            const btn = (e.target as HTMLElement).closest('.decision-btn') as HTMLElement | null;
+            if (!btn) return;
+            const orderId  = decodeURIComponent(btn.dataset.orderId || '');
+            const decision = btn.dataset.decision || '';
+            if (!orderId || !['Confirmado', 'Reembolso'].includes(decision)) return;
+            await (window as any).makeDecision(orderId, decision);
+        });
     }
 
+    // SECURITY FIX: Verify order ownership before writing client_decision (prevents IDOR).
     (window as any).makeDecision = async (id: string, decision: string) => {
+        const session = await waitForSession();
+        if (!session) { window.location.replace('/login'); return; }
+
+        // Allowed decisions whitelist
+        if (!['Confirmado', 'Reembolso'].includes(decision)) return;
+
+        // Fetch the order and confirm ownership client-side (Supabase RLS is the real gate).
+        const { data: order, error } = await supabase
+            .from('orders')
+            .select('id, user_id')
+            .eq('id', id)
+            .eq('user_id', session.user.id) // IDOR fix: filter by authenticated user
+            .single();
+
+        if (error || !order) {
+            console.error('Order not found or not yours.');
+            return;
+        }
+
         await supabase.from('orders').update({ client_decision: decision }).eq('id', id);
         location.reload();
     };

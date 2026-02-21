@@ -1,117 +1,123 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="Registro | AMG Sneakers">
-  <main class="min-h-screen flex items-center justify-center bg-gray-50 py-20 px-4">
-    <div class="max-w-xl w-full bg-white p-8 md:p-12 rounded-[40px] shadow-2xl border border-gray-100">
+
+<Layout title="Crear Cuenta | AMG Sneakers">
+  <main class="bg-[#0A0A0A] min-h-screen flex items-center justify-center px-6 py-24">
+    <div class="w-full max-w-lg">
+
+      <!-- Logo -->
       <div class="text-center mb-10">
-        <h2 class="text-5xl font-[900] italic uppercase tracking-tighter mb-2">Crear Perfil</h2>
-        <p class="text-gray-400 font-bold uppercase text-[10px] tracking-[0.3em]">Únete a la comunidad sneakerhead</p>
+        <img src="/logo-amg-white.webp" alt="AMG Sneakers" class="h-10 w-auto mx-auto mb-6" width={960} height={960} />
+        <h1 class="text-2xl font-bold text-[#F5F5F5] mb-2" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;">
+          Crear Cuenta
+        </h1>
+        <p class="text-xs text-[#888888]">Únete a AMG Sneakers</p>
       </div>
-      
-      <form id="register-form" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" name="full_name" placeholder="Nombre Completo" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
-          <input type="tel" name="phone" placeholder="WhatsApp +569..." required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
-        </div>
-        <input type="email" name="email" placeholder="Email" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="password" name="password" placeholder="Contraseña" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
-          <input type="password" name="confirm_password" placeholder="Confirmar" required class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-black transition-all">
-        </div>
-        <div id="error-message" class="hidden bg-red-50 text-red-600 p-4 rounded-lg text-sm border border-red-100"></div>
-        <button type="submit" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase italic tracking-widest hover:bg-[#2ecc71] transition-all transform active:scale-95 shadow-xl">
-          Finalizar Registro
-        </button>
-      </form>
+
+      <!-- Card -->
+      <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-8">
+        <form id="register-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-semibold text-[#888888] uppercase tracking-widest mb-2">Nombre completo</label>
+              <input type="text" name="full_name" placeholder="Tu nombre" required
+                class="w-full bg-[#1A1A1A] border border-[#2A2A2A] focus:border-[#16A34A] rounded-sm py-3 px-4 text-sm text-[#F5F5F5] placeholder:text-[#888888] outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-[#888888] uppercase tracking-widest mb-2">WhatsApp</label>
+              <input type="tel" name="phone" placeholder="+569..." required
+                class="w-full bg-[#1A1A1A] border border-[#2A2A2A] focus:border-[#16A34A] rounded-sm py-3 px-4 text-sm text-[#F5F5F5] placeholder:text-[#888888] outline-none transition-colors" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-[#888888] uppercase tracking-widest mb-2">Email</label>
+            <input type="email" name="email" placeholder="tu@email.com" required
+              class="w-full bg-[#1A1A1A] border border-[#2A2A2A] focus:border-[#16A34A] rounded-sm py-3 px-4 text-sm text-[#F5F5F5] placeholder:text-[#888888] outline-none transition-colors" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-semibold text-[#888888] uppercase tracking-widest mb-2">Contraseña</label>
+              <input type="password" name="password" placeholder="••••••••" required
+                class="w-full bg-[#1A1A1A] border border-[#2A2A2A] focus:border-[#16A34A] rounded-sm py-3 px-4 text-sm text-[#F5F5F5] placeholder:text-[#888888] outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-[#888888] uppercase tracking-widest mb-2">Confirmar</label>
+              <input type="password" name="confirm_password" placeholder="••••••••" required
+                class="w-full bg-[#1A1A1A] border border-[#2A2A2A] focus:border-[#16A34A] rounded-sm py-3 px-4 text-sm text-[#F5F5F5] placeholder:text-[#888888] outline-none transition-colors" />
+            </div>
+          </div>
+
+          <div id="error-message" class="hidden bg-red-900/20 border border-red-900/30 text-red-400 p-3 rounded-sm text-xs"></div>
+
+          <button type="submit" id="submit-btn"
+            class="w-full bg-[#16A34A] hover:bg-[#22C55E] text-black py-4 rounded-sm font-bold uppercase text-xs tracking-widest transition-all duration-200 cursor-pointer active:scale-[0.99]"
+          >
+            Crear Cuenta
+          </button>
+        </form>
+        <p class="text-center text-xs text-[#888888] mt-6">
+          ¿Ya tienes cuenta?
+          <a href="/login" class="text-[#16A34A] hover:text-[#22C55E] font-semibold transition-colors ml-1">Iniciar sesión</a>
+        </p>
+      </div>
     </div>
   </main>
 </Layout>
 
-<!-- Reemplaza el script del form submit con esto: -->
 <script>
   import { supabase } from '../lib/supabase';
 
-  const form = document.getElementById('register-form') as HTMLFormElement | null;
-  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
-  const errorMsg = document.getElementById('error-message') as HTMLDivElement | null;
+  const form      = document.getElementById('register-form') as HTMLFormElement;
+  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+  const errorMsg  = document.getElementById('error-message') as HTMLDivElement;
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form) return;
 
-    const formData = new FormData(form);
-    const fullName = (formData.get('full_name') as string).trim();
-    const phone = (formData.get('phone') as string).trim();
-    const email = (formData.get('email') as string).trim().toLowerCase();
-    const password = (formData.get('password') as string).trim();
-    const confirmPassword = (formData.get('confirm_password') as string).trim();
+    const fd            = new FormData(form);
+    const fullName      = (fd.get('full_name') as string).trim();
+    const phone         = (fd.get('phone') as string).trim();
+    const email         = (fd.get('email') as string).trim().toLowerCase();
+    const password      = (fd.get('password') as string).trim();
+    const confirmPwd    = (fd.get('confirm_password') as string).trim();
 
-    // ✅ VALIDACIÓN DE CONTRASEÑA
-    if (password.length < 8) {
-      if (errorMsg) {
-        errorMsg.textContent = 'La contraseña debe tener mínimo 8 caracteres';
-        errorMsg.classList.remove('hidden');
-      }
-      return;
-    }
+    if (password.length < 8) { showError('La contraseña debe tener mínimo 8 caracteres.'); return; }
+    if (password !== confirmPwd) { showError('Las contraseñas no coinciden.'); return; }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) { showError('La contraseña debe tener mayúsculas, minúsculas y números.'); return; }
 
-    if (password !== confirmPassword) {
-      if (errorMsg) {
-        errorMsg.textContent = 'Las contraseñas no coinciden';
-        errorMsg.classList.remove('hidden');
-      }
-      return;
-    }
-
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      if (errorMsg) {
-        errorMsg.textContent = 'La contraseña debe contener mayúsculas, minúsculas y números';
-        errorMsg.classList.remove('hidden');
-      }
-      return;
-    }
-
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Registrando...';
-    }
-    if (errorMsg) errorMsg.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registrando...';
+    errorMsg.classList.add('hidden');
 
     try {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email, password,
         options: {
           emailRedirectTo: `${location.origin}/auth/callback`,
-          data: {
-            full_name: fullName,
-            phone,
-          },
+          data: { full_name: fullName, phone },
         },
       });
-
       if (error) {
-        if (errorMsg) {
-          errorMsg.textContent = error.message;
-          errorMsg.classList.remove('hidden');
-        }
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Registrarse';
-        }
+        let msg = 'Error al crear la cuenta. Inténtalo de nuevo.';
+        if (error.message.includes('already registered') || error.message.includes('duplicate')) msg = 'Ya existe una cuenta con ese email.';
+        else if (error.message.includes('password')) msg = 'La contraseña no cumple los requisitos.';
+        else if (error.message.includes('email')) msg = 'El email ingresado no es válido.';
+        showError(msg);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Crear Cuenta';
       } else {
         window.location.href = '/login?registered=true';
       }
     } catch {
-      if (errorMsg) {
-        errorMsg.textContent = 'Error inesperado. Intenta de nuevo.';
-        errorMsg.classList.remove('hidden');
-      }
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Registrarse';
-      }
+      showError('Error inesperado. Intenta de nuevo o escríbenos por WhatsApp.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Crear Cuenta';
     }
   });
+
+  function showError(msg: string) {
+    if (errorMsg) { errorMsg.textContent = msg; errorMsg.classList.remove('hidden'); }
+  }
 </script>

@@ -1,143 +1,208 @@
 ---
-// src/components/CartDrawer.astro
+// CartDrawer.astro — AMG Redesign
 ---
-<div id="cart-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300"></div>
+<!-- Overlay -->
+<div
+  id="cart-overlay"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] pointer-events-none opacity-0"
+  style="transition: opacity 0.3s ease;"
+></div>
 
-<aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[101] translate-x-full transition-transform duration-500 ease-out shadow-2xl flex flex-col">
-    <div class="p-6 border-b border-zinc-100 flex justify-between items-center">
-        <h2 class="text-2xl font-[900] italic uppercase tracking-tighter text-black">Tu Pedido <span class="text-[#2ecc71]">AMG</span></h2>
-        <button id="close-cart-btn" class="text-zinc-400 hover:text-black transition-colors font-black uppercase text-[10px] tracking-widest cursor-pointer border-none bg-transparent">Cerrar</button>
+<!-- Drawer -->
+<aside
+  id="cart-drawer"
+  class="fixed top-0 right-0 h-full w-full max-w-md z-[101] flex flex-col translate-x-full"
+  style="background: var(--color-surface); border-left: 1px solid var(--color-border);"
+>
+
+  <!-- Header -->
+  <div class="p-5 flex justify-between items-center flex-shrink-0" style="border-bottom: 1px solid var(--color-border);">
+    <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--color-text);">
+      Tu Gestión <span style="color: var(--color-green);">AMG</span>
+    </h2>
+    <button
+      id="close-cart-btn"
+      class="w-8 h-8 flex items-center justify-center rounded-sm transition-colors cursor-pointer"
+      style="border: 1px solid var(--color-border); color: var(--color-text-muted);"
+      aria-label="Cerrar carrito"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+        <path d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Cart Content -->
+  <div id="cart-content" class="flex-1 overflow-y-auto p-5 space-y-4">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Footer -->
+  <div class="flex-shrink-0 p-5 space-y-4" style="border-top: 1px solid var(--color-border); background: var(--color-bg);">
+    <!-- Price breakdown -->
+    <div class="space-y-2">
+      <div class="flex justify-between text-xs" style="color: var(--color-text-muted);">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">$0</span>
+      </div>
+      <div class="flex justify-between text-xs" style="color: var(--color-text-muted);">
+        <span>Logística incluida</span>
+        <span style="color: var(--color-green);">Gratis ✓</span>
+      </div>
+      <div class="pt-2 flex justify-between" style="border-top: 1px solid var(--color-border);">
+        <span class="text-sm font-bold" style="color: var(--color-text);">Total</span>
+        <span id="cart-total" class="text-sm font-bold" style="color: var(--color-green);">$0</span>
+      </div>
     </div>
 
-    <div id="cart-content" class="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
-        </div>
-
-    <div class="p-6 bg-zinc-50 border-t border-zinc-100">
-        <div class="flex justify-between mb-4">
-            <span class="font-bold text-zinc-500 uppercase text-xs tracking-widest">Total Gestión</span>
-            <span id="cart-total" class="font-[900] text-2xl italic tracking-tighter text-black">$0</span>
-        </div>
-        <button id="checkout-btn" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-[#2ecc71] transition-all cursor-pointer shadow-lg active:scale-95">
-            Finalizar Pedido
-        </button>
+    <!-- MercadoPago trust notice -->
+    <div class="rounded-sm p-3 flex gap-2.5" style="background: var(--color-surface-2); border: 1px solid var(--color-border);">
+      <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" style="color: var(--color-green);">
+        <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+      </svg>
+      <p class="text-[10px] leading-relaxed" style="color: var(--color-text-muted);">
+        Tu pago va directo a MercadoPago. Nunca vemos tus datos de tarjeta.
+      </p>
     </div>
+
+    <!-- Checkout CTA -->
+    <button
+      id="checkout-btn"
+      class="w-full py-4 font-bold uppercase text-xs tracking-widest transition-all duration-200 cursor-pointer rounded-sm hover:scale-[1.01] active:scale-[0.99]"
+      style="background: var(--color-green); color: #000;"
+    >
+      Finalizar Gestión →
+    </button>
+  </div>
 </aside>
-<script>
-    import { isCartOpen, cartItems, removeFromCart } from '../store/cartStore';
 
-    // ✅ SANITIZAR HTML para prevenir XSS
-    function escapeHTML(str: string): string {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+<script>
+  import { isCartOpen, cartItems, removeFromCart } from '../store/cartStore';
+
+  function escapeHTML(str: string): string {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  const drawer      = document.getElementById('cart-drawer');
+  const overlay     = document.getElementById('cart-overlay');
+  const closeBtn    = document.getElementById('close-cart-btn');
+  const content     = document.getElementById('cart-content');
+  const totalEl     = document.getElementById('cart-total');
+  const subtotalEl  = document.getElementById('cart-subtotal');
+  const checkoutBtn = document.getElementById('checkout-btn');
+
+  // ── Open / Close ─────────────────────────────────────
+  (isCartOpen as any).subscribe((open: boolean) => {
+    if (!drawer || !overlay) return;
+    if (open) {
+      // Show overlay
+      overlay.style.pointerEvents = 'auto';
+      overlay.style.opacity = '1';
+      // Slide in drawer
+      requestAnimationFrame(() => {
+        drawer.style.transform = 'translateX(0)';
+      });
+      // Hide WhatsApp button
+      document.body.classList.add('cart-open');
+    } else {
+      // Slide out drawer
+      drawer.style.transform = 'translateX(100%)';
+      // Fade out overlay
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      // Show WhatsApp button
+      document.body.classList.remove('cart-open');
+    }
+  });
+
+  // ── Render Cart Items ────────────────────────────────
+  (cartItems as any).subscribe((items: any[]) => {
+    if (!content || !totalEl || !subtotalEl) return;
+
+    if (!items || items.length === 0) {
+      content.innerHTML = `
+        <div class="flex flex-col items-center justify-center h-64 text-center px-6">
+          <div class="w-14 h-14 flex items-center justify-center rounded-sm mb-4" style="border: 1px solid var(--color-border);">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" style="color: var(--color-text-muted);">
+              <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold uppercase tracking-widest mb-1" style="color: var(--color-text-muted);">Carrito vacío</p>
+          <p class="text-[11px] mb-4" style="color: var(--color-text-muted);">Aún no has agregado nada.</p>
+          <a href="/coleccion" class="text-xs font-semibold uppercase tracking-wider transition-colors" style="color: var(--color-green);">
+            Mira el catálogo →
+          </a>
+        </div>
+      `;
+      totalEl.textContent = '$0';
+      subtotalEl.textContent = '$0';
+      return;
     }
 
-    // Seleccionar elementos del DOM
-    const drawer = document.getElementById('cart-drawer');
-    const overlay = document.getElementById('cart-overlay');
-    const closeBtn = document.getElementById('close-cart-btn');
-    const content = document.getElementById('cart-content');
-    const totalEl = document.getElementById('cart-total');
-    const checkoutBtn = document.getElementById('checkout-btn');
+    content.innerHTML = items.map((item: any) => {
+      const nombre   = escapeHTML(item.name || item.product_name || 'Producto AMG');
+      const imagen   = escapeHTML(item.image || item.image_url || '/placeholder.jpg');
+      const precio   = Number(item.price) || 0;
+      const cantidad = Number(item.quantity) || 1;
+      const talla    = escapeHTML(String(item.size || 'N/A'));
+      const calidad  = escapeHTML(String(item.quality || 'PK'));
+      const itemId   = escapeHTML(String(item.id || item.product_id || ''));
 
-    // 1. GESTIÓN DE APERTURA Y CIERRE
-    (isCartOpen as any).subscribe((open: boolean) => {
-        if (!drawer || !overlay) return;
-        
-        if (open) {
-            overlay.classList.remove('hidden');
-            setTimeout(() => {
-                overlay.classList.add('opacity-100');
-                drawer.classList.remove('translate-x-full');
-            }, 10);
-        } else {
-            overlay.classList.remove('opacity-100');
-            drawer.classList.add('translate-x-full');
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-            }, 500);
-        }
+      return `
+        <div class="flex gap-3.5 pb-4" style="border-bottom: 1px solid var(--color-border);">
+          <div class="w-20 h-20 flex-shrink-0 rounded-sm overflow-hidden flex items-center justify-center p-1.5" style="background: var(--color-surface-2); border: 1px solid var(--color-border);">
+            <img src="${imagen}" class="w-full h-full object-contain" alt="${nombre}" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-xs font-semibold leading-snug mb-1.5 line-clamp-2" style="color: var(--color-text);">${nombre}</h4>
+            <div class="flex gap-1.5 mb-1.5">
+              <span class="text-[9px] font-semibold uppercase px-2 py-0.5 rounded-sm tracking-wider" style="background: var(--color-surface-2); color: var(--color-text-muted);">EU ${talla}</span>
+              <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-sm tracking-wider text-black" style="background: var(--color-green);">${calidad}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-bold" style="color: var(--color-green);">$${(precio * cantidad).toLocaleString('es-CL')}</p>
+              <button class="remove-item-btn transition-colors cursor-pointer p-1 bg-transparent border-none" data-id="${itemId}" aria-label="Eliminar" style="color: var(--color-border);">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const total = items.reduce((acc: number, item: any) =>
+      acc + (Number(item.price) * (Number(item.quantity) || 1)), 0);
+    totalEl.textContent = `$${total.toLocaleString('es-CL')}`;
+    subtotalEl.textContent = `$${total.toLocaleString('es-CL')}`;
+
+    content.querySelectorAll('.remove-item-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+        if (id) removeFromCart(id);
+      });
     });
+  });
 
-    // 2. RENDERIZADO DINÁMICO DE PRODUCTOS (✅ SANITIZADO contra XSS)
-    (cartItems as any).subscribe((items: any[]) => {
-        if (!content || !totalEl) return;
-        
-        if (!items || items.length === 0) {
-            content.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-64 opacity-40">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1" class="mb-4">
-                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-                    </svg>
-                    <p class="text-center font-black uppercase text-[10px] tracking-[0.3em]">Carrito Vacío</p>
-                </div>
-            `;
-            totalEl.innerText = '$0';
-            return;
-        }
+  // ── Listeners ────────────────────────────────────────
+  closeBtn?.addEventListener('click', () => (isCartOpen as any).set(false));
+  overlay?.addEventListener('click', () => (isCartOpen as any).set(false));
 
-        // Generar el HTML de cada producto (sanitizado)
-        content.innerHTML = items.map((item: any) => {
-            const nombre = escapeHTML(item.name || item.product_name || "PRODUCTO AMG");
-            const imagen = escapeHTML(item.image || item.image_url || "/placeholder.jpg");
-            const precio = Number(item.price) || 0;
-            const cantidad = Number(item.quantity) || 1;
-            const talla = escapeHTML(String(item.size || 'N/A'));
-            const calidad = escapeHTML(String(item.quality || 'TOP'));
-            const itemId = escapeHTML(String(item.id || item.product_id || ''));
-
-            return `
-                <div class="flex gap-4 items-center border-b border-zinc-50 pb-4 group animate-in fade-in slide-in-from-right-4 duration-300">
-                    <img src="${imagen}" class="w-20 h-20 object-contain rounded-2xl bg-zinc-100 shadow-sm p-2" />
-                    <div class="flex-1 text-left">
-                        <h4 class="font-black uppercase italic text-[11px] leading-tight mb-1 text-black">${nombre}</h4>
-                        
-                        <div class="flex gap-2 mb-1">
-                            <span class="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter">EU: ${talla}</span>
-                            <span class="bg-black text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">${calidad}</span>
-                        </div>
-                        
-                        <p class="text-[9px] text-zinc-400 font-extrabold uppercase tracking-tighter">Unidades: ${cantidad}</p>
-                    </div>
-                    <div class="text-right flex flex-col items-end gap-2">
-                        <p class="font-black italic text-sm text-black">
-                            $${(precio * cantidad).toLocaleString('es-CL')}
-                        </p>
-                        <button class="remove-item-btn text-zinc-300 hover:text-red-600 transition-all cursor-pointer border-none bg-transparent p-1 active:scale-90" data-id="${itemId}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 9v-4m4 4v-4"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Calcular total general
-        const totalFinal = items.reduce((acc: number, item: any) => acc + (Number(item.price) * (Number(item.quantity) || 1)), 0);
-        totalEl.innerText = `$${totalFinal.toLocaleString('es-CL')}`;
-
-        // Asignar eventos a los botones de eliminar generados
-        content.querySelectorAll('.remove-item-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
-                if (id) {
-                    removeFromCart(id);
-                }
-            });
-        });
-    });
-
-    // 3. LISTENERS DE ACCIÓN MANUAL
-    closeBtn?.addEventListener('click', () => isCartOpen.set(false));
-    overlay?.addEventListener('click', () => isCartOpen.set(false));
-
-    checkoutBtn?.addEventListener('click', () => {
-        const currentItems = (cartItems as any).get();
-        if (currentItems.length > 0) {
-            window.location.href = '/checkout';
-        } else {
-            alert("TU CARRITO ESTÁ VACÍO. AÑADE PRODUCTOS PARA CONTINUAR.");
-        }
-    });
+  checkoutBtn?.addEventListener('click', () => {
+    const currentItems = (cartItems as any).get();
+    if (currentItems.length > 0) {
+      window.location.href = '/checkout';
+    } else {
+      alert('Aún no has agregado nada. Mira el catálogo.');
+    }
+  });
 </script>
+
+<style>
+  #cart-drawer {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+</style>

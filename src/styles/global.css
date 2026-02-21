@@ -3,28 +3,324 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles */
+/* AMG Animation Layer */
+@import './animations.css';
+
+/* ═══════════════════════════════════════════════════════
+   AMG Design System — Dark (default)
+═══════════════════════════════════════════════════════ */
+:root {
+  --color-bg: #0A0A0A;
+  --color-surface: #111111;
+  --color-surface-2: #1A1A1A;
+  --color-border: #2A2A2A;
+  --color-text: #F5F5F5;
+  --color-text-muted: #888888;
+  --color-green: #16A34A;
+  --color-green-light: #22C55E;
+  --color-green-glow: rgba(34, 197, 94, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════
+   AMG Design System — Light
+═══════════════════════════════════════════════════════ */
+html.light-mode {
+  --color-bg: #F7F7F7;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F0F0F0;
+  --color-border: #E0E0E0;
+  --color-text: #0A0A0A;
+  --color-text-muted: #555555;
+  --color-green: #16A34A;
+  --color-green-light: #22C55E;
+  --color-green-glow: rgba(22, 163, 74, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BASE STYLES — use CSS variables, NOT hardcoded colors
+═══════════════════════════════════════════════════════ */
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar — ÚNICA definición */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE — Attribute substring matching
+   (avoids CSS escaping issues with # in class names)
+   Catches ALL elements using each hardcoded hex value.
+═══════════════════════════════════════════════════════ */
+
+/* ── Background overrides ── */
+html.light-mode [class*="#0A0A0A"],
+html.light-mode [class*="#0a0a0a"] {
+  background-color: var(--color-bg) !important;
+}
+
+html.light-mode [class*="#111111"] {
+  background-color: var(--color-surface) !important;
+}
+
+html.light-mode [class*="#1A1A1A"],
+html.light-mode [class*="#1a1a1a"] {
+  background-color: var(--color-surface-2) !important;
+}
+
+html.light-mode [class*="#080808"] {
+  background-color: #EFEFEF !important;
+}
+
+html.light-mode [class*="#0D1F10"] {
+  background-color: #EAF7EE !important;
+}
+
+html.light-mode [class*="#2A2A2A"][class*="bg-"] {
+  background-color: var(--color-border) !important;
+}
+
+/* ── Border overrides ── */
+html.light-mode [class*="#2A2A2A"][class*="border"] {
+  border-color: var(--color-border) !important;
+}
+
+html.light-mode [class*="divide-"][class*="#2A2A2A"] {
+  border-color: var(--color-border) !important;
+}
+
+/* ── Text overrides ── */
+html.light-mode [class*="#F5F5F5"],
+html.light-mode [class*="#f5f5f5"] {
+  color: var(--color-text) !important;
+}
+
+html.light-mode [class*="#888888"],
+html.light-mode [class*="#888"][class*="text-"] {
+  color: var(--color-text-muted) !important;
+}
+
+/* ── Keep green accent unchanged (no override needed) ── */
+
+/* ── Header specific ── */
+html.light-mode #main-header {
+  background-color: rgba(247, 247, 247, 0.95) !important;
+  border-bottom-color: var(--color-border) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Announcement bar ── */
+html.light-mode .bg-\[#111111\].border-b {
+  background-color: #F0F0F0 !important;
+  border-bottom-color: var(--color-border) !important;
+}
+
+/* ── Mobile menu in light mode ── */
+html.light-mode #mobile-menu {
+  background-color: var(--color-bg) !important;
+}
+
+/* ── Hamburger lines ── */
+html.light-mode .hamburger-line {
+  background-color: #0A0A0A !important;
+}
+
+/* ── Logo swap via CSS class ── */
+html:not(.light-mode) .logo-light {
+  display: none !important;
+}
+
+html:not(.light-mode) .logo-dark {
+  display: block !important;
+}
+
+html.light-mode .logo-dark {
+  display: none !important;
+}
+
+html.light-mode .logo-light {
+  display: block !important;
+}
+
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #f5f5f5;
-}
-::-webkit-scrollbar-thumb {
-  background: #18181b;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #333;
+  width: 6px;
 }
 
-/* Firefox */
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-green);
+}
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: #18181b #f5f5f5;
+  scrollbar-color: var(--color-border) var(--color-bg);
+}
+
+/* ── Select/Option ── */
+select option {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+select {
+  color: var(--color-text);
+}
+
+/* ── Reveal animation ── */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal-init.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Global card ── */
+.amg-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 200ms ease;
+}
+
+.amg-card:hover {
+  border-color: var(--color-green);
+  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.12);
+  transform: translateY(-4px);
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--color-green);
+  color: #000;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: var(--color-green-light);
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  filter: brightness(1);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--color-text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-text);
+  background: rgba(128, 128, 128, 0.08);
+}
+
+/* ── Labels & badges ── */
+.amg-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.badge-green {
+  background: var(--color-green);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Image rendering ── */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* ── WhatsApp: hide when cart is open ── */
+body.cart-open #whatsapp-float {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.8) !important;
+}
+
+#whatsapp-float {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* ── Cart Drawer ── */
+#cart-drawer {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#cart-overlay {
+  transition: opacity 0.3s ease;
 }

@@ -1,19 +1,21 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import SizeGuideModal from '../../components/SizeGuideModal.astro';
+import TrustPaymentBlock from '../../components/TrustPaymentBlock.astro';
+import ActivityToast from '../../components/ActivityToast.astro';
+import QualityModal from '../../components/QualityModal.astro';
+import SizeQuiz from '../../components/SizeQuiz.astro';
 import { productos } from '../../data/products';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  // Deduplicate by ID — in case of duplicates in products.ts
   const seen = new Set<string>();
   const uniqueProducts = productos.filter((p) => {
     if (seen.has(p.id)) return false;
     seen.add(p.id);
     return true;
   });
-
   return uniqueProducts.map((product) => ({
     params: { id: product.id.toString() },
     props: { product },
@@ -21,214 +23,496 @@ export async function getStaticPaths() {
 }
 
 const { product } = Astro.props;
-
 if (!product) return Astro.redirect('/404');
 
 const initialImage = Array.isArray(product.image) ? product.image[0] : product.image;
-const albumImages = Array.isArray(product.image) ? product.image : [product.image];
+const albumImages  = Array.isArray(product.image) ? product.image : [product.image];
 
-// ── SEO ─────────────────────────────────────────
 const siteUrl = 'https://amgpage.vercel.app';
-
-const lowestPrice = Math.min(product.prices.PK, product.prices.G5);
+const lowestPrice  = Math.min(product.prices.PK, product.prices.G5);
 const highestPrice = Math.max(product.prices.PK, product.prices.G5);
-const formattedPK = new Intl.NumberFormat('es-CL').format(product.prices.PK);
-const formattedG5 = new Intl.NumberFormat('es-CL').format(product.prices.G5);
+const formattedPK  = new Intl.NumberFormat('es-CL').format(product.prices.PK);
+const formattedG5  = new Intl.NumberFormat('es-CL').format(product.prices.G5);
+
+// Price anchoring — retail reference is ~2.1× PK price (typical reseller markup)
+const retailRef     = Math.round(product.prices.PK * 2.1 / 1000) * 1000;
+const formattedRetail = new Intl.NumberFormat('es-CL').format(retailRef);
+const savings       = retailRef - product.prices.PK;
+const formattedSavings = new Intl.NumberFormat('es-CL').format(savings);
+const savingsPct    = Math.round((savings / retailRef) * 100);
 
 const productDescription = `${product.name} — Disponible en calidad PK ($${formattedPK}) y G5 ($${formattedG5}). Inspección QC real antes del envío a todo Chile.`;
 
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER || '56912345678';
+const whatsappMsg    = encodeURIComponent(`Hola AMG, tengo una pregunta sobre el ${product.name}`);
+
 const productJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": product.name,
-  "image": albumImages.map((img: string) => `${siteUrl}${img}`),
-  "description": productDescription,
-  "brand": {
-    "@type": "Brand",
-    "name": "AMG Sneakers"
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  image: albumImages.map((img: string) => `${siteUrl}${img}`),
+  description: productDescription,
+  brand: { '@type': 'Brand', name: 'AMG Sneakers' },
+  offers: {
+    '@type': 'AggregateOffer',
+    lowPrice: lowestPrice,
+    highPrice: highestPrice,
+    priceCurrency: 'CLP',
+    availability: 'https://schema.org/PreOrder',
+    seller: { '@type': 'Organization', name: 'AMG Sneakers' },
   },
-  "offers": {
-    "@type": "AggregateOffer",
-    "lowPrice": lowestPrice,
-    "highPrice": highestPrice,
-    "priceCurrency": "CLP",
-    "availability": "https://schema.org/PreOrder",
-    "seller": {
-      "@type": "Organization",
-      "name": "AMG Sneakers"
-    }
-  },
-  "url": `${siteUrl}/producto/${product.id}`
+  url: `${siteUrl}/producto/${product.id}`,
 };
 ---
 
-<Layout 
+<Layout
   title={product.name}
   description={productDescription}
   ogImage={initialImage}
   ogType="product"
   jsonLd={productJsonLd}
 >
-  <main class="relative bg-white pt-32 pb-20">
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16">
-      
-      <!-- ── GALERÍA DE IMÁGENES ── -->
-      <div class="space-y-4">
-        <div class="bg-[#f9f9f9] rounded-[40px] aspect-square flex items-center justify-center border border-gray-100 overflow-hidden">
-          <img 
-            id="main-product-image" 
-            src={initialImage} 
-            alt={`${product.name} — Sneaker premium AMG Sneakers`}
-            class="w-full h-full object-contain p-6"
-            width={1280}
-            height={1280}
-          />
-        </div>
-        <div class="grid grid-cols-6 gap-2">
-          {albumImages.map((img: string, idx: number) => (
-            <button 
-              class={`thumb-btn border-2 rounded-xl aspect-square overflow-hidden bg-[#f9f9f9] transition-all ${idx === 0 ? 'border-black' : 'border-gray-100'}`}
-              data-src={img}
-            >
-       <img 
-              src={img} 
-              alt={`${product.name} — Vista ${idx + 1}`}
-              class="w-full h-full object-contain"
-              width={200}
-              height={200}
-              loading="lazy"
-              decoding="async"
+  <div class="bg-[#0A0A0A] pt-24 pb-20 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-[10px] text-[#888888] uppercase tracking-widest mb-8" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#F5F5F5] transition-colors">Inicio</a>
+        <span class="text-[#2A2A2A]">/</span>
+        <a href="/coleccion" class="hover:text-[#F5F5F5] transition-colors">Colección</a>
+        <span class="text-[#2A2A2A]">/</span>
+        <span class="text-[#F5F5F5] truncate max-w-[200px]">{product.name}</span>
+      </nav>
+
+      <!-- Main grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+
+        <!-- ── LEFT: Image gallery ── -->
+        <div class="reveal space-y-3">
+          <!-- Main image -->
+          <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm aspect-square flex items-center justify-center overflow-hidden relative group">
+            <img
+              id="main-product-image"
+              src={initialImage}
+              alt={`${product.name} — Sneaker AMG Sneakers Chile`}
+              class="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105"
+              width={1280}
+              height={1280}
             />
-            </button>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <!-- ── DETALLES DEL PRODUCTO ── -->
-      <div class="space-y-8" 
-           id="product-root" 
-           data-id={product.id} 
-           data-name={product.name} 
-           data-price-pk={product.prices.PK} 
-           data-price-g5={product.prices.G5}>
-        
-        <div>
-          <h1 class="text-6xl font-[900] uppercase italic tracking-tighter text-slate-900 leading-none">{product.name}</h1>
-          <p class="text-3xl font-light mt-4 italic text-gray-500">
-            $ <span id="display-price">{formattedPK}</span> CLP
-          </p>
-        </div>
+          <!-- Thumbnails -->
+          {albumImages.length > 1 && (
+            <div class={`grid gap-2`} style={`grid-template-columns: repeat(${Math.min(albumImages.length, 6)}, 1fr);`}>
+              {albumImages.map((img: string, idx: number) => (
+                <button
+                  class={`thumb-btn border rounded-sm aspect-square overflow-hidden bg-[#1A1A1A] transition-all duration-200 ${idx === 0 ? 'border-[#16A34A]' : 'border-[#2A2A2A] hover:border-[#888888]'}`}
+                  data-src={img}
+                  aria-label={`Vista ${idx + 1}`}
+                >
+                  <img
+                    src={img}
+                    alt={`${product.name} — Vista ${idx + 1}`}
+                    class="w-full h-full object-contain p-1"
+                    width={200}
+                    height={200}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
 
-        <!-- Selector de Calidad -->
-        <div class="space-y-4">
-          <p class="text-[10px] font-black uppercase text-gray-400">Calidad de Gestión:</p>
-          <div class="flex gap-3">
-            <button data-q="PK" class="q-selector flex-1 bg-black text-white py-4 rounded-xl font-black text-[11px] border-2 border-black italic transition-all">
-              PK INDUSTRIAL (TOP)
-            </button>
-            <button data-q="G5" class="q-selector flex-1 bg-white text-gray-400 py-4 rounded-xl font-black text-[11px] border-2 border-gray-100 italic transition-all">
-              G5 STANDARD
-            </button>
+          <!-- "How we verify quality" educational block -->
+          <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-5">
+            <p class="text-[10px] font-bold text-[#888888] uppercase tracking-widest mb-3 flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-[#16A34A]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.537 3.204a1 1 0 00-1.414-1.414l-3.293 3.293-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              ¿Cómo verificamos la calidad?
+            </p>
+            <ul class="space-y-2">
+              {[
+                'Etiqueta interior y número de lote verificados',
+                'Simetría del logo y costuras inspeccionadas',
+                'Reacción del material al doblado comprobada',
+                'Peso del par completo validado contra referencia',
+              ].map(item => (
+                <li class="flex items-start gap-2 text-[11px] text-[#888888] leading-snug">
+                  <svg class="w-3 h-3 text-[#16A34A] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <!-- Selector de Talla -->
-        <div class="space-y-4">
-          <div class="flex justify-between items-center">
-            <p class="text-[10px] font-black uppercase text-gray-400">Talla EU:</p>
-            <button id="open-size-guide-btn" class="text-[9px] font-black text-[#2ecc71] uppercase cursor-pointer bg-transparent border-none">Guía de tallas</button>
+        <!-- ── RIGHT: Product details ── -->
+        <div class="reveal space-y-6"
+          id="product-root"
+          data-id={product.id}
+          data-name={product.name}
+          data-price-pk={product.prices.PK}
+          data-price-g5={product.prices.G5}
+          data-reveal-delay="120"
+          data-reveal-direction="right"
+        >
+
+          <!-- Grade badge + quality modal trigger + wishlist heart -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="inline-block bg-[#16A34A] text-black text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+              GRADO PK
+            </span>
+            <QualityModal />
+            <!-- Wishlist heart -->
+            <button
+              id="product-wishlist-btn"
+              class="ml-auto flex items-center gap-1.5 px-3 py-1.5 border border-[#2A2A2A] rounded-sm text-[10px] text-[#888888] hover:border-red-400/60 hover:text-red-400 transition-all duration-200 bg-transparent cursor-pointer"
+              data-product-id={product.id}
+              data-product-name={product.name}
+              data-product-image={initialImage}
+              data-price-pk={product.prices.PK}
+              data-price-g5={product.prices.G5}
+              aria-label="Guardar par"
+            >
+              <!-- outline -->
+              <svg id="pwl-outline" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <!-- filled -->
+              <svg id="pwl-filled" class="w-4 h-4 text-red-400 hidden" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span id="pwl-label">Guardar par</span>
+            </button>
           </div>
-          <div class="grid grid-cols-5 gap-2">
-            {product.tallas.map((talla: string) => (
-              <button data-size={talla} class="s-selector border-2 border-gray-100 py-3 rounded-xl font-black text-xs italic bg-white text-black hover:border-black transition-all">
-                {talla}
+
+          <!-- Product name -->
+          <h1 class="text-3xl md:text-4xl font-bold text-[#F5F5F5] leading-tight" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;">
+            {product.name}
+          </h1>
+
+          <!-- Price anchoring block -->
+          <div class="space-y-1">
+            <!-- Retail reference (struck through) -->
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm text-[#555555] line-through"
+                title="Precio de referencia en tiendas oficiales y resellers Chile"
+              >
+                ${formattedRetail}
+              </span>
+              <span class="text-[9px] text-[#555555] uppercase tracking-wider">Retail ref.</span>
+            </div>
+            <!-- AMG price -->
+            <div class="flex items-baseline gap-3">
+              <span class="text-3xl font-bold text-[#16A34A]" id="display-price-formatted">
+                ${formattedPK}
+              </span>
+              <span class="text-xs text-[#888888] uppercase tracking-wider">CLP</span>
+            </div>
+            <p class="text-[10px] text-[#888888] uppercase tracking-wider">Precio de Gestión</p>
+            <!-- Savings badge -->
+            <div class="inline-flex items-center gap-1.5 bg-[#0D1F10] border border-[#16A34A]/20 rounded-sm px-2.5 py-1 mt-1">
+              <svg class="w-3 h-3 text-[#16A34A]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-[10px] font-bold text-[#16A34A]">
+                Ahorro: ${formattedSavings} ({savingsPct}%)
+              </span>
+            </div>
+          </div>
+
+          <!-- Stars — honest zero review state -->
+          <div class="flex items-center gap-2">
+            <div class="flex gap-0.5">
+              {[1,2,3,4,5].map(() => (
+                <svg class="w-3.5 h-3.5 text-[#2A2A2A]" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              ))}
+            </div>
+            <span class="text-[10px] text-[#888888]">Aún no hay reseñas — Sé el primero</span>
+          </div>
+
+          <div class="border-t border-[#2A2A2A]"></div>
+
+          <!-- Quality Selector -->
+          <div class="space-y-3">
+            <p class="text-[10px] font-bold text-[#888888] uppercase tracking-widest">Calidad de Gestión</p>
+            <div class="flex gap-2">
+              <button
+                data-q="PK"
+                class="q-selector flex-1 py-3 rounded-sm text-xs font-semibold uppercase tracking-wide border-2 transition-all duration-200 bg-[#16A34A] text-black border-[#16A34A]"
+              >
+                PK Industrial
               </button>
+              <button
+                data-q="G5"
+                class="q-selector flex-1 py-3 rounded-sm text-xs font-semibold uppercase tracking-wide border-2 transition-all duration-200 bg-transparent text-[#888888] border-[#2A2A2A] hover:border-[#888888]"
+              >
+                G5 Estándar
+              </button>
+            </div>
+          </div>
+
+          <!-- Size Selector -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <p class="text-[10px] font-bold text-[#888888] uppercase tracking-widest">Seleccionar Talla (EU)</p>
+              <button
+                id="open-size-guide-btn"
+                class="text-[10px] text-[#16A34A] hover:text-[#22C55E] uppercase tracking-widest font-semibold cursor-pointer bg-transparent border-none transition-colors"
+              >
+                Guía de tallas
+              </button>
+            </div>
+            <div class="grid grid-cols-5 gap-2">
+              {product.tallas.map((talla: string) => (
+                <button
+                  data-size={talla}
+                  class="s-selector py-3 rounded-sm text-xs font-semibold border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#F5F5F5] hover:text-[#F5F5F5] transition-all duration-200"
+                >
+                  {talla}
+                </button>
+              ))}
+            </div>
+
+            <!-- Size quiz widget -->
+            <SizeQuiz />
+          </div>
+
+          <!-- Add to Cart / Buy Now -->
+          <div class="space-y-3 pt-1">
+            <button
+              id="add-to-cart-action"
+              class="w-full h-14 bg-[#16A34A] hover:bg-[#22C55E] text-black font-bold uppercase text-xs tracking-widest transition-all duration-200 rounded-sm hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              </svg>
+              Agregar al carrito
+            </button>
+            <button
+              id="buy-now-action"
+              class="w-full h-12 bg-transparent border border-[#2A2A2A] hover:border-[#F5F5F5] text-[#F5F5F5] font-semibold text-xs uppercase tracking-widest transition-all duration-200 rounded-sm"
+            >
+              Comprar ahora →
+            </button>
+          </div>
+
+          <!-- WhatsApp consultation -->
+          <a
+            href={`https://wa.me/${whatsappNumber}?text=${whatsappMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2.5 text-xs text-[#888888] hover:text-[#F5F5F5] transition-colors"
+          >
+            <svg class="w-4 h-4 text-[#128C7E] flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            ¿Tienes dudas? Pregúntanos antes de comprar →
+          </a>
+
+          <!-- Payment protection block -->
+          <TrustPaymentBlock />
+
+          <!-- Trust signals -->
+          <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-4 space-y-3">
+            {[
+              { icon: '🛡️', label: 'Pago procesado 100% por MercadoPago' },
+              { icon: '📸', label: 'Recibirás QC visual antes del envío' },
+              { icon: '⚖️', label: 'Seguro de reposición aduanero incluido' },
+            ].map(t => (
+              <div class="flex items-center gap-3">
+                <span class="text-base">{t.icon}</span>
+                <p class="text-xs text-[#888888]">{t.label}</p>
+              </div>
             ))}
           </div>
-        </div>
 
-        <!-- Botones de Acción -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-          <button id="add-to-cart-action" class="bg-white text-black border-2 border-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-gray-50 transition-all">
-            Añadir al Carrito
-          </button>
-          <button id="buy-now-action" class="bg-black text-white py-6 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl hover:bg-[#2ecc71] transition-all">
-            Comprar Ahora
-          </button>
+          <!-- Tags -->
+          {product.tags.length > 0 && (
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              {product.tags.map((tag: string) => (
+                <span class="text-[9px] font-semibold text-[#888888] uppercase tracking-wider border border-[#2A2A2A] px-2.5 py-1 rounded-sm">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
+  <!-- Modals & toasts -->
   <SizeGuideModal />
+  <ActivityToast productName={product.name} />
+
+  <!-- ── Sticky mobile CTA bar ── -->
+  <div
+    id="sticky-mobile-bar"
+    class="fixed bottom-0 left-0 right-0 z-40 bg-[#111111] border-t border-[#2A2A2A] px-4 py-3 flex items-center justify-between gap-3 lg:hidden translate-y-full transition-transform duration-300"
+    style="padding-bottom: env(safe-area-inset-bottom, 12px);"
+  >
+    <div class="min-w-0">
+      <p class="text-[10px] text-[#F5F5F5] font-semibold truncate">{product.name}</p>
+      <p class="text-[10px] text-[#888888]">
+        Talla: <span id="sticky-size-display">—</span>
+      </p>
+    </div>
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <span class="text-sm font-bold text-[#16A34A]" id="sticky-price-display">${formattedPK}</span>
+      <button
+        id="sticky-add-to-cart"
+        class="bg-[#16A34A] hover:bg-[#22C55E] text-black font-bold text-[10px] uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors whitespace-nowrap"
+      >
+        Pedir este par
+      </button>
+    </div>
+  </div>
 
 <script>
   import { addToCart } from '../../store/cartStore';
+  import { isCartOpen } from '../../store/cartStore';
+  import { wishlist, toggleWishlist, isWishlisted } from '../../store/wishlistStore';
 
-  const root = document.getElementById('product-root') as HTMLElement;
-  const displayPrice = document.getElementById('display-price') as HTMLElement;
-  const mainImg = document.getElementById('main-product-image') as HTMLImageElement;
-  const qButtons = document.querySelectorAll('.q-selector');
-  const sButtons = document.querySelectorAll('.s-selector');
+  // ── Wishlist heart (product page) ─────────────────────────
+  const pwlBtn     = document.getElementById('product-wishlist-btn') as HTMLElement | null;
+  const pwlOutline = document.getElementById('pwl-outline') as SVGElement | null;
+  const pwlFilled  = document.getElementById('pwl-filled') as SVGElement | null;
+  const pwlLabel   = document.getElementById('pwl-label') as HTMLElement | null;
+
+  function syncProductHeart() {
+    if (!pwlBtn) return;
+    const saved = isWishlisted(pwlBtn.dataset.productId!);
+    pwlOutline?.classList.toggle('hidden', saved);
+    pwlFilled?.classList.toggle('hidden', !saved);
+    if (pwlLabel) pwlLabel.textContent = saved ? 'Guardado ♥' : 'Guardar par';
+    if (saved) {
+      pwlBtn.classList.add('border-red-400/60', 'text-red-400');
+      pwlBtn.classList.remove('border-[#2A2A2A]', 'text-[#888888]');
+    } else {
+      pwlBtn.classList.remove('border-red-400/60', 'text-red-400');
+      pwlBtn.classList.add('border-[#2A2A2A]', 'text-[#888888]');
+    }
+  }
+
+  syncProductHeart();
+  wishlist.subscribe(() => syncProductHeart());
+  window.addEventListener('wishlist-change', () => syncProductHeart());
+
+  pwlBtn?.addEventListener('click', async () => {
+    if (!pwlBtn) return;
+    const item = {
+      id: pwlBtn.dataset.productId!,
+      name: pwlBtn.dataset.productName!,
+      image: pwlBtn.dataset.productImage!,
+      pricePK: Number(pwlBtn.dataset.pricePk),
+      priceG5: Number(pwlBtn.dataset.priceG5),
+      savedAt: Date.now(),
+    };
+    // Pulse animation
+    pwlBtn.style.transform = 'scale(1.1)';
+    setTimeout(() => { pwlBtn.style.transform = ''; }, 180);
+    const nowSaved = await toggleWishlist(item);
+    window.dispatchEvent(new CustomEvent('wishlist-change', { detail: { id: item.id, saved: nowSaved } }));
+  });
+
+  const root         = document.getElementById('product-root') as HTMLElement;
+  const mainImg      = document.getElementById('main-product-image') as HTMLImageElement;
+  const priceEl      = document.getElementById('display-price-formatted') as HTMLElement;
+  const qButtons     = document.querySelectorAll('.q-selector');
+  const sButtons     = document.querySelectorAll('.s-selector');
+  const stickyBar    = document.getElementById('sticky-mobile-bar') as HTMLElement;
+  const stickySize   = document.getElementById('sticky-size-display') as HTMLElement;
+  const stickyPrice  = document.getElementById('sticky-price-display') as HTMLElement;
+  const addCartBtn   = document.getElementById('add-to-cart-action') as HTMLElement;
 
   let selectedSize: string | null = null;
   let selectedQuality: 'PK' | 'G5' = 'PK';
 
   const prices: Record<string, number> = {
     PK: Number(root.dataset.pricePk),
-    G5: Number(root.dataset.priceG5)
+    G5: Number(root.dataset.priceG5),
   };
 
-  // ✅ SELECTOR DE CALIDAD
+  function formatPrice(n: number) {
+    return new Intl.NumberFormat('es-CL').format(n);
+  }
+
+  // Quality selector
   qButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const quality = (btn as HTMLElement).dataset.q as 'PK' | 'G5';
       selectedQuality = quality;
-      qButtons.forEach(b => b.className = 'q-selector flex-1 bg-white text-gray-400 py-4 rounded-xl font-black text-[11px] border-2 border-gray-100 italic transition-all');
-      btn.className = 'q-selector flex-1 bg-black text-white py-4 rounded-xl font-black text-[11px] border-2 border-black italic transition-all';
-      displayPrice.innerText = new Intl.NumberFormat('es-CL').format(prices[selectedQuality]);
+      qButtons.forEach(b => {
+        b.className = 'q-selector flex-1 py-3 rounded-sm text-xs font-semibold uppercase tracking-wide border-2 transition-all duration-200 bg-transparent text-[#888888] border-[#2A2A2A] hover:border-[#888888]';
+      });
+      btn.className = 'q-selector flex-1 py-3 rounded-sm text-xs font-semibold uppercase tracking-wide border-2 transition-all duration-200 bg-[#16A34A] text-black border-[#16A34A]';
+      const p = formatPrice(prices[selectedQuality]);
+      priceEl.textContent = `$${p}`;
+      if (stickyPrice) stickyPrice.textContent = `$${p}`;
     });
   });
 
-  // ✅ SELECTOR DE TALLA
+  // Size selector
   sButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       selectedSize = (btn as HTMLElement).dataset.size || null;
-      sButtons.forEach(b => b.classList.remove('border-black', 'bg-black', 'text-white'));
-      btn.classList.add('border-black', 'bg-black', 'text-white');
+      sButtons.forEach(b => {
+        b.className = 's-selector py-3 rounded-sm text-xs font-semibold border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#F5F5F5] hover:text-[#F5F5F5] transition-all duration-200';
+      });
+      btn.className = 's-selector py-3 rounded-sm text-xs font-semibold border-2 border-[#16A34A] bg-[#16A34A] text-black transition-all duration-200';
+      if (stickySize && selectedSize) stickySize.textContent = selectedSize;
     });
   });
 
-  // ✅ THUMBNAIL GALLERY — cambiar imagen principal al click
+  // Sticky mobile bar — show when add-to-cart scrolls out of view
+  if (stickyBar && addCartBtn) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          stickyBar.style.transform = 'translateY(0)';
+        } else {
+          stickyBar.style.transform = 'translateY(100%)';
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(addCartBtn);
+  }
+
+  // Thumbnail gallery
   document.querySelectorAll('.thumb-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const src = (btn as HTMLElement).dataset.src;
       if (src && mainImg) {
-        mainImg.src = src;
         document.querySelectorAll('.thumb-btn').forEach(b => {
-          b.classList.remove('border-black');
-          b.classList.add('border-gray-100');
+          b.className = b.className.replace('border-[#16A34A]', 'border-[#2A2A2A]');
         });
-        btn.classList.remove('border-gray-100');
-        btn.classList.add('border-black');
+        btn.className = btn.className.replace('border-[#2A2A2A]', 'border-[#16A34A]').replace('hover:border-[#888888]', '');
       }
     });
   });
 
-  // ✅ GUÍA DE TALLAS — botón sin inline onclick
+  // Size guide
   document.getElementById('open-size-guide-btn')?.addEventListener('click', () => {
     window.dispatchEvent(new CustomEvent('open-size-guide'));
   });
 
-  // ✅ COMPRA / CARRITO
+  // Purchase handler
   function handlePurchase(redirect: boolean = false) {
     if (!selectedSize) {
-      alert('POR FAVOR SELECCIONA TU TALLA');
+      alert('Por favor selecciona tu talla antes de continuar.');
       return;
     }
-
     const priceToPay = prices[selectedQuality];
-
     const productToSave = {
       id: `${root.dataset.id}-${selectedQuality}-${selectedSize}`,
       productId: root.dataset.id,
@@ -238,21 +522,18 @@ const productJsonLd = {
       quality: selectedQuality,
       quantity: 1,
       price: priceToPay,
-      prices: {
-        [selectedQuality]: priceToPay
-      }
+      prices: { [selectedQuality]: priceToPay },
     };
-
     addToCart(productToSave);
-    
     if (redirect) {
       window.location.href = '/checkout';
     } else {
-      window.dispatchEvent(new CustomEvent('open-cart'));
+      isCartOpen.set(true);
     }
   }
 
   document.getElementById('add-to-cart-action')?.addEventListener('click', () => handlePurchase(false));
   document.getElementById('buy-now-action')?.addEventListener('click', () => handlePurchase(true));
+  document.getElementById('sticky-add-to-cart')?.addEventListener('click', () => handlePurchase(false));
 </script>
 </Layout>

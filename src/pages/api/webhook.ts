@@ -110,7 +110,13 @@ function validateMercadoPagoSignature(
     hmac.update(`${requestId}.${body}`);
     const hash = hmac.digest("hex");
 
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(hash));
+    // SECURITY FIX: timingSafeEqual throws if buffers differ in byte length.
+    // Return false immediately on length mismatch to avoid crash-path bypass.
+    const sigBuf  = Buffer.from(signature);
+    const hashBuf = Buffer.from(hash);
+    if (sigBuf.length !== hashBuf.length) return false;
+
+    return crypto.timingSafeEqual(sigBuf, hashBuf);
   } catch {
     console.error("Error validando firma");
     return false;

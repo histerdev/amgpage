@@ -1,102 +1,100 @@
 ---
 import Layout from '../layouts/Layout.astro';
-export const prerender = true;  // ✅ AGREGAR
-
+export const prerender = true;
 ---
 
-<Layout title="Sobre Nosotros | AMG SHOES">
+<Layout
+  title="Sobre Nosotros | AMG Sneakers"
+  description="Conoce la historia de AMG Sneakers Chile. Somos una sociedad de gestión de pares premium, operada por aficionados para aficionados."
+>
+  <main class="bg-[#0A0A0A] pt-24 pb-20 min-h-screen">
+    <div class="max-w-4xl mx-auto px-6">
 
-    <main class="max-w-4xl mx-auto px-6 py-20 font-['Inter',_sans-serif]">
-        <header class="text-center mb-20">
-            <span class="text-red-600 font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Manifesto de Transparencia</span>
-            <h1 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter mb-6 leading-none text-slate-900">
-                Sobre Nosotros: <span class="block text-zinc-400">AMG SNEAKERS</span>
-            </h1>
-            <div class="h-1.5 w-24 bg-black mx-auto"></div>
-        </header>
+      <!-- Header -->
+      <div class="text-center mb-16 reveal-init">
+        <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-4">Manifiesto de Transparencia</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-[#F5F5F5] mb-4" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em;">
+          Sobre Nosotros
+        </h1>
+        <div class="w-12 h-0.5 bg-[#16A34A] mx-auto"></div>
+      </div>
 
-        <div class="grid gap-16">
-            <section class="grid md:grid-cols-2 gap-10 items-center">
-                <div class="space-y-4">
-                    <h2 class="text-3xl font-[900] uppercase italic tracking-tighter">¿Quiénes somos?</h2>
-                    <p class="text-zinc-600 leading-relaxed">
-                        Somos, antes que todo, <strong>aficionados de las zapatillas</strong>. Al igual que tú, hemos pasado años en la cultura sneakerhead y hemos presenciado de todo: desde estafas directas hasta el abuso de tiendas que cobran precios ridículos por pares que solo deberían ser accesibles.
-                    </p>
-                </div>
-                <div class="bg-zinc-100 aspect-square rounded-[40px] flex items-center justify-center border border-zinc-200">
-                    <img src="/logo-amg.webp" alt="AMG Logo" class="w-1/2 opacity-20 grayscale" />
-                </div>
-            </section>
+      <div class="space-y-8">
 
-            <section class="bg-zinc-950 text-white p-10 md:p-16 rounded-[50px] shadow-2xl relative overflow-hidden">
-                <div class="relative z-10">
-                    <h2 class="text-3xl font-[900] uppercase italic mb-8 tracking-tighter">Nuestro Modelo de Valor</h2>
-                    <p class="text-zinc-400 mb-10 leading-relaxed text-lg">
-                        A diferencia de una tienda G5 o PK convencional en Chile que infla los precios para cubrir bodegas y márgenes de ganancia masivos, en <strong>AMG</strong> operamos bajo una estructura de costos abierta:
-                    </p>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="bg-white/5 border border-white/10 p-8 rounded-3xl">
-                            <h3 class="text-[#2ecc71] font-black uppercase italic text-sm mb-2 tracking-widest">90% Inversión Real</h3>
-                            <p class="text-zinc-400 text-sm leading-relaxed">
-                                La mayor parte de lo que pagas se destina directamente a la **manufactura y materiales de élite**. No escatimamos en el costo de fábrica para garantizar que recibas el grado más alto del mercado mundial.
-                            </p>
-                        </div>
-                        <div class="bg-white/5 border border-white/10 p-8 rounded-3xl">
-                            <h3 class="text-zinc-100 font-black uppercase italic text-sm mb-2 tracking-widest">10% Gestión AMG</h3>
-                            <p class="text-zinc-400 text-sm leading-relaxed">
-                                Nosotros no te cobramos por el par; te cobramos una <strong>comisión de gestión mínima</strong>. Esto cubre nuestro control de calidad (QC), la logística internacional y el seguro aduanero que protege tu inversión.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="absolute top-0 right-0 p-10 opacity-10">
-                    <svg class="w-40 h-40" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18h10V4H7v14zm0-16h10c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2z"/></svg>
-                </div>
-            </section>
+        <!-- Who we are -->
+        <section class="grid md:grid-cols-2 gap-8 items-center reveal-init">
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif;">¿Quiénes somos?</h2>
+            <p class="text-[#888888] leading-relaxed text-sm">
+              Somos, antes que todo, <strong class="text-[#F5F5F5]">aficionados de los pares</strong>. Hemos pasado años en la cultura sneakerhead y hemos presenciado de todo: estafas directas, precios abusivos y cero transparencia.
+            </p>
+            <p class="text-[#888888] leading-relaxed text-sm">
+              Por eso creamos AMG: una sociedad de gestión que pone al comprador primero. Nada más, nada menos.
+            </p>
+          </div>
+          <div class="bg-[#111111] border border-[#2A2A2A] aspect-square rounded-sm flex items-center justify-center">
+            <img src="/logo-amg-white.webp" alt="AMG Logo" class="w-1/2 opacity-20" />
+          </div>
+        </section>
 
-            <section class="p-10 border-2 border-dashed border-zinc-200 rounded-[40px]">
-                <h2 class="text-2xl font-[900] uppercase italic mb-6">¿Por qué lo hacemos?</h2>
-                <p class="text-zinc-600 leading-relaxed mb-8">
-                    Nacimos de la frustración de ver cómo se castiga al consumidor que no tiene un presupuesto de millones. Creamos esta sociedad porque creemos que la pasión no debería ser un riesgo de estafa.
-                </p>
-                <div class="bg-zinc-50 p-8 rounded-3xl border-l-8 border-black">
-                    <p class="italic font-bold text-zinc-800 text-xl tracking-tight leading-tight">
-                        "Nuestra misión es ayudar al aficionado, porque nosotros somos esos mismos aficionados. Queremos que tengas el par que siempre quisiste, con la seguridad de que nadie te está robando en el proceso."
-                    </p>
-                </div>
-            </section>
+        <!-- Value model -->
+        <section class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-8 md:p-10 relative overflow-hidden reveal-init">
+          <div class="absolute top-0 right-0 w-48 h-48 bg-[#16A34A] blur-[100px] opacity-[0.06] pointer-events-none"></div>
+          <h2 class="text-xl font-bold text-[#F5F5F5] mb-6 relative z-10" style="font-family: 'Space Grotesk', sans-serif;">Nuestro Modelo de Valor</h2>
+          <div class="grid md:grid-cols-2 gap-4 relative z-10">
+            <div class="bg-[#0D1F10] border border-[#16A34A]/20 rounded-sm p-6">
+              <h3 class="text-[#16A34A] font-bold text-sm uppercase tracking-wider mb-2">90% — Inversión Real</h3>
+              <p class="text-[#888888] text-xs leading-relaxed">
+                La mayor parte de tu pago va directo a manufactura y materiales de élite. No escatimamos en la fábrica.
+              </p>
+            </div>
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm p-6">
+              <h3 class="text-[#F5F5F5] font-bold text-sm uppercase tracking-wider mb-2">10% — Comisión AMG</h3>
+              <p class="text-[#888888] text-xs leading-relaxed">
+                Nuestra comisión cubre el QC, la logística internacional y el seguro aduanero que protege tu gestión.
+              </p>
+            </div>
+          </div>
+        </section>
 
-            <section class="text-center py-10">
-                <h2 class="text-4xl font-[900] uppercase italic mb-8 tracking-tighter">El Estándar AMG</h2>
-                <div class="grid md:grid-cols-3 gap-8 mb-12">
-                    <div class="space-y-2">
-                        <div class="text-2xl font-black italic">01.</div>
-                        <h4 class="font-black uppercase text-xs tracking-widest">Sourcing Directo</h4>
-                        <p class="text-xs text-zinc-500 uppercase font-bold">Sin intermediarios, sin hype inflado.</p>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="text-2xl font-black italic">02.</div>
-                        <h4 class="font-black uppercase text-xs tracking-widest">QC Riguroso</h4>
-                        <p class="text-xs text-zinc-500 uppercase font-bold">Si tiene un fallo, no sale de origen.</p>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="text-2xl font-black italic">03.</div>
-                        <h4 class="font-black uppercase text-xs tracking-widest">Entrega Final</h4>
-                        <p class="text-xs text-zinc-500 uppercase font-bold">Seguimiento total hasta tu puerta.</p>
-                    </div>
-                </div>
-                
-                <div class="bg-black text-white px-10 py-6 rounded-full inline-block font-[900] uppercase italic tracking-widest text-sm hover:scale-105 transition-transform cursor-default">
-                    Si nosotros no lo usaríamos, no te lo enviamos.
-                </div>
-            </section>
-        </div>
-    </main>
+        <!-- Why -->
+        <section class="border border-[#2A2A2A] border-dashed rounded-sm p-8 reveal-init">
+          <h2 class="text-xl font-bold text-[#F5F5F5] mb-4" style="font-family: 'Space Grotesk', sans-serif;">¿Por qué lo hacemos?</h2>
+          <p class="text-[#888888] text-sm leading-relaxed mb-6">
+            Nacimos de la frustración de ver cómo se castiga al consumidor que no tiene un presupuesto de millones. La pasión no debería ser un riesgo de estafa.
+          </p>
+          <blockquote class="border-l-2 border-[#16A34A] pl-6">
+            <p class="text-[#F5F5F5] italic text-sm leading-relaxed">
+              "Nuestra misión es ayudar al aficionado, porque nosotros somos esos mismos aficionados. Queremos que tengas el par que siempre quisiste, con la seguridad de que nadie te está robando en el proceso."
+            </p>
+            <cite class="text-[10px] text-[#888888] uppercase tracking-widest not-italic mt-2 block">— Fundadores, AMG Sneakers</cite>
+          </blockquote>
+        </section>
 
-    <footer class="py-20 text-center border-t border-zinc-100">
-        <p class="text-zinc-400 text-[10px] font-black uppercase tracking-[0.5em]">
-            © 2025 AMG SNEAKERS — SOCIEDAD DE GESTIÓN Y LOGÍSTICA
-        </p>
-    </footer>
+        <!-- Standards -->
+        <section class="reveal-init">
+          <h2 class="text-xl font-bold text-[#F5F5F5] mb-6 text-center" style="font-family: 'Space Grotesk', sans-serif;">El Estándar AMG</h2>
+          <div class="grid md:grid-cols-3 gap-4">
+            {[
+              { n: '01', t: 'Sourcing Directo', d: 'Sin intermediarios. Sin precios inflados.' },
+              { n: '02', t: 'QC Riguroso', d: 'Si tiene un fallo, no sale de origen.' },
+              { n: '03', t: 'Entrega Final', d: 'Seguimiento total hasta tu puerta.' },
+            ].map(s => (
+              <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-6 text-center">
+                <span class="text-3xl font-bold text-[#16A34A] opacity-30">{s.n}</span>
+                <h3 class="text-sm font-bold text-[#F5F5F5] uppercase tracking-wider mt-2 mb-2">{s.t}</h3>
+                <p class="text-xs text-[#888888]">{s.d}</p>
+              </div>
+            ))}
+          </div>
+          <div class="mt-6 bg-[#111111] border border-[#2A2A2A] rounded-sm p-4 text-center">
+            <p class="text-xs font-semibold text-[#888888]">
+              Si nosotros no lo usaríamos, <span class="text-[#F5F5F5]">no te lo enviamos.</span>
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
 </Layout>

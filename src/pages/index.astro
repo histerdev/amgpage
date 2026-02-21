@@ -1,203 +1,456 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
+import WhatsAppChatBubbles from '../components/WhatsAppChatBubbles.astro';
+import FounderMessage from '../components/FounderMessage.astro';
+import FearFAQ from '../components/FearFAQ.astro';
 import { productos } from '../data/products';
-export const prerender = true;  // ✅ AGREGAR
+export const prerender = true;
 
-// Filtramos todos los "Famosos" y los mezclamos aleatoriamente
+// Featured products with "Famoso" tag
 const famosos = productos
-    .filter(p => p.tags?.includes("Famoso"))
-    .map(p => ({
-        id: p.id,
-        name: p.name,
-        prices: p.prices,
-        image: p.image, 
-        tags: p.tags || []
-    }));
+  .filter(p => p.tags?.includes('Famoso'))
+  .slice(0, 6)
+  .map(p => ({
+    id: p.id,
+    name: p.name,
+    prices: p.prices,
+    image: p.image,
+    tags: p.tags || [],
+    tallas: p.tallas || [],
+  }));
 
-// Para el build estático, tomar los 2 primeros como fallback/SSR
-const destacadosHero = famosos.slice(0, 2);
+// Hero product — Travis Scott Olive
+const heroProduct = productos.find(p => p.id === 'jordan-1-travis-olive')
+  || productos.find(p => p.tags?.includes('Famoso'))!;
+const heroImage = Array.isArray(heroProduct?.image) ? heroProduct.image[0] : heroProduct?.image;
+const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.prices.PK || 95900);
 ---
 
-<Layout title="AMG Sneakers | Alta Gama al Valor Real">
-    
-    <main class="bg-white overflow-x-hidden">
-        <section class="relative pt-12 pb-32 min-h-[90vh] flex items-center">
-            <div class="max-w-7xl mx-auto px-6 w-full">
-                <div class="grid lg:grid-cols-12 gap-12 items-center">
-                    
-                    <div class="lg:col-span-5 reveal-init z-30">
-                        <div class="inline-flex items-center gap-2 bg-zinc-100 px-4 py-2 rounded-full mb-6">
-                            <span class="relative flex h-3 w-3">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2ecc71] opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-[#2ecc71]"></span>
-                            </span>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-600">Gestión Activa Chile 2026</span>
-                        </div>
-                        
-                        <h1 class="text-6xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-[0.85] mb-8 text-slate-900">
-                            ¿POR QUÉ <br/> <span class="text-[#2ecc71]">COMPRAR CON AMG?</span>
-                        </h1>
-                        
-                        <div class="space-y-6 mb-10 max-w-md">
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black italic text-sm">01</div>
-                                <p class="text-zinc-500 text-xs leading-relaxed"><strong>Sinceridad y Valor Real.</strong> No buscamos márgenes del 200% como otros. Solo cobramos una comisión por gestionar y asegurar el par perfecto para ti.</p>
-                            </div>
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black italic text-sm">02</div>
-                                <p class="text-zinc-500 text-xs leading-relaxed"><strong>Tú das el visto bueno.</strong> Revisamos cada par personalmente antes del envío. Recibes evidencia visual y tú autorizas el despacho final.</p>
-                            </div>
-                        </div>
+<Layout
+  title="AMG Sneakers | El par que buscabas, al precio que corresponde"
+  description="Gestión directa de pares premium desde manufactura de élite a Chile. Calidad PK y G5. Control de calidad visual antes de cada despacho. Pago seguro por MercadoPago."
+>
+  <div class="bg-[#0A0A0A] overflow-x-hidden">
 
-                        <a href="/coleccion" class="inline-block bg-black text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#2ecc71] transition-all">
-                            Explorar Catálogo
-                        </a>
-                    </div>
+    <!-- ══════════════════════════════════════════════════
+         HERO — Split screen
+    ══════════════════════════════════════════════════ -->
+    <section id="hero" class="min-h-[92vh] flex items-center pt-24 pb-16 relative overflow-hidden">
 
-                    <div class="lg:col-span-7 relative h-[500px] md:h-[600px] w-full reveal-init" style="transition-delay: 200ms">
-                        <div class="absolute top-10 left-0 w-64 md:w-80 z-10 -rotate-6 opacity-90 transition-transform hover:rotate-0 duration-500">
-                            <ProductCard {...destacadosHero[0]} />
-                        </div>
+      <!-- Background glow (right) -->
+      <div class="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#16A34A] rounded-full blur-[200px] opacity-[0.06] pointer-events-none"></div>
 
-                        <div class="absolute bottom-0 right-0 w-72 md:w-96 z-30 rotate-3 shadow-2xl transition-transform hover:rotate-0 duration-500">
-                            <div class="absolute -top-12 -right-4 z-50 bg-white p-5 rounded-[2.5rem] shadow-2xl border border-zinc-100 rotate-12 group">
-                                <div class="bg-[#2ecc71] text-white px-3 py-1 rounded-xl font-black italic text-xl mb-1 inline-block leading-none">PK</div>
-                                <div class="leading-none text-right">
-                                    <p class="font-black text-[11px] uppercase tracking-tighter text-slate-900">Estándar PK</p>
-                                    <p class="text-[9px] text-zinc-400 font-extrabold uppercase">Máximo nivel de fabricación</p>
-                                </div>
-                            </div>
-                            <ProductCard {...destacadosHero[1]} />
-                        </div>
-                    </div>
-                </div>
+      <div class="max-w-7xl mx-auto px-6 w-full">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+          <!-- LEFT — Copy -->
+          <div class="order-2 lg:order-1">
+
+            <!-- Label -->
+            <div class="anim-hero-badge inline-flex items-center gap-2 mb-6">
+              <span class="text-[#16A34A] text-[9px] font-bold uppercase tracking-[0.3em]">
+                GESTIÓN DIRECTA · CHILE 2026
+              </span>
             </div>
-        </section>
 
-        <section class="py-24 bg-white reveal-init">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="text-center mb-16">
-                    <h2 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter text-slate-900">
-                        AMG <span class="text-[#2ecc71]">VS</span> EL RESTO
-                    </h2>
-                    <p class="text-zinc-400 font-bold uppercase text-[10px] tracking-widest mt-2">Honestidad en cada paso del proceso</p>
-                </div>
+            <!-- H1 -->
+            <h1 class="anim-hero-h1 text-5xl md:text-6xl lg:text-7xl font-bold text-[#F5F5F5] leading-[1.05] mb-6" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em;">
+              El par que<br />
+              buscabas,<br />
+              <span class="text-[#16A34A]">al precio que<br />corresponde.</span>
+            </h1>
 
-                <div class="grid md:grid-cols-2 gap-px bg-zinc-100 border border-zinc-100 rounded-[40px] overflow-hidden shadow-2xl">
-                    <div class="bg-white p-10 md:p-16">
-                        <div class="flex items-center gap-4 mb-10">
-                            <div class="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center text-2xl">❌</div>
-                            <h4 class="font-black uppercase italic text-2xl text-zinc-400 leading-none">Tiendas Comunes</h4>
-                        </div>
-                        <ul class="space-y-8">
-                            <li class="flex gap-4">
-                                <div class="text-red-500 font-black italic text-xl">01</div>
-                                <p class="text-zinc-500 text-sm"><strong>Márgenes Excesivos.</strong> Inflan los precios un 200% solo para ganar más, sin importar la calidad real.</p>
-                            </li>
-                            <li class="flex gap-4">
-                                <div class="text-red-500 font-black italic text-xl">02</div>
-                                <p class="text-zinc-500 text-sm"><strong>Materiales Básicos.</strong> Venden gamuza sintética y plásticos como si fueran cuero premium.</p>
-                            </li>
-                            <li class="flex gap-4">
-                                <div class="text-red-500 font-black italic text-xl">03</div>
-                                <p class="text-zinc-500 text-sm"><strong>Sin Revisión.</strong> Compras a ciegas. Te envían lo que tienen en stock sin filtros de calidad.</p>
-                            </li>
-                        </ul>
-                    </div>
+            <!-- Subtitle -->
+            <p class="anim-hero-subtitle text-[#888888] text-base leading-relaxed mb-8 max-w-md">
+              Importación directa desde manufactura de élite.<br />
+              Control de calidad visual antes de cada despacho.
+            </p>
 
-                    <div class="bg-zinc-950 p-10 md:p-16 relative overflow-hidden group">
-                        <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#2ecc71] blur-[120px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                        <div class="flex items-center gap-4 mb-10 relative z-10">
-                            <div class="w-12 h-12 bg-[#2ecc71] rounded-full flex items-center justify-center text-2xl">⚡</div>
-                            <h4 class="font-black uppercase italic text-2xl text-white leading-none">AMG Sneakers</h4>
-                        </div>
-                        <ul class="space-y-8 relative z-10">
-                            <li class="flex gap-4 border-l-2 border-[#2ecc71] pl-4">
-                                <div class="text-[#2ecc71] font-black italic text-xl">01</div>
-                                <p class="text-zinc-300 text-sm"><strong class="text-white">Gestión Honrada.</strong> Pagas por el par y una comisión por nuestro servicio. Sin precios inflados.</p>
-                            </li>
-                            <li class="flex gap-4 border-l-2 border-[#2ecc71] pl-4">
-                                <div class="text-[#2ecc71] font-black italic text-xl">02</div>
-                                <p class="text-zinc-300 text-sm"><strong class="text-white">Calidad Industrial.</strong> Solo seleccionamos materiales reales que reaccionan al tacto y duran.</p>
-                            </li>
-                            <li class="flex gap-4 border-l-2 border-[#2ecc71] pl-4">
-                                <div class="text-[#2ecc71] font-black italic text-xl">03</div>
-                                <p class="text-zinc-300 text-sm"><strong class="text-white">Inspección HD.</strong> Somos tus ojos en la fábrica. Si el par no es perfecto, no se envía.</p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+            <!-- CTAs -->
+            <div class="anim-hero-ctas flex flex-wrap gap-3 mb-6">
+              <a href="/coleccion" class="btn-primary text-sm px-7 py-4">
+                Ver Catálogo
+              </a>
+              <a href="/sobre-nosotros" class="btn-secondary text-sm px-7 py-4">
+                ¿Cómo funciona?
+              </a>
             </div>
-        </section>
 
-        <section class="py-24 bg-zinc-50">
-            <div class="max-w-7xl mx-auto px-6">
-                <h3 class="text-zinc-900 font-[900] uppercase italic tracking-tighter text-3xl mb-16 text-center">NUESTRA GESTIÓN</h3>
-                <div class="grid md:grid-cols-3 gap-12">
-                    <div class="reveal-init">
-                        <span class="text-[#2ecc71] font-black text-5xl italic opacity-30">01</span>
-                        <h4 class="text-xl font-black uppercase italic mt-2">Búsqueda de Materiales</h4>
-                        <p class="text-zinc-500 text-sm mt-4">Ubicamos los mejores batches del mercado mundial, asegurando que tu inversión valga la pena.</p>
-                    </div>
-                    <div class="reveal-init" style="transition-delay: 200ms">
-                        <span class="text-[#2ecc71] font-black text-5xl italic opacity-30">02</span>
-                        <h4 class="text-xl font-black uppercase italic mt-2">Control de Detalles</h4>
-                        <p class="text-zinc-500 text-sm mt-4">Verificamos simetría y acabados. Si el par tiene detalles, solicitamos un cambio de inmediato antes del despacho.</p>
-                    </div>
-                    <div class="reveal-init" style="transition-delay: 400ms">
-                        <span class="text-[#2ecc71] font-black text-5xl italic opacity-30">03</span>
-                        <div class="inline-block bg-black text-white px-3 py-1 rounded text-[8px] font-bold mb-2 uppercase">Logística</div>
-                        <h4 class="text-xl font-black uppercase italic mt-1">Envío a Chile</h4>
-                        <p class="text-zinc-500 text-sm mt-4">Gestionamos el transporte seguro con seguimiento en tiempo real hasta la puerta de tu hogar.</p>
-                    </div>
-                </div>
+            <!-- ── Security badge strip ── -->
+            <div class="anim-hero-trust flex flex-wrap gap-x-4 gap-y-2 mb-5">
+              {[
+                { icon: '🔒', label: 'SSL Seguro' },
+                { icon: '✅', label: 'MercadoPago Oficial' },
+                { icon: '📸', label: 'QC Garantizado' },
+                { icon: '🛡️', label: 'Seguro Aduanero' },
+              ].map(b => (
+                <span class="inline-flex items-center gap-1.5 text-[10px] text-[#666666] bg-[#111111] border border-[#1E1E1E] rounded-sm px-2.5 py-1.5">
+                  <span>{b.icon}</span>
+                  <span>{b.label}</span>
+                </span>
+              ))}
             </div>
-        </section>
 
-        <section class="py-24 bg-white reveal-init">
-            <div class="max-w-4xl mx-auto px-6">
-                <h3 class="text-zinc-900 font-[900] uppercase italic tracking-tighter text-2xl mb-8">Métodos de Pago</h3>
-                <div class="bg-[#f0f7ff] border border-blue-100 rounded-[45px] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10">
-                    <div class="flex items-center gap-6">
-                        <div class="bg-white p-5 rounded-[24px] shadow-sm">
-                            <svg class="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
-                        </div>
-                        <div>
-                            <h4 class="font-[900] uppercase italic text-[#1e3a8a] tracking-tight text-2xl leading-none">PAGO 100% SEGURO</h4>
-                            <p class="text-blue-400 font-bold uppercase text-[10px] tracking-widest mt-1">GESTIONADO POR MERCADOPAGO</p>
-                        </div>
-                    </div>
-                    <div class="bg-white/90 backdrop-blur-md p-5 rounded-[30px] border border-white flex items-center gap-5 shadow-sm">
-                        <div class="flex gap-4 font-black text-zinc-300 text-[10px] tracking-widest italic">
-                            <span>VISA</span> <span>MASTERCARD</span> <span>AMEX</span>
-                        </div>
-                        <div class="h-8 w-[1px] bg-zinc-200"></div>
-                        <span class="text-zinc-800 font-black text-lg">+2</span>
-                    </div>
-                </div>
+            <!-- ── Real-time social proof ticker ── -->
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#16A34A] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#16A34A]"></span>
+              </span>
+              <p id="social-proof-ticker" class="text-[11px] text-[#888888]">
+                👁 <span id="viewer-count">12</span> personas están viendo el catálogo ahora
+              </p>
             </div>
-        </section>
 
-        <section class="py-32 bg-black text-center relative overflow-hidden">
-            <div class="absolute inset-0 opacity-20">
-                <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#2ecc71] via-transparent to-transparent"></div>
+          </div>
+
+          <!-- RIGHT — Hero product image -->
+          <div class="relative order-1 lg:order-2 flex items-center justify-center" style="min-height: 420px;">
+            <!-- Glow behind shoe -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="anim-hero-glow w-72 h-72 bg-[#16A34A] rounded-full blur-[100px] opacity-[0.12]"></div>
             </div>
-            <div class="relative z-10 max-w-4xl mx-auto px-6">
-                <h2 class="text-5xl md:text-8xl font-[900] uppercase italic tracking-tighter text-white leading-[0.9] mb-10">
-                    ¿LISTO PARA EL <br/> <span class="text-[#2ecc71]">SIGUIENTE NIVEL?</span>
-                </h2>
-                <a href="/coleccion" class="inline-block bg-[#2ecc71] text-black px-12 py-6 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all">
-                    Ver Catálogo Premium
-                </a>
+
+            <!-- Floating grade badge -->
+            <div class="absolute top-6 right-6 z-20 bg-[#16A34A] text-black text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+              GRADO PK
             </div>
-        </section>
-    </main>
+
+            <!-- Product image -->
+            <div class="anim-hero-shoe relative z-10 w-full max-w-md">
+              <img
+                src={heroImage}
+                alt={`${heroProduct?.name || 'Travis Scott Olive'} — AMG Sneakers`}
+                class="w-full h-auto object-contain drop-shadow-2xl"
+                width={800}
+                height={800}
+                loading="eager"
+                fetchpriority="high"
+              />
+            </div>
+
+            <!-- Price badge -->
+            <div class="absolute bottom-6 left-6 z-20 bg-[#111111] border border-[#2A2A2A] rounded-sm px-4 py-3">
+              <p class="text-[9px] text-[#888888] uppercase tracking-widest mb-0.5">Precio de Gestión</p>
+              <p class="text-lg font-bold text-[#16A34A]">
+                ${formattedHeroPrice}&nbsp;<span class="text-xs text-[#888888] font-normal">CLP</span>
+              </p>
+              <a
+                href={`/producto/${heroProduct?.id}`}
+                class="mt-2.5 flex items-center justify-center gap-1.5 w-full bg-[#16A34A] hover:bg-[#22C55E] text-black text-[10px] font-bold uppercase tracking-wider py-2 rounded-sm transition-colors"
+              >
+                Ver Par →
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         TRUST STRIP — 4 indicators
+    ══════════════════════════════════════════════════ -->
+    <section id="trust" class="bg-[#111111] border-y border-[#2A2A2A]">
+      <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="reveal flex flex-col items-center text-center gap-2" data-reveal-delay="0">
+            <span class="text-2xl">🛡️</span>
+            <div>
+              <p class="text-[11px] font-bold text-[#F5F5F5] uppercase tracking-widest">Pago Seguro</p>
+              <p class="text-[10px] text-[#888888] mt-0.5">MercadoPago</p>
+            </div>
+          </div>
+
+          <div class="reveal flex flex-col items-center text-center gap-2" data-reveal-delay="80">
+            <span class="text-2xl">📸</span>
+            <div>
+              <p class="text-[11px] font-bold text-[#F5F5F5] uppercase tracking-widest">QC Visual Previo</p>
+              <p class="text-[10px] text-[#888888] mt-0.5">Fotos HD antes de enviar</p>
+            </div>
+          </div>
+
+          <div class="reveal flex flex-col items-center text-center gap-2" data-reveal-delay="160">
+            <span class="text-2xl">🚚</span>
+            <div>
+              <p class="text-[11px] font-bold text-[#F5F5F5] uppercase tracking-widest">Envío con Seguimiento</p>
+              <p class="text-[10px] text-[#888888] mt-0.5">Hasta tu puerta</p>
+            </div>
+          </div>
+
+          <div class="reveal flex flex-col items-center text-center gap-2" data-reveal-delay="240">
+            <span class="text-2xl">⚖️</span>
+            <div>
+              <p class="text-[11px] font-bold text-[#F5F5F5] uppercase tracking-widest">Seguro Aduanero</p>
+              <p class="text-[10px] text-[#888888] mt-0.5">Reposición garantizada</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         FEATURED PRODUCTS — Selección Actual
+    ══════════════════════════════════════════════════ -->
+    <section id="productos" class="py-24">
+      <div class="max-w-7xl mx-auto px-6">
+
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12 gap-4">
+          <div class="reveal">
+            <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-2">Catálogo</p>
+            <h2 class="text-3xl lg:text-4xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;">
+              Selección Actual
+              <span class="block w-12 h-0.5 bg-[#16A34A] mt-3"></span>
+            </h2>
+          </div>
+          <a href="/coleccion" class="text-xs text-[#888888] hover:text-[#22C55E] uppercase tracking-widest font-semibold transition-colors flex items-center gap-1.5">
+            Ver todo el catálogo
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {famosos.map((product, i) => (
+            <div class="reveal-init" style={`transition-delay: ${i * 80}ms`}>
+              <ProductCard {...product} />
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         HOW IT WORKS — Critical trust section
+    ══════════════════════════════════════════════════ -->
+    <section id="como-funciona" class="py-24 bg-[#111111] border-y border-[#2A2A2A]">
+      <div class="max-w-7xl mx-auto px-6">
+
+        <div class="text-center mb-16">
+          <p class="reveal text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-3">¿Proceso?</p>
+          <h2 class="reveal text-3xl lg:text-4xl font-bold text-[#F5F5F5] mb-3" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;" data-reveal-delay="80">
+            ¿Cómo funciona? Es simple.
+          </h2>
+          <p class="reveal text-[#888888] text-sm" data-reveal-delay="160">Transparencia total en cada paso</p>
+        </div>
+
+        <!-- Steps -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+
+          <!-- Connecting line (desktop) -->
+          <div class="hidden lg:block absolute top-8 left-[12.5%] right-[12.5%] h-px border-t border-dashed border-[#2A2A2A] z-0"></div>
+
+          {[
+            { num: '01', emoji: '🔍', title: 'Elige tu par', desc: 'Selecciona el modelo y talla desde el catálogo con precios reales de gestión.' },
+            { num: '02', emoji: '💳', title: 'Paga con seguridad', desc: 'El pago se procesa 100% por MercadoPago. Tu pago va directo, nosotros nunca vemos tus datos de tarjeta.' },
+            { num: '03', emoji: '📸', title: 'Aprueba el QC', desc: 'Te enviamos fotos y video HD del par específico. Tú das el ok antes de que salga.' },
+            { num: '04', emoji: '📦', title: 'Lo recibes en casa', desc: 'Envío con seguimiento completo desde origen. Seguro aduanero incluido.' },
+          ].map((step, i) => (
+            <div class="reveal relative z-10 flex flex-col items-center text-center" data-reveal-delay={i * 120}>
+              <div class="anim-step-circle w-16 h-16 rounded-full bg-[#0A0A0A] border-2 border-[#16A34A] flex items-center justify-center mb-4 flex-shrink-0 shadow-[0_0_20px_rgba(22,163,74,0.2)]" data-step-idx={i}>
+                <span class="text-[#16A34A] text-sm font-bold">{step.num}</span>
+              </div>
+              <div class="text-2xl mb-3">{step.emoji}</div>
+              <h3 class="text-sm font-bold text-[#F5F5F5] uppercase tracking-wide mb-2">{step.title}</h3>
+              <p class="text-xs text-[#888888] leading-relaxed max-w-[200px]">{step.desc}</p>
+            </div>
+          ))}
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         WHATSAPP CHAT BUBBLES — Social proof
+    ══════════════════════════════════════════════════ -->
+    <WhatsAppChatBubbles />
+
+    <!-- ══════════════════════════════════════════════════
+         AMG VS EL RESTO — Comparison
+    ══════════════════════════════════════════════════ -->
+    <section class="py-24 reveal-init">
+      <div class="max-w-5xl mx-auto px-6">
+
+        <div class="text-center mb-12">
+          <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-3">Comparativa</p>
+          <h2 class="text-3xl lg:text-4xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em;">
+            AMG <span class="text-[#16A34A]">VS</span> El Resto
+          </h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-px bg-[#2A2A2A] rounded-[2px] overflow-hidden">
+
+          <!-- Tiendas Comunes -->
+          <div class="bg-[#111111] p-8 md:p-10">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-10 h-10 bg-red-900/20 border border-red-900/30 rounded-sm flex items-center justify-center text-lg">❌</div>
+              <h3 class="font-bold text-[#888888] uppercase tracking-wide text-sm">Tiendas Comunes</h3>
+            </div>
+            <ul class="space-y-5">
+              {[
+                { t: 'Márgenes excesivos.', d: 'Inflan los precios 200% sin importar la calidad real.' },
+                { t: 'Materiales básicos.', d: 'Venden sintéticos como si fueran materiales premium.' },
+                { t: 'Sin revisión previa.', d: 'Compras a ciegas, te envían lo que tienen.' },
+                { t: 'Soporte inexistente.', d: 'Ningún canal de comunicación directo.' },
+              ].map(item => (
+                <li class="flex gap-3">
+                  <span class="text-red-400 text-sm font-bold flex-shrink-0 w-4">—</span>
+                  <p class="text-xs text-[#888888] leading-relaxed">
+                    <strong class="text-[#888888] line-through">{item.t}</strong>{' '}{item.d}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <!-- AMG -->
+          <div class="bg-[#0D1F10] border border-[#16A34A]/20 p-8 md:p-10 relative overflow-hidden">
+            <div class="absolute -top-16 -right-16 w-48 h-48 bg-[#16A34A] rounded-full blur-[80px] opacity-10 pointer-events-none"></div>
+            <div class="flex items-center gap-3 mb-8 relative z-10">
+              <div class="w-10 h-10 bg-[#16A34A] rounded-sm flex items-center justify-center text-lg">⚡</div>
+              <h3 class="font-bold text-[#F5F5F5] uppercase tracking-wide text-sm">AMG Sneakers</h3>
+            </div>
+            <ul class="space-y-5 relative z-10">
+              {[
+                { t: 'Gestión honesta.', d: 'Pagas el par + una comisión por nuestro servicio. Sin precios inflados.' },
+                { t: 'Calidad industrial.', d: 'Solo seleccionamos materiales reales que duran.' },
+                { t: 'Inspección HD.', d: 'Somos tus ojos en la fábrica. Si el par no es perfecto, no se envía.' },
+                { t: 'Comunicación directa.', d: 'WhatsApp directo con el equipo en cada etapa.' },
+              ].map(item => (
+                <li class="flex gap-3 border-l-2 border-[#16A34A] pl-3">
+                  <p class="text-xs text-[#F5F5F5]/80 leading-relaxed">
+                    <strong class="text-[#F5F5F5]">{item.t}</strong>{' '}{item.d}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         FEAR FAQ — Objection handling
+    ══════════════════════════════════════════════════ -->
+    <FearFAQ />
+
+    <!-- ══════════════════════════════════════════════════
+         TRUST MANIFESTO — Quote + Stats
+    ══════════════════════════════════════════════════ -->
+    <section id="manifesto" class="py-24 bg-[#111111] border-y border-[#2A2A2A]">
+      <div class="max-w-5xl mx-auto px-6">
+
+        <!-- Quote -->
+        <div class="reveal text-center mb-16">
+          <div class="w-8 h-8 mx-auto mb-6 opacity-30">
+            <svg viewBox="0 0 32 32" fill="currentColor" class="text-[#16A34A]">
+              <path d="M10 8v8H6v8H0V8h10zm18 0v8h-4v8h-6V8h10z"/>
+            </svg>
+          </div>
+          <blockquote class="text-xl md:text-2xl lg:text-3xl font-light text-[#F5F5F5] leading-relaxed italic max-w-3xl mx-auto mb-6" style="font-family: 'Space Grotesk', sans-serif;">
+            "Nacimos de la frustración de ver cómo se castiga al consumidor
+            que no tiene un presupuesto de millones."
+          </blockquote>
+          <cite class="text-[#888888] text-xs uppercase tracking-widest not-italic">
+            — Fundadores, AMG Sneakers
+          </cite>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-8 border-t border-[#2A2A2A] pt-12">
+          {[
+            { val: '90', suffix: '%', label: 'Inversión en el par' },
+            { val: '0', suffix: '', label: 'Intermediarios en la cadena' },
+            { val: '100', suffix: '%', label: 'Gestión QC antes de enviar' },
+          ].map((stat, i) => (
+            <div class="reveal text-center" data-reveal-delay={i * 120}>
+              <p
+                class="text-3xl md:text-4xl font-bold text-[#16A34A] mb-2"
+                style="font-family: 'Space Grotesk', sans-serif;"
+                data-counter-target={stat.val}
+                data-counter-suffix={stat.suffix}
+              >
+                {stat.val}{stat.suffix}
+              </p>
+              <p class="text-[10px] text-[#888888] uppercase tracking-wider leading-relaxed">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         FOUNDER MESSAGE — Authenticity
+    ══════════════════════════════════════════════════ -->
+    <FounderMessage />
+
+    <!-- ══════════════════════════════════════════════════
+         FINAL CTA
+    ══════════════════════════════════════════════════ -->
+    <section class="py-32 relative overflow-hidden">
+      <!-- Subtle radial green -->
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#16A34A] rounded-full blur-[160px] opacity-[0.08]"></div>
+      </div>
+
+      <div class="relative z-10 max-w-3xl mx-auto px-6 text-center">
+        <p class="reveal text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-4">¿Listo para empezar?</p>
+        <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-bold text-[#F5F5F5] leading-tight mb-6" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em;" data-reveal-delay="100">
+          Tu próximo par<br />
+          <span class="text-[#16A34A]">ya está disponible.</span>
+        </h2>
+        <p class="reveal text-[#888888] text-sm mb-10 max-w-md mx-auto" data-reveal-delay="200">
+          Compramos el par en fábrica y te lo traemos a Chile. Tú ves las fotos antes de que salga.
+        </p>
+        <div class="reveal flex flex-col sm:flex-row gap-3 justify-center" data-reveal-delay="300">
+          <a href="/coleccion" class="btn-primary text-sm px-10 py-4">
+            Ver Catálogo
+          </a>
+          <a href="/calidades" class="btn-secondary text-sm px-10 py-4">
+            Guía de Calidades
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </Layout>
 
-<style is:global>
-    .reveal-init { opacity: 0; transform: translateY(40px); transition: all 1s ease-out; }
-    .reveal-init.active { opacity: 1; transform: translateY(0); }
-    img { image-rendering: -webkit-optimize-contrast; backface-visibility: hidden; }
-</style>
+<!-- Social proof ticker script -->
+<script>
+  function randomBetween(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
+  const tickerEl = document.getElementById('viewer-count');
+  if (tickerEl) {
+    // Initial random value
+    tickerEl.textContent = String(randomBetween(8, 24));
+
+    // Update every 45–90 seconds with slight variation
+    function updateTicker() {
+      const current = parseInt(tickerEl!.textContent || '12', 10);
+      // Drift ±3 from current, clamped to [5, 30]
+      const drift = randomBetween(-3, 3);
+      const next  = Math.max(5, Math.min(30, current + drift));
+      tickerEl!.textContent = String(next);
+
+      // Schedule next update
+      setTimeout(updateTicker, randomBetween(45_000, 90_000));
+    }
+    setTimeout(updateTicker, randomBetween(45_000, 90_000));
+  }
+</script>

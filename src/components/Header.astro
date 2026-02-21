@@ -1,213 +1,422 @@
 ---
-// Header.astro
+// Header.astro — AMG Redesign
 ---
-<div class="bg-black text-white overflow-hidden py-2 border-b border-white/10">
-    <div class="animate-marquee flex whitespace-nowrap">
-        <div class="flex items-center">
-            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
-                🔥 OFERTAS NUNCA ANTES VISTAS EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
-            </span>
-            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
-                🚀 CALIDAD PREMIUM GARANTIZADA — FOTOS REALES ANTES DEL ENVÍO 🚀
-            </span>
-        </div>
-        <div class="flex items-center">
-            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
-                🔥 OFERTAS NUNCA ANTES VISTAS EN LAS PRIMERAS 10 COMPRAS — ENVÍO GRATIS A TODO CHILE 🔥
-            </span>
-            <span class="text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-bold px-10">
-                🚀 CALIDAD PREMIUM GARANTIZADA — FOTOS REALES ANTES DEL ENVÍO 🚀
-            </span>
-        </div>
+
+<!-- Announcement Bar -->
+<div class="bg-[#111111] border-b border-[#2A2A2A] overflow-hidden py-2">
+  <div class="animate-marquee flex whitespace-nowrap">
+    <div class="flex items-center">
+      <span class="text-[10px] uppercase tracking-[0.25em] font-semibold px-12 text-[#888888]">
+        <span class="text-[#22C55E] mr-1">✓</span> QC visual antes de cada despacho
+        <span class="mx-6 text-[#2A2A2A]">|</span>
+        <span class="text-[#22C55E] mr-1">✓</span> Pago 100% por MercadoPago
+        <span class="mx-6 text-[#2A2A2A]">|</span>
+        <span class="text-[#22C55E] mr-1">✓</span> Envío con seguimiento a todo Chile
+        <span class="mx-6 text-[#2A2A2A]">|</span>
+        <span class="text-[#22C55E] mr-1">✓</span> Seguro aduanero incluido
+      </span>
     </div>
+    <div class="flex items-center" aria-hidden="true">
+      <span class="text-[10px] uppercase tracking-[0.25em] font-semibold px-12 text-[#888888]">
+        <span class="text-[#22C55E] mr-1">✓</span> QC visual antes de cada despacho
+        <span class="mx-6 text-[#2A2A2A]">|</span>
+        <span class="text-[#22C55E] mr-1">✓</span> Pago 100% por MercadoPago
+        <span class="mx-6 text-[#2A2A2A]">|</span>
+        <span class="text-[#22C55E] mr-1">✓</span> Envío con seguimiento a todo Chile
+        <span class="mx-6 text-[#2A2A2A]">|</span>
+        <span class="text-[#22C55E] mr-1">✓</span> Seguro aduanero incluido
+      </span>
+    </div>
+  </div>
 </div>
 
-<header class="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between gap-4 md:gap-10">
-        
-        <div class="flex-shrink-0">
-            <a href="/">
-                <img 
-                    src="/logo-amg.webp" 
-                    alt="AMG Sneakers — Inicio" 
-                    class="h-8 md:h-16 w-auto object-contain"
-                    width={960}
-                    height={960}
-                />
-            </a>
-        </div>
+<!-- Main Header -->
+<header class="sticky top-0 z-50 backdrop-blur-md bg-[#0A0A0A]/90 border-b border-[#2A2A2A]" id="main-header">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between gap-6">
 
-        <!-- ✅ Buscador funcional — redirige a /coleccion?q=... -->
-        <div class="flex-grow max-w-xl hidden md:block">
-            <form action="/coleccion" method="get" class="relative group">
-                <input 
-                    type="text"
-                    name="q"
-                    placeholder="Buscar en AMG Sneakers..." 
-                    class="w-full bg-gray-100 border-none rounded-full py-3 px-6 pr-12 text-sm focus:bg-white focus:ring-2 focus:ring-black transition-all outline-none"
-                />
-                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-black transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </button>
-            </form>
-        </div>
-
-        <div class="flex items-center gap-4 md:gap-8">
-            <div class="relative" id="user-menu-wrapper">
-                <button id="user-menu-button" class="flex items-center gap-3 group outline-none cursor-pointer border-none bg-transparent">
-                    <div class="text-right leading-tight hidden sm:block pointer-events-none">
-                        <p id="user-greeting" class="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Hola,</p>
-                        <p id="user-name-display" class="text-[14px] font-[900] uppercase italic tracking-tighter group-hover:text-[#2ecc71] transition-colors">
-                            Mi Cuenta
-                        </p>
-                    </div>
-                    <div class="p-2 bg-gray-100 rounded-full group-hover:bg-gray-200 transition-all pointer-events-none">
-                        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    </div>
-                </button>
-
-                <div id="dropdown-menu" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100]">
-                    
-                    <!-- Solo visible para admins -->
-                    <div id="admin-only-option" class="hidden p-2 bg-red-50/50">
-                        <a href="/admin" class="block px-4 py-3 text-[11px] font-black uppercase italic bg-white text-red-600 border border-red-100 shadow-sm rounded-xl hover:bg-red-600 hover:text-white transition-all text-center">
-                            ⚡ Panel Admin
-                        </a>
-                    </div>
-
-                    <!-- Menú para visitantes -->
-                    <div id="menu-guest" class="p-2">
-                        <a href="/login" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl transition-colors text-center text-black">Iniciar Sesión</a>
-                        <a href="/registro" class="block px-4 py-3 text-[12px] font-black uppercase italic bg-black text-white rounded-xl hover:bg-[#2ecc71] transition-colors mt-1 text-center">Registrarse</a>
-                    </div>
-
-                    <!-- Menú para usuarios autenticados -->
-                    <div id="menu-user" class="hidden p-2">
-                        <a href="/perfil" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl text-black">Mi Perfil</a>
-                        <a href="/pedidos" class="block px-4 py-3 text-[12px] font-black uppercase italic hover:bg-gray-50 rounded-xl text-black">Mis Pedidos</a>
-                        <hr class="my-2 border-gray-100">
-                        <button
-                            id="logout-btn"
-                            class="w-full px-4 py-3 text-[12px] font-black uppercase italic text-left text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                        >
-                            Cerrar Sesión
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="cart-btn" class="relative p-2.5 bg-gray-100 rounded-full hover:bg-black hover:text-white transition-all group cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                </svg>
-                <span id="cart-count" class="absolute -top-1 -right-1 bg-[#2ecc71] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black border-2 border-white">0</span>
-            </div>
-        </div>
+    <!-- Logo -->
+    <div class="flex-shrink-0 anim-logo">
+      <a href="/" class="block">
+        <!-- Dark mode logo -->
+        <img
+          src="/logo-amg-white.webp"
+          alt="AMG Sneakers — Inicio"
+          class="logo-dark h-8 md:h-10 w-auto object-contain"
+          width={960} height={960}
+        />
+        <!-- Light mode logo -->
+        <img
+          src="/logo-amg.webp"
+          alt="AMG Sneakers — Inicio"
+          class="logo-light h-8 md:h-10 w-auto object-contain"
+          width={960} height={960}
+        />
+      </a>
     </div>
+
+    <!-- Desktop Nav Links (center) -->
+    <nav class="hidden lg:flex items-center gap-8 relative" aria-label="Navegación principal">
+      <a href="/coleccion" class="anim-nav-link text-xs uppercase tracking-widest font-semibold text-[#888888] hover:text-[#F5F5F5] transition-colors duration-200" style="animation-delay: 0ms">
+        Colección
+      </a>
+      <a href="/calidades" class="anim-nav-link text-xs uppercase tracking-widest font-semibold text-[#888888] hover:text-[#F5F5F5] transition-colors duration-200" style="animation-delay: 60ms">
+        Calidades
+      </a>
+      <a href="/faq" class="anim-nav-link text-xs uppercase tracking-widest font-semibold text-[#888888] hover:text-[#F5F5F5] transition-colors duration-200" style="animation-delay: 120ms">
+        FAQ
+      </a>
+      <a href="/sobre-nosotros" class="anim-nav-link text-xs uppercase tracking-widest font-semibold text-[#888888] hover:text-[#F5F5F5] transition-colors duration-200" style="animation-delay: 180ms">
+        Nosotros
+      </a>
+      <!-- Wishlist link with live count badge -->
+      <a href="/guardados" class="anim-nav-link relative flex items-center gap-1.5 text-xs uppercase tracking-widest font-semibold text-[#888888] hover:text-red-400 transition-colors duration-200" style="animation-delay: 240ms" title="Pares guardados">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        Guardados
+        <span id="wishlist-count-badge" class="hidden bg-red-400 text-black text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center leading-none">0</span>
+      </a>
+      <div id="nav-indicator"></div>
+    </nav>
+
+    <!-- Right: User + Cart -->
+    <div class="flex items-center gap-3 md:gap-4">
+
+      <!-- User menu -->
+      <div class="relative" id="user-menu-wrapper">
+        <button
+          id="user-menu-button"
+          class="flex items-center gap-2 cursor-pointer border-none bg-transparent group outline-none"
+          aria-label="Menú de cuenta"
+        >
+          <!-- Desktop label -->
+          <div class="hidden sm:flex flex-col items-end leading-none">
+            <span id="user-greeting" class="text-[9px] text-[#888888] uppercase tracking-widest font-medium">Hola,</span>
+            <span id="user-name-display" class="text-xs font-bold uppercase tracking-wide text-[#F5F5F5] group-hover:text-[#22C55E] transition-colors">
+              Mi Cuenta
+            </span>
+          </div>
+          <div class="w-9 h-9 flex items-center justify-center rounded-sm border border-[#2A2A2A] bg-[#111111] group-hover:border-[#22C55E] transition-colors">
+            <svg class="w-4 h-4 text-[#888888] group-hover:text-[#22C55E] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </button>
+
+        <!-- Dropdown -->
+        <div
+          id="dropdown-menu"
+          class="hidden absolute right-0 mt-2 w-52 rounded-sm shadow-2xl z-[200] overflow-hidden"
+          style="background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: 0 8px 32px rgba(0,0,0,0.25);"
+        >
+          <!-- Admin only -->
+          <div id="admin-only-option" class="hidden border-b border-[#2A2A2A]">
+            <a href="/admin" class="block px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-red-400 hover:bg-[#1A1A1A] transition-colors">
+              ⚡ Panel Admin
+            </a>
+          </div>
+
+          <!-- Guest menu (hidden until auth resolves) -->
+          <div id="menu-guest" class="hidden p-2 space-y-1">
+            <a href="/login" class="block px-3 py-2.5 text-xs font-semibold text-[#888888] hover:text-[#F5F5F5] hover:bg-[#1A1A1A] transition-colors rounded-sm">
+              Iniciar Sesión
+            </a>
+            <a href="/registro" class="block px-3 py-2.5 text-xs font-bold text-black bg-[#16A34A] hover:bg-[#22C55E] transition-colors rounded-sm text-center">
+              Crear Cuenta
+            </a>
+          </div>
+
+          <!-- Logged-in menu -->
+          <div id="menu-user" class="hidden p-2 space-y-1">
+            <a href="/perfil" class="block px-3 py-2.5 text-xs font-semibold hover:bg-[#1A1A1A] transition-colors rounded-sm" style="color: var(--color-text-muted);">
+              Mi Perfil
+            </a>
+            <a href="/pedidos" class="block px-3 py-2.5 text-xs font-semibold hover:bg-[#1A1A1A] transition-colors rounded-sm" style="color: var(--color-text-muted);">
+              Mis Pedidos
+            </a>
+            <a href="/guardados" class="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold hover:bg-[#1A1A1A] transition-colors rounded-sm" style="color: var(--color-text-muted);">
+              <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Pares Guardados
+            </a>
+            <div class="border-t my-1" style="border-color: var(--color-border);"></div>
+            <button
+              id="logout-btn"
+              class="w-full text-left px-3 py-2.5 text-xs font-semibold text-red-400 hover:bg-[#1A1A1A] transition-colors rounded-sm cursor-pointer border-none bg-transparent"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button
+        id="theme-toggle-btn"
+        class="w-9 h-9 flex items-center justify-center border border-[#2A2A2A] bg-[#111111] hover:border-[#22C55E] rounded-sm transition-colors duration-200 cursor-pointer"
+        aria-label="Cambiar tema"
+        title="Cambiar tema"
+      >
+        <!-- Sun icon (shown in dark mode) -->
+        <svg id="theme-icon-sun" class="w-4 h-4 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+          <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 100 10A5 5 0 0012 7z"/>
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg id="theme-icon-moon" class="hidden w-4 h-4 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+          <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+
+      <!-- Cart Button -->
+      <button
+        id="cart-btn"
+        class="anim-cart relative w-9 h-9 flex items-center justify-center border border-[#2A2A2A] bg-[#111111] hover:border-[#22C55E] rounded-sm transition-colors duration-200 cursor-pointer"
+        aria-label="Ver carrito"
+      >
+        <svg class="w-4 h-4 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+          <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        <span
+          id="cart-count"
+          class="absolute -top-1.5 -right-1.5 bg-[#16A34A] text-black text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-black border border-[#0A0A0A]"
+        >0</span>
+      </button>
+
+      <!-- Mobile hamburger -->
+      <button
+        id="mobile-menu-btn"
+        class="lg:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 border border-[#2A2A2A] bg-[#111111] hover:border-[#22C55E] rounded-sm transition-colors duration-200 cursor-pointer"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+      >
+        <span class="hamburger-line block w-4 h-0.5 bg-[#F5F5F5] transition-transform duration-300"></span>
+        <span class="hamburger-line block w-4 h-0.5 bg-[#F5F5F5] transition-all duration-300"></span>
+        <span class="hamburger-line block w-4 h-0.5 bg-[#F5F5F5] transition-transform duration-300"></span>
+      </button>
+    </div>
+  </div>
 </header>
 
+<!-- Mobile Menu (full-screen overlay) -->
+<div
+  id="mobile-menu"
+  class="fixed inset-0 bg-[#0A0A0A] z-[60] flex flex-col translate-x-full transition-transform duration-300 ease-out lg:hidden"
+  aria-hidden="true"
+>
+  <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#2A2A2A]">
+    <img src="/logo-amg-white.webp" alt="AMG Sneakers" class="h-8 w-auto" width={960} height={960} />
+    <button
+      id="mobile-menu-close"
+      class="w-9 h-9 flex items-center justify-center border border-[#2A2A2A] rounded-sm text-[#888888] hover:text-[#F5F5F5] transition-colors cursor-pointer"
+      aria-label="Cerrar menú"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+        <path d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  <nav class="flex-1 flex flex-col px-6 py-8 space-y-1" aria-label="Menú móvil">
+    <a href="/coleccion" class="block py-4 text-xl font-bold text-[#F5F5F5] border-b border-[#2A2A2A] hover:text-[#22C55E] transition-colors">
+      Colección
+    </a>
+    <a href="/calidades" class="block py-4 text-xl font-bold text-[#F5F5F5] border-b border-[#2A2A2A] hover:text-[#22C55E] transition-colors">
+      Calidades
+    </a>
+    <a href="/faq" class="block py-4 text-xl font-bold text-[#F5F5F5] border-b border-[#2A2A2A] hover:text-[#22C55E] transition-colors">
+      FAQ
+    </a>
+    <a href="/sobre-nosotros" class="block py-4 text-xl font-bold text-[#F5F5F5] border-b border-[#2A2A2A] hover:text-[#22C55E] transition-colors">
+      Sobre Nosotros
+    </a>
+    <a href="/guardados" class="flex items-center gap-3 py-4 text-xl font-bold text-[#F5F5F5] border-b border-[#2A2A2A] hover:text-red-400 transition-colors">
+      <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Guardados
+    </a>
+  </nav>
+  <div class="px-6 pb-8 space-y-3">
+    <a href="/coleccion" class="btn-primary w-full">Ver Catálogo</a>
+  </div>
+</div>
+
 <style>
-    @keyframes marquee {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-    }
-    .animate-marquee {
-        animation: marquee 25s linear infinite;
-    }
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+  #mobile-menu.open { transform: translateX(0); }
 </style>
 
 <script>
-    import { supabase } from '../lib/supabase';
-    import { isCartOpen, loadCartFromDB, cartItems } from '../store/cartStore';
-    import type { CartItem } from '../types';
+  import { supabase } from '../lib/supabase';
+  import { isCartOpen, loadCartFromDB, cartItems } from '../store/cartStore';
+  import type { CartItem } from '../types';
 
-    // 1. Manejo del Dropdown
-    function setupDropdown() {
-        const userBtn = document.getElementById('user-menu-button');
-        const dropdown = document.getElementById('dropdown-menu');
+  // ── Dropdown ──────────────────────────────────────────────
+  function setupDropdown() {
+    const userBtn  = document.getElementById('user-menu-button');
+    const dropdown = document.getElementById('dropdown-menu');
 
-        userBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown?.classList.toggle('hidden');
-        });
+    userBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown?.classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => dropdown?.classList.add('hidden'));
+  }
 
-        document.addEventListener('click', () => {
-            dropdown?.classList.add('hidden');
-        });
+  // ── Mobile menu ───────────────────────────────────────────
+  function setupMobileMenu() {
+    const menuBtn   = document.getElementById('mobile-menu-btn');
+    const closeBtn  = document.getElementById('mobile-menu-close');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    const openMenu = () => {
+      mobileMenu?.classList.remove('translate-x-full');
+      mobileMenu?.classList.add('translate-x-0');
+      mobileMenu?.setAttribute('aria-hidden', 'false');
+      menuBtn?.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    };
+    const closeMenu = () => {
+      mobileMenu?.classList.add('translate-x-full');
+      mobileMenu?.classList.remove('translate-x-0');
+      mobileMenu?.setAttribute('aria-hidden', 'true');
+      menuBtn?.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    };
+
+    menuBtn?.addEventListener('click', openMenu);
+    closeBtn?.addEventListener('click', closeMenu);
+
+    // Close on mobile link clicks
+    mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  }
+
+  // ── Auth state ─────────────────────────────────────────
+  async function updateHeaderUI(user?: any) {
+    // Use provided user object or fetch via getUser() (sends httpOnly cookie)
+    let currentUser = user;
+    if (!currentUser) {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!error) currentUser = data?.user;
+      } catch (e) {
+        console.warn('[AMG] Auth check failed:', e);
+      }
     }
 
-    // 2. Actualizar Interfaz según sesión
-    async function updateHeaderUI() {
-        const { data: { session } } = await supabase.auth.getSession();
+    const guestMenu   = document.getElementById('menu-guest');
+    const userMenu    = document.getElementById('menu-user');
+    const nameDisplay = document.getElementById('user-name-display');
+    const greeting    = document.getElementById('user-greeting');
+    const adminOption = document.getElementById('admin-only-option');
 
-        const guestMenu   = document.getElementById('menu-guest');
-        const userMenu    = document.getElementById('menu-user');
-        const nameDisplay = document.getElementById('user-name-display');
-        const adminOption = document.getElementById('admin-only-option');
+    if (currentUser) {
+      guestMenu?.classList.add('hidden');
+      userMenu?.classList.remove('hidden');
+      if (nameDisplay) {
+        const fullName = currentUser.user_metadata?.full_name
+          || currentUser.user_metadata?.name
+          || currentUser.email?.split('@')[0]
+          || 'Usuario';
+        nameDisplay.textContent = fullName.split(' ')[0].toUpperCase();
+      }
+      if (greeting) greeting.textContent = 'Hola,';
 
-        if (session) {
-            guestMenu?.classList.add('hidden');
-            userMenu?.classList.remove('hidden');
+      // Check admin role
+      try {
+        const { data: profile } = await supabase
+          .from('profiles').select('role').eq('id', currentUser.id).single();
+        if (profile?.role === 'admin') adminOption?.classList.remove('hidden');
+        else adminOption?.classList.add('hidden');
+      } catch { adminOption?.classList.add('hidden'); }
 
-            if (nameDisplay) {
-                const fullName = session.user.user_metadata?.full_name
-                    || session.user.email?.split('@')[0]
-                    || 'Usuario';
-                nameDisplay.innerText = fullName.toUpperCase();
-            }
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profile?.role === 'admin') {
-                adminOption?.classList.remove('hidden');
-            } else {
-                adminOption?.classList.add('hidden');
-            }
-
-            await loadCartFromDB();
-        } else {
-            guestMenu?.classList.remove('hidden');
-            userMenu?.classList.add('hidden');
-            adminOption?.classList.add('hidden');
-            if (nameDisplay) nameDisplay.innerText = 'MI CUENTA';
-        }
+      await loadCartFromDB();
+    } else {
+      guestMenu?.classList.remove('hidden');
+      userMenu?.classList.add('hidden');
+      adminOption?.classList.add('hidden');
+      if (nameDisplay) nameDisplay.textContent = 'MI CUENTA';
+      if (greeting) greeting.textContent = 'Hola,';
     }
+  }
 
-    // 3. ✅ Contador del carrito — FIX: readonly CartItem[] para nanostores
-    cartItems.subscribe((items: readonly CartItem[]) => {
-        const countEl = document.getElementById('cart-count');
-        if (countEl) {
-            const total = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
-            countEl.innerText = total.toString();
-        }
-    });
+  // ── Cart counter ──────────────────────────────────────────
+  cartItems.subscribe((items: readonly CartItem[]) => {
+    const countEl = document.getElementById('cart-count');
+    if (countEl) {
+      const total = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+      countEl.textContent = total.toString();
+    }
+  });
 
-    // 4. Botón carrito
-    document.getElementById('cart-btn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        isCartOpen.set(true);
-    });
+  // ── Cart button ───────────────────────────────────────────
+  document.getElementById('cart-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    isCartOpen.set(true);
+  });
 
-    // 5. Botón cerrar sesión
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/';
-    });
+  // ── Logout ────────────────────────────────────────────────
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  });
 
-    // 6. Escuchar cambios de autenticación
-    supabase.auth.onAuthStateChange(() => {
-        updateHeaderUI();
-    });
+  // ── Auth listener ─────────────────────────────────────────
+  supabase.auth.onAuthStateChange((_event, session) => {
+    updateHeaderUI(session?.user || null);
+  });
 
-    // 7. Inicializar
-    setupDropdown();
-    updateHeaderUI();
+  // ── Logout ────────────────────────────────────────────────
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  });
+
+  // ── Theme Toggle ──────────────────────────────────────────
+  function applyTheme(theme: string) {
+    const html = document.documentElement;
+    const sunIcon  = document.getElementById('theme-icon-sun');
+    const moonIcon = document.getElementById('theme-icon-moon');
+    if (theme === 'light') {
+      html.classList.add('light-mode');
+      sunIcon?.classList.add('hidden');
+      moonIcon?.classList.remove('hidden');
+    } else {
+      html.classList.remove('light-mode');
+      sunIcon?.classList.remove('hidden');
+      moonIcon?.classList.add('hidden');
+    }
+  }
+
+  const savedTheme = localStorage.getItem('amg-theme') || 'dark';
+  applyTheme(savedTheme);
+
+  document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
+    const current = document.documentElement.classList.contains('light-mode') ? 'light' : 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('amg-theme', next);
+    applyTheme(next);
+  });
+
+  // ── Init ──────────────────────────────────────────────────
+  setupDropdown();
+  setupMobileMenu();
+  updateHeaderUI();
+
+  // ── Wishlist badge counter ─────────────────────────────────
+  import { wishlist } from '../store/wishlistStore';
+  function updateWishlistBadge(items: readonly any[]) {
+    const badge = document.getElementById('wishlist-count-badge');
+    if (!badge) return;
+    if (items.length > 0) {
+      badge.textContent = String(items.length);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+  wishlist.subscribe(updateWishlistBadge);
+  updateWishlistBadge(wishlist.get());
 </script>

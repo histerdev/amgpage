@@ -1,90 +1,89 @@
 ---
 import Layout from '../layouts/Layout.astro';
+export const prerender = true;
 ---
 
-<Layout title="PK vs G5 | AMG Sneakers">    
-    <main class="bg-white pt-32 pb-24">
-        <div class="max-w-4xl mx-auto px-6">
-            <div class="mb-16 text-center reveal-init">
-                <span class="text-[#2ecc71] font-black uppercase tracking-[0.3em] text-[10px]">Estándares de Fabricación</span>
-                <h1 class="text-5xl md:text-7xl font-[900] uppercase italic tracking-tighter leading-none mt-4 text-slate-900">
-                    GUÍA DE <span class="text-[#2ecc71]">CALIDAD</span>
-                </h1>
-                <p class="text-zinc-500 mt-6 text-sm max-w-xl mx-auto leading-relaxed font-medium">
-                    En AMG Sneakers gestionamos solo dos niveles de fabricación. La diferencia radica en la fidelidad de los materiales y la precisión de los detalles.
-                </p>
-            </div>
+<Layout
+  title="Guía de Calidades | AMG Sneakers"
+  description="Conoce los estándares de fabricación PK y G5 de AMG Sneakers. Transparencia total en cada par que gestionamos."
+>
+  <main class="bg-[#0A0A0A] pt-24 pb-20 min-h-screen">
+    <div class="max-w-4xl mx-auto px-6">
 
-            <div class="grid md:grid-cols-2 gap-8">
-                <section class="bg-zinc-50 rounded-[40px] p-8 border border-zinc-100 flex flex-col reveal-init">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="bg-black text-white px-4 py-1 rounded-full text-[10px] font-black uppercase italic">Top Tier</div>
-                        <span class="text-3xl font-[900] text-[#2ecc71]">99%</span>
-                    </div>
-                    
-                    <h2 class="text-3xl font-[900] uppercase italic tracking-tighter mb-4">PK (Perfect kicks)</h2>
-                    <p class="text-zinc-600 text-xs leading-relaxed mb-6 flex-grow">
-                        Es el nivel más alto de fidelidad. Se utilizan <strong>materiales idénticos</strong> a los lanzamientos de retail: cueros de primera capa, gamuza real con movimiento y tecnología de amortiguación exacta.
-                    </p>
-                    
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71]"></span> Materiales Originales
-                        </li>
-                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71]"></span> Construcción 1:1
-                        </li>
-                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#2ecc71]"></span> Fidelidad Total (99%)
-                        </li>
-                    </ul>
+      <!-- Header -->
+      <div class="text-center mb-16 reveal-init">
+        <p class="text-[10px] font-bold text-[#16A34A] uppercase tracking-[0.3em] mb-4">Estándares de Fabricación</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-[#F5F5F5] mb-4" style="font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em;">
+          Guía de Calidades
+        </h1>
+        <p class="text-[#888888] text-sm max-w-xl mx-auto leading-relaxed">
+          En AMG gestionamos solo dos niveles de fabricación. La diferencia radica en la fidelidad de los materiales y la precisión de los detalles.
+        </p>
+      </div>
 
-                    <div class="text-center p-4 bg-white rounded-2xl border border-zinc-100">
-                        <p class="text-[9px] font-black uppercase text-zinc-400">Recomendado para Coleccionistas</p>
-                    </div>
-                </section>
+      <!-- Cards -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
 
-                <section class="bg-white rounded-[40px] p-8 border border-zinc-100 flex flex-col reveal-init">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="bg-zinc-200 text-zinc-500 px-4 py-1 rounded-full text-[10px] font-black uppercase italic">High Tier</div>
-                        <span class="text-3xl font-[900] text-zinc-400">80%</span>
-                    </div>
-                    
-                    <h2 class="text-3xl font-[900] uppercase italic tracking-tighter mb-4 text-zinc-800">G5 STANDARD</h2>
-                    <p class="text-zinc-600 text-xs leading-relaxed mb-6 flex-grow">
-                        Una opción equilibrada. Utiliza <strong>materiales similares</strong> de alta calidad. Estéticamente es impecable, pero con sutiles diferencias en la composición de los materiales premium.
-                    </p>
-                    
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-400">
-                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span> Materiales Similares
-                        </li>
-                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-400">
-                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span> Estética Superior
-                        </li>
-                        <li class="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-400">
-                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-300"></span> Fidelidad Alta (80%)
-                        </li>
-                    </ul>
+        <!-- PK -->
+        <section class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-8 flex flex-col reveal-init hover:border-[#16A34A]/40 transition-colors">
+          <div class="flex justify-between items-center mb-6">
+            <span class="bg-[#16A34A] text-black text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Top Tier</span>
+            <span class="text-3xl font-bold text-[#16A34A]">99%</span>
+          </div>
+          <h2 class="text-2xl font-bold text-[#F5F5F5] mb-3" style="font-family: 'Space Grotesk', sans-serif;">
+            PK <span class="text-[#888888] font-normal text-base">(Perfect Kicks)</span>
+          </h2>
+          <p class="text-[#888888] text-sm leading-relaxed mb-6 flex-grow">
+            El nivel más alto de fidelidad. Materiales idénticos a los lanzamientos retail: cueros de primera capa, gamuza real con movimiento y tecnología de amortiguación exacta.
+          </p>
+          <ul class="space-y-2.5 mb-8">
+            {['Materiales originales', 'Construcción 1:1', 'Fidelidad total (99%)', 'Inspección QC rigurosa'].map(f => (
+              <li class="flex items-center gap-2.5 text-xs text-[#F5F5F5]">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#16A34A] flex-shrink-0"></span>
+                {f}
+              </li>
+            ))}
+          </ul>
+          <div class="bg-[#0D1F10] border border-[#16A34A]/20 rounded-sm px-4 py-3 text-center">
+            <p class="text-[10px] font-semibold text-[#16A34A] uppercase tracking-widest">Recomendado para coleccionistas</p>
+          </div>
+        </section>
 
-                    <div class="text-center p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                        <p class="text-[9px] font-black uppercase text-zinc-400">Excelente relación precio/calidad</p>
-                    </div>
-                </section>
-            </div>
+        <!-- G5 -->
+        <section class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-8 flex flex-col reveal-init" style="transition-delay: 120ms;">
+          <div class="flex justify-between items-center mb-6">
+            <span class="bg-[#1A1A1A] border border-[#2A2A2A] text-[#888888] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">High Tier</span>
+            <span class="text-3xl font-bold text-[#888888]">80%</span>
+          </div>
+          <h2 class="text-2xl font-bold text-[#F5F5F5] mb-3" style="font-family: 'Space Grotesk', sans-serif;">
+            G5 <span class="text-[#888888] font-normal text-base">(Standard)</span>
+          </h2>
+          <p class="text-[#888888] text-sm leading-relaxed mb-6 flex-grow">
+            Una opción equilibrada. Materiales similares de alta calidad. Estéticamente impecable, con sutiles diferencias en la composición de los materiales premium.
+          </p>
+          <ul class="space-y-2.5 mb-8">
+            {['Materiales de alta calidad', 'Estética superior', 'Fidelidad alta (80%)', 'Inspección QC incluida'].map(f => (
+              <li class="flex items-center gap-2.5 text-xs text-[#888888]">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] flex-shrink-0"></span>
+                {f}
+              </li>
+            ))}
+          </ul>
+          <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm px-4 py-3 text-center">
+            <p class="text-[10px] font-semibold text-[#888888] uppercase tracking-widest">Excelente relación precio/calidad</p>
+          </div>
+        </section>
 
-            <div class="mt-12 bg-black rounded-[30px] p-8 text-center reveal-init">
-                <h3 class="text-white font-[900] italic uppercase tracking-tighter text-xl mb-2">Nuestra Garantía de Gestión</h3>
-                <p class="text-zinc-400 text-[11px] uppercase tracking-widest font-bold">
-                    Sea cual sea el nivel que elijas, cada par pasa por nuestra inspección física antes del envío.
-                </p>
-            </div>
-        </div>
-    </main>
+      </div>
+
+      <!-- QC guarantee banner -->
+      <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-6 text-center reveal-init">
+        <p class="text-xs font-semibold text-[#888888] uppercase tracking-wider">
+          Sea cual sea el nivel que elijas —
+          <span class="text-[#F5F5F5]">cada par pasa por inspección QC visual antes de salir hacia Chile.</span>
+        </p>
+      </div>
+
+    </div>
+  </main>
 </Layout>
-
-<style>
-    .reveal-init { opacity: 0; transform: translateY(20px); transition: all 0.8s ease-out; }
-    .reveal-init.active { opacity: 1; transform: translateY(0); }
-</style>
-

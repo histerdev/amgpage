@@ -80,6 +80,13 @@ export const prerender = false;
             return;
         }
 
+        // SECURITY FIX: Escape all DB-sourced values before injecting into innerHTML.
+        function escapeHTML(str: unknown): string {
+            const div = document.createElement('div');
+            div.textContent = String(str ?? '');
+            return div.innerHTML;
+        }
+
         // Mostrar datos básicos
         const emailEl   = document.getElementById('profile-email');
         const initialEl = document.getElementById('user-initial');
@@ -128,28 +135,39 @@ export const prerender = false;
             const date = new Date(order.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' });
             const item = order.order_items[0];
 
+            // SECURITY FIX: Escape all DB-sourced values before rendering in innerHTML.
+            const safeImg     = escapeHTML(item?.image_url || '');
+            const safeName    = escapeHTML(item?.product_name || 'Pedido Sin Nombre');
+            const safeStatus  = escapeHTML(order.status);
+            const safeSize    = escapeHTML(item?.size || '--');
+            const safeQuality = escapeHTML(item?.quality || '--');
+            const safeId      = escapeHTML(order.id.slice(0, 8));
+            const safeTotal   = new Intl.NumberFormat('es-CL').format(Number(order.total_price) || 0);
+            const safeDate    = escapeHTML(date);
+            const statusCls   = escapeHTML(statusColors[order.status] || 'bg-zinc-100 text-zinc-600');
+
             const card = document.createElement('div');
             card.className = "group bg-white border border-zinc-100 p-6 rounded-[32px] flex flex-col md:flex-row items-center gap-6 transition-all hover:shadow-xl hover:shadow-zinc-200/50 hover:border-zinc-200";
 
             card.innerHTML = `
                 <div class="w-24 h-24 bg-zinc-50 rounded-2xl flex-shrink-0 flex items-center justify-center p-2 border border-zinc-100">
-                    <img src="${item?.image_url || ''}" class="w-full h-full object-contain mix-blend-multiply" alt="Producto">
+                    <img src="${safeImg}" class="w-full h-full object-contain mix-blend-multiply" alt="Producto">
                 </div>
                 <div class="flex-1 text-center md:text-left space-y-1">
                     <div class="flex flex-col md:flex-row md:items-center gap-2">
-                        <span class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">${date}</span>
-                        <span class="text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${statusColors[order.status] || 'bg-zinc-100 text-zinc-600'} w-fit mx-auto md:mx-0">
-                            ${order.status}
+                        <span class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">${safeDate}</span>
+                        <span class="text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${statusCls} w-fit mx-auto md:mx-0">
+                            ${safeStatus}
                         </span>
                     </div>
-                    <h4 class="text-xl font-[900] uppercase italic tracking-tighter leading-none">${item?.product_name || 'Pedido Sin Nombre'}</h4>
+                    <h4 class="text-xl font-[900] uppercase italic tracking-tighter leading-none">${safeName}</h4>
                     <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                        Talla: ${item?.size || '--'} | Calidad: ${item?.quality || '--'}
+                        Talla: ${safeSize} | Calidad: ${safeQuality}
                     </p>
                 </div>
                 <div class="text-center md:text-right">
-                    <p class="text-2xl font-[900] italic tracking-tighter">$${new Intl.NumberFormat('es-CL').format(order.total_price)}</p>
-                    <p class="text-[9px] font-black text-zinc-300 uppercase tracking-widest">ID: ${order.id.slice(0, 8)}</p>
+                    <p class="text-2xl font-[900] italic tracking-tighter">$${safeTotal}</p>
+                    <p class="text-[9px] font-black text-zinc-300 uppercase tracking-widest">ID: ${safeId}</p>
                 </div>
             `;
             ordersContainer!.appendChild(card);

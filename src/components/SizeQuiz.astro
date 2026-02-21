@@ -1,0 +1,84 @@
+---
+// SizeQuiz.astro — micro-commitment size helper widget
+---
+
+<div id="size-quiz-widget" class="space-y-3">
+  <button
+    id="size-quiz-toggle"
+    class="text-[10px] text-[#16A34A] hover:text-[#22C55E] uppercase tracking-widest font-semibold transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1.5"
+    aria-expanded="false"
+    aria-controls="size-quiz-body"
+  >
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
+    ¿No sabes tu talla en CM? → Encontrar mi talla
+  </button>
+
+  <div
+    id="size-quiz-body"
+    class="hidden bg-[#111111] border border-[#2A2A2A] rounded-sm p-4"
+  >
+    <p class="text-[10px] text-[#888888] uppercase tracking-widest mb-3">¿Cuál es tu talla habitual en zapatillas?</p>
+    <div class="flex flex-wrap gap-2 mb-3">
+      {[
+        { eu: '38', cm: '24.0' },
+        { eu: '39', cm: '24.5' },
+        { eu: '40', cm: '25.5' },
+        { eu: '41', cm: '26.0' },
+        { eu: '42', cm: '26.5' },
+        { eu: '43', cm: '27.5' },
+        { eu: '44', cm: '28.0' },
+        { eu: '45', cm: '28.5' },
+      ].map(({ eu, cm }) => (
+        <button
+          class="quiz-size-btn py-2 px-3.5 rounded-sm text-xs font-semibold border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#16A34A] hover:text-[#F5F5F5] transition-all duration-150"
+          data-eu={eu}
+          data-cm={cm}
+        >
+          {eu}
+        </button>
+      ))}
+    </div>
+    <div id="size-quiz-result" class="hidden">
+      <div class="flex items-center gap-2 py-2.5 px-3 bg-[#0D1F10] border border-[#16A34A]/30 rounded-sm">
+        <svg class="w-3.5 h-3.5 text-[#16A34A] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        </svg>
+        <p class="text-xs text-[#F5F5F5]" id="size-quiz-result-text"></p>
+      </div>
+    </div>
+    <p class="text-[10px] text-[#888888] mt-2.5 leading-relaxed">
+      Nuestros pares son <strong class="text-[#F5F5F5]">True to Size</strong>. Si tu talla habitual es 42 EU, pide la 42 EU.
+    </p>
+  </div>
+</div>
+
+<script>
+  const toggle    = document.getElementById('size-quiz-toggle');
+  const body      = document.getElementById('size-quiz-body');
+  const resultBox = document.getElementById('size-quiz-result');
+  const resultTxt = document.getElementById('size-quiz-result-text');
+
+  toggle?.addEventListener('click', () => {
+    const isHidden = body?.classList.contains('hidden');
+    body?.classList.toggle('hidden', !isHidden);
+    toggle.setAttribute('aria-expanded', String(isHidden));
+  });
+
+  document.querySelectorAll('.quiz-size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eu = (btn as HTMLElement).dataset.eu;
+      const cm = (btn as HTMLElement).dataset.cm;
+
+      // Highlight selected
+      document.querySelectorAll('.quiz-size-btn').forEach(b => {
+        b.className = 'quiz-size-btn py-2 px-3.5 rounded-sm text-xs font-semibold border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#16A34A] hover:text-[#F5F5F5] transition-all duration-150';
+      });
+      btn.className = 'quiz-size-btn py-2 px-3.5 rounded-sm text-xs font-semibold border-2 border-[#16A34A] bg-[#16A34A] text-black transition-all duration-150';
+
+      if (resultTxt) resultTxt.textContent = `Tu talla ${eu} EU equivale a ${cm} CM en nuestra guía.`;
+      resultBox?.classList.remove('hidden');
+    });
+  });
+</script>
