@@ -1,13 +1,13 @@
+/* AMG Animation Layer */
+@import './animations.css';
+
 /* Astro + Tailwind base */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* AMG Animation Layer */
-@import './animations.css';
-
 /* ═══════════════════════════════════════════════════════
-   AMG Design System — Dark (default)
+  AMG Design System — Dark (default)
 ═══════════════════════════════════════════════════════ */
 :root {
   --color-bg: #0A0A0A;
