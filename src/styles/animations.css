@@ -326,11 +326,19 @@
 
 .product-item {
     transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    contain: layout paint style;
 }
 
-.product-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(34, 197, 94, 0.12);
+/* Only apply hover effects on real pointer devices (not touch) */
+@media (hover: hover) and (pointer: fine) {
+    .product-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(34, 197, 94, 0.12);
+    }
+
+    .product-item:hover .card-arrow {
+        transform: translateX(4px);
+    }
 }
 
 .product-item:active {
@@ -341,8 +349,11 @@
     transition: transform 200ms ease;
 }
 
-.product-item:hover .card-arrow {
-    transform: translateX(4px);
+/* Disable pulse dot on mobile to avoid 70+ simultaneous animations */
+@media (max-width: 767px) {
+    .animate-pulse {
+        animation: none !important;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════

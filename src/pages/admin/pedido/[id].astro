@@ -1,8 +1,27 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import { createSupabaseServerClient } from '../../../lib/supabase-ssr';
+
 export const prerender = false;
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/admin');
+
+// SECURITY FIX: Server-side admin verification (defence-in-depth beyond middleware)
+// The middleware's startsWith("/admin") guard covers this route, but an explicit
+// server-side check here ensures this page is NEVER rendered for non-admins even
+// if middleware logic changes in the future.
+const _responseHeaders = new Headers();
+const _supabase = createSupabaseServerClient(Astro.request, _responseHeaders);
+const { data: { user: _user } } = await _supabase.auth.getUser();
+if (!_user) return Astro.redirect('/login?redirectTo=/admin');
+const { data: _profile } = await _supabase
+  .from('profiles')
+  .select('role')
+  .eq('id', _user.id)
+  .single();
+if (_profile?.role !== 'admin') {
+  return new Response('403 Forbidden — Admin access only.', { status: 403 });
+}
 ---
 
 <Layout title={`Gestión Pedido #${id?.slice(0,5)}`}>

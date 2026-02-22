@@ -89,7 +89,7 @@ export const prerender = false;
               id="pay-button"
               class="w-full bg-[#16A34A] hover:bg-[#22C55E] text-black py-5 rounded-sm font-bold uppercase tracking-widest text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Ir a Pagar → MercadoPago
+              Pagar de forma segura en MercadoPago 🔒
             </button>
             <p class="text-[10px] text-center text-[#888888] uppercase tracking-widest">
               Pago procesado de forma segura por MercadoPago
@@ -215,7 +215,7 @@ export const prerender = false;
   }
 
   if (rutInput) {
-    rutInput.addEventListener('input', (e) => {
+    rutInput.addEventListener('blur', (e) => {
       const target = e.target as HTMLInputElement;
       let clean = target.value.replace(/[^0-9K]/gi, '').toUpperCase().slice(0, 9);
       if (clean.length > 0) {
@@ -331,15 +331,13 @@ export const prerender = false;
 
       if (!result.init_point) throw new Error('No se pudo generar el enlace de pago');
 
-      cartStore.set([]);
-      localStorage.removeItem('amg-cart');
       window.location.href = result.init_point;
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       if (errorMsg) { errorMsg.textContent = `⚠️ ${message}`; errorMsg.classList.remove('hidden'); }
     } finally {
-      if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Ir a Pagar → MercadoPago'; }
+      if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pagar de forma segura en MercadoPago 🔒'; }
     }
   });
 

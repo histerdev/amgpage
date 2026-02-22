@@ -26,14 +26,28 @@ export const prerender = true;
           <div class="space-y-4">
             <h2 class="text-2xl font-bold text-[#F5F5F5]" style="font-family: 'Space Grotesk', sans-serif;">¿Quiénes somos?</h2>
             <p class="text-[#888888] leading-relaxed text-sm">
-              Somos, antes que todo, <strong class="text-[#F5F5F5]">aficionados de los pares</strong>. Hemos pasado años en la cultura sneakerhead y hemos presenciado de todo: estafas directas, precios abusivos y cero transparencia.
+              Somos <strong class="text-[#F5F5F5]">compradores antes que vendedores</strong>. Llevamos años importando pares para nosotros mismos — hasta que decidimos abrir el proceso a quienes quieran lo mismo.
             </p>
             <p class="text-[#888888] leading-relaxed text-sm">
-              Por eso creamos AMG: una sociedad de gestión que pone al comprador primero. Nada más, nada menos.
+              AMG nació de la frustración por los precios y estafas, no de un plan de negocios.
             </p>
           </div>
-          <div class="bg-[#111111] border border-[#2A2A2A] aspect-square rounded-sm flex items-center justify-center">
-            <img src="/logo-amg-white.webp" alt="AMG Logo" class="w-1/2 opacity-20" />
+          <div class="bg-[#111111] border border-[#2A2A2A] aspect-square rounded-sm flex flex-col items-center justify-center p-6 text-center space-y-4 relative overflow-hidden">
+            <!-- Glow background -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none"></div>
+            <!-- Placeholder for Founder photo -->
+            <div class="w-24 h-24 rounded-full bg-[#1A1A1A] border-2 border-[#16A34A] overflow-hidden flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(22,163,74,0.15)]">
+              <svg class="w-10 h-10 text-[#2A2A2A]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              <!-- TODO (AMG): Put founder photo here: <img src="/images/founder.jpg" class="absolute inset-0 w-full h-full object-cover"/> -->
+            </div>
+            <div class="relative z-10">
+              <p class="text-base font-bold text-[#F5F5F5]">Nicolás <span class="text-[#888888] font-normal text-xs uppercase tracking-widest ml-1">/ Fundador</span></p>
+              <p class="text-xs text-[#888888] italic mt-2 w-4/5 mx-auto">
+                "Hola. Creé AMG porque ya no quería pagar precios inflados para sumar un par a mi colección personal."
+              </p>
+            </div>
           </div>
         </section>
 
@@ -61,7 +75,7 @@ export const prerender = true;
         <section class="border border-[#2A2A2A] border-dashed rounded-sm p-8 reveal-init">
           <h2 class="text-xl font-bold text-[#F5F5F5] mb-4" style="font-family: 'Space Grotesk', sans-serif;">¿Por qué lo hacemos?</h2>
           <p class="text-[#888888] text-sm leading-relaxed mb-6">
-            Nacimos de la frustración de ver cómo se castiga al consumidor que no tiene un presupuesto de millones. La pasión no debería ser un riesgo de estafa.
+            Nacimos de la frustración de ver cómo se castiga al consumidor que no tiene un presupuesto de miles. La pasión no debería ser un riesgo de estafa.
           </p>
           <blockquote class="border-l-2 border-[#16A34A] pl-6">
             <p class="text-[#F5F5F5] italic text-sm leading-relaxed">

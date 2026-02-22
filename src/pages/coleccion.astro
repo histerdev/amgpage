@@ -6,6 +6,9 @@ export const prerender = true;
 
 const siluetas = ["Jordan 1", "Jordan 3", "Jordan 4", "Jordan 5", "Jordan 6", "Jordan 7", "Jordan 8", "Jordan 9", "Jordan 11", "Jordan 12", "Jordan 13", "Dunk", "Travis Scott"];
 const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
+
+// First 8 products get eager loading + high fetchpriority (LCP candidates)
+const EAGER_COUNT = 8;
 ---
 
 <Layout
@@ -26,8 +29,8 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
           </span>
         </div>
 
-        <!-- Filter bar -->
-        <div class="sticky top-[80px] z-40 bg-[#0A0A0A]/95 backdrop-blur-md pb-4 space-y-3">
+        <!-- Filter bar — backdrop-blur only on desktop (GPU-heavy on mobile) -->
+        <div class="sticky top-[80px] z-40 bg-[#0A0A0A]/95 md:backdrop-blur-md pb-4 space-y-3">
 
           <!-- Search -->
           <div class="relative">
@@ -79,11 +82,15 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
         </div>
       </div>
 
-      <!-- Product grid -->
+      <!-- Product grid — all products rendered (SSG), JS hides invisible ones -->
       <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {productos.map((prod) => (
-          <div class="product-wrapper" data-product-id={prod.id}>
-            <ProductCard {...prod} />
+        {productos.map((prod, i) => (
+          <div
+            class="product-wrapper"
+            data-product-id={prod.id}
+            data-index={i}
+          >
+            <ProductCard {...prod} eager={i < EAGER_COUNT} />
           </div>
         ))}
       </div>
@@ -161,4 +168,77 @@ const todosLosTags = [...new Set(productos.flatMap(p => p.tags))].sort();
     currentSearch = (e.target as HTMLInputElement).value;
     schedule();
   });
+</script>
+
+<!-- Wishlist script — SINGLE instance, not per-card, to avoid N syncAllHearts() calls -->
+<script>
+  import { wishlist, toggleWishlist, isWishlisted } from '../store/wishlistStore';
+
+  function syncAllHearts() {
+    document.querySelectorAll<HTMLElement>('.wishlist-heart-btn').forEach(btn => {
+      const id = btn.dataset.productId!;
+      const saved = isWishlisted(id);
+      btn.querySelector('.heart-outline')?.classList.toggle('hidden', saved);
+      btn.querySelector('.heart-filled')?.classList.toggle('hidden', !saved);
+    });
+  }
+
+  // Initial sync — single pass over all cards
+  syncAllHearts();
+
+  // Re-sync when wishlist state changes
+  wishlist.subscribe(() => syncAllHearts());
+  window.addEventListener('wishlist-change', () => syncAllHearts());
+
+  // Unified click delegation — one listener for ALL cards in the page
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('.wishlist-heart-btn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const id      = btn.dataset.productId!;
+    const name    = btn.dataset.productName!;
+    const image   = btn.dataset.productImage!;
+    const pricePK = Number(btn.dataset.pricePk);
+    const priceG5 = Number(btn.dataset.priceG5);
+
+    // Optimistic animation
+    btn.style.transform = 'scale(1.25)';
+    setTimeout(() => { btn.style.transform = ''; }, 200);
+
+    const nowSaved = await toggleWishlist({ id, name, image, pricePK, priceG5, savedAt: Date.now() });
+
+    btn.querySelector('.heart-outline')?.classList.toggle('hidden', nowSaved);
+    btn.querySelector('.heart-filled')?.classList.toggle('hidden', !nowSaved);
+
+    showWishlistToast(nowSaved, name);
+    window.dispatchEvent(new CustomEvent('wishlist-change', { detail: { id, saved: nowSaved } }));
+  });
+
+  function showWishlistToast(saved: boolean, name: string) {
+    const existing = document.getElementById('wl-toast');
+    existing?.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'wl-toast';
+    toast.className = 'fixed bottom-[80px] left-4 z-[200] flex items-center gap-2.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm px-4 py-3 shadow-2xl max-w-[280px]';
+    toast.style.cssText = 'opacity:0; transform:translateX(-16px); transition: opacity 0.3s ease, transform 0.3s ease;';
+
+    const shortName = name.length > 28 ? name.slice(0, 28) + '…' : name;
+    toast.innerHTML = saved
+      ? `<svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div><p class="text-[11px] text-[#F5F5F5] font-semibold">${shortName}</p><a href="/guardados" class="text-[10px] text-[#16A34A] hover:underline">Ver guardados →</a></div>`
+      : `<svg class="w-4 h-4 text-[#888888] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><p class="text-[11px] text-[#888888]">Quitado de guardados</p>`;
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(0)';
+    }));
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-16px)';
+      setTimeout(() => toast.remove(), 350);
+    }, 3500);
+  }
 </script>

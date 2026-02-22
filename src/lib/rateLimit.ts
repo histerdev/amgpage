@@ -42,9 +42,11 @@ async function checkRateLimit(
     .gte("created_at", windowStart.toISOString());
 
   if (countError) {
-    console.error("Rate limit DB error:", countError.message);
-    // Si la DB falla, PERMITIR el request (fail-open)
-    // para no bloquear ventas legítimas
+    // SECURITY FIX: Add critical security alert log so rate-limit bypass is visible
+    // in monitoring dashboards even though we still fail-open (to preserve sales
+    // during Supabase outages). Investigate any occurrence of this log urgently.
+    console.error("[SECURITY ALERT] Rate limit DB error — limits are BYPASSED for key:", key);
+    console.error("[SECURITY ALERT] DB error detail:", countError.message);
     return { success: true, remaining: maxRequests };
   }
 

@@ -4,6 +4,8 @@ import ProductCard from '../components/ProductCard.astro';
 import WhatsAppChatBubbles from '../components/WhatsAppChatBubbles.astro';
 import FounderMessage from '../components/FounderMessage.astro';
 import FearFAQ from '../components/FearFAQ.astro';
+import MiniGuia from '../components/MiniGuia.astro';
+import QuizHero from '../components/QuizHero.astro';
 import { productos } from '../data/products';
 export const prerender = true;
 
@@ -63,8 +65,7 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
 
             <!-- Subtitle -->
             <p class="anim-hero-subtitle text-[#888888] text-base leading-relaxed mb-8 max-w-md">
-              Importación directa desde manufactura de élite.<br />
-              Control de calidad visual antes de cada despacho.
+              Tu par favorito, traído directo de fábrica, con fotos del par antes de enviarlo. Sin estafas, sin sorpresas, con MercadoPago.
             </p>
 
             <!-- CTAs -->
@@ -92,14 +93,14 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
               ))}
             </div>
 
-            <!-- ── Real-time social proof ticker ── -->
+            <!-- ── Real-time status ── -->
             <div class="flex items-center gap-2">
               <span class="relative flex h-2 w-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#16A34A] opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-[#16A34A]"></span>
               </span>
-              <p id="social-proof-ticker" class="text-[11px] text-[#888888]">
-                👁 <span id="viewer-count">12</span> personas están viendo el catálogo ahora
+              <p class="text-[11px] text-[#888888]">
+                🟢 Catálogo en línea con fábrica. Gestión individual 1 a 1.
               </p>
             </div>
 
@@ -150,6 +151,12 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
     </section>
 
     <!-- ══════════════════════════════════════════════════
+         MINI-GUIA & QUIZ (Trust Boosters pre-compra)
+    ══════════════════════════════════════════════════ -->
+    <MiniGuia />
+    <QuizHero />
+
+    <!-- ══════════════════════════════════════════════════
          TRUST STRIP — 4 indicators
     ══════════════════════════════════════════════════ -->
     <section id="trust" class="bg-[#111111] border-y border-[#2A2A2A]">
@@ -184,7 +191,7 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
             <span class="text-2xl">⚖️</span>
             <div>
               <p class="text-[11px] font-bold text-[#F5F5F5] uppercase tracking-widest">Seguro Aduanero</p>
-              <p class="text-[10px] text-[#888888] mt-0.5">Reposición garantizada</p>
+              <p class="text-[10px] text-[#888888] mt-0.5 max-w-[120px]">Si lo retiene aduana, te lo remandamos gratis</p>
             </div>
           </div>
 
@@ -244,14 +251,74 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
         <!-- Steps -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
 
-          <!-- Connecting line (desktop) -->
-          <div class="hidden lg:block absolute top-8 left-[12.5%] right-[12.5%] h-px border-t border-dashed border-[#2A2A2A] z-0"></div>
+          <!-- ANIMATIONS BLOCK START -->
+          <!-- ANIMATIONS BLOCK START -->
+          <!-- Connecting line & Desktop Animation (lg) -->
+          <div class="hidden lg:block absolute top-[30px] left-[12.5%] right-[12.5%] h-px border-t border-dashed border-[#2A2A2A] z-0">
+            <div class="absolute top-[-14px] left-0 text-2xl -ml-3" style="animation: desktopCart 7.5s linear infinite;">
+              <span class="inline-block" style="transform: scaleX(-1);">🛒</span>
+            </div>
+            <!-- Camera: absolute so cam-flash child positions correctly -->
+            <div class="absolute top-[-14px] left-[33.3%] text-2xl -ml-3" style="animation: desktopCam 7.5s linear infinite;">
+              <span style="display:inline-block; animation: desktopCamPulse 7.5s linear infinite;">📸</span>
+              <div class="cam-flash" style="animation: camFlash 7.5s linear infinite;">
+                <div class="cam-flash-rays" style="animation: camFlashRays 7.5s linear infinite;"></div>
+              </div>
+            </div>
+            <div class="absolute top-[-14px] left-[66.6%] text-xl -ml-3" style="animation: desktopPlane 7.5s linear infinite;">✈️</div>
+          </div>
+
+          <!--
+            Mobile S-Curve: SVG draws the visible path only.
+            HTML divs are animated by JS using path.getPointAtLength() for pixel-perfect,
+            zero-distortion emoji rendering at their natural browser size.
+          -->
+          <div class="block md:hidden absolute inset-0 z-0" id="mobileAnimWrap" style="pointer-events:none;overflow:visible;">
+            <svg id="mSvg" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 500"
+                 xmlns="http://www.w3.org/2000/svg">
+              <path id="mSvgPath"
+                d="M 50,30 C 90,105 90,165 50,225 C 10,285 10,355 50,430"
+                fill="none" stroke="#16A34A" stroke-width="0.9" stroke-dasharray="3 8" opacity="0.5"/>
+            </svg>
+            <!-- Real HTML divs – sized and positioned in pixels by JS; never distorted -->
+            <div id="mEmojiCart" style="position:absolute;top:0;left:0;font-size:24px;line-height:1;opacity:0;will-change:transform;transform:translate(-50%,-50%);">
+              <span style="display:inline-block;transform:scaleX(-1);">🛒</span>
+            </div>
+            <div id="mEmojiCam" style="position:absolute;top:0;left:0;font-size:24px;line-height:1;opacity:0;will-change:transform;transform:translate(-50%,-50%);">
+              <span style="display:inline-block;">📸</span>
+              <!-- flash burst — cartoon starburst, shown/hidden by JS -->
+              <div id="mCamFlash" class="m-cam-flash-burst" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);opacity:0;pointer-events:none;width:50px;height:50px;"></div>
+            </div>
+            <div id="mEmojiPlane" style="position:absolute;top:0;left:0;font-size:22px;line-height:1;opacity:0;will-change:transform;transform:translate(-50%,-50%);">✈️</div>
+          </div>
+
+          <!-- Connecting line & Tablet Animation (md) -->
+          <div class="hidden md:block lg:hidden absolute inset-0 z-0 pointer-events-none opacity-80">
+            <div class="absolute top-[25%] left-[25%] right-[25%] h-px border-t border-dashed border-[#2A2A2A]"></div>
+            <div class="absolute top-[75%] left-[25%] right-[25%] h-px border-t border-dashed border-[#2A2A2A]"></div>
+            
+            <div class="absolute -mt-3 -ml-3 text-2xl" style="animation: tabletCart 7.5s linear infinite;">
+              <span class="inline-block" style="transform: scaleX(-1);">🛒</span>
+            </div>
+            <div class="absolute -mt-3 -ml-3 text-2xl" style="animation: tabletCam 7.5s linear infinite;">
+              <span style="display:inline-block; animation: desktopCamPulse 7.5s linear infinite;">📸</span>
+              <div class="cam-flash" style="animation: camFlash 7.5s linear infinite;">
+                <div class="cam-flash-rays" style="animation: camFlashRays 7.5s linear infinite;"></div>
+              </div>
+            </div>
+            <div class="absolute -mt-3 -ml-3 text-xl" style="animation: tabletPlane 7.5s linear infinite;">✈️</div>
+          </div>
+          <!-- ANIMATIONS BLOCK END -->
+
+
+
+
 
           {[
-            { num: '01', emoji: '🔍', title: 'Elige tu par', desc: 'Selecciona el modelo y talla desde el catálogo con precios reales de gestión.' },
-            { num: '02', emoji: '💳', title: 'Paga con seguridad', desc: 'El pago se procesa 100% por MercadoPago. Tu pago va directo, nosotros nunca vemos tus datos de tarjeta.' },
+            { num: '01', emoji: '🔍', title: 'Elige tu par', desc: 'Elige el modelo y la talla. El precio que ves es el precio que pagas — sin sorpresas.' },
+            { num: '02', emoji: '💳', title: 'Paga con seguridad', desc: 'Pagas en MercadoPago, igual que en Falabella o Ripley. Nosotros nunca tocamos tu tarjeta.' },
             { num: '03', emoji: '📸', title: 'Aprueba el QC', desc: 'Te enviamos fotos y video HD del par específico. Tú das el ok antes de que salga.' },
-            { num: '04', emoji: '📦', title: 'Lo recibes en casa', desc: 'Envío con seguimiento completo desde origen. Seguro aduanero incluido.' },
+            { num: '04', emoji: '📦', title: 'Lo recibes en casa', desc: 'Parte con seguimiento en tiempo real. Y si aduana lo retiene, te mandamos otro gratis. Sin drama, sin trámites.' },
           ].map((step, i) => (
             <div class="reveal relative z-10 flex flex-col items-center text-center" data-reveal-delay={i * 120}>
               <div class="anim-step-circle w-16 h-16 rounded-full bg-[#0A0A0A] border-2 border-[#16A34A] flex items-center justify-center mb-4 flex-shrink-0 shadow-[0_0_20px_rgba(22,163,74,0.2)]" data-step-idx={i}>
@@ -359,7 +426,7 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
           </div>
           <blockquote class="text-xl md:text-2xl lg:text-3xl font-light text-[#F5F5F5] leading-relaxed italic max-w-3xl mx-auto mb-6" style="font-family: 'Space Grotesk', sans-serif;">
             "Nacimos de la frustración de ver cómo se castiga al consumidor
-            que no tiene un presupuesto de millones."
+            que no tiene un presupuesto de miles."
           </blockquote>
           <cite class="text-[#888888] text-xs uppercase tracking-widest not-italic">
             — Fundadores, AMG Sneakers
@@ -429,28 +496,281 @@ const formattedHeroPrice = new Intl.NumberFormat('es-CL').format(heroProduct?.pr
   </div>
 </Layout>
 
-<!-- Social proof ticker script -->
-<script>
-  function randomBetween(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+<style>
+  /* ═══ DESKTOP ANIMATIONS ═══ */
+  @keyframes desktopCart {
+    0%   { left: 0%;    opacity: 0; }
+    3%   { left: 1%;    opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    30%  { left: 31%;   opacity: 1; }
+    32%  { left: 33.3%; opacity: 0.2; }
+    33%  { left: 33.3%; opacity: 0; }
+    100% { left: 33.3%; opacity: 0; }
+  }
+  /* desktopCam moves position only — no flash/scale mixed in */
+  @keyframes desktopCam {
+    0%   { left: 33.3%; opacity: 0; }
+    33%  { left: 33.3%; opacity: 0; }
+    35%  { left: 34.5%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    64%  { left: 64.5%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    66%  { left: 66.6%; opacity: 0; }
+    100% { left: 66.6%; opacity: 0; }
+  }
+  /* Camera emoji: squash → pop → settle (classic cartoon anticipation arc) */
+  @keyframes desktopCamPulse {
+    0%    { transform: scale(1); }
+    /* Squash / anticipation — camera shrinks just before the flash */
+    38%   { transform: scale(1); }
+    41%   { transform: scale(0.72); }
+    43%   { transform: scale(0.72); }
+    /* POP — flash fires here, camera bursts open */
+    45%   { transform: scale(1.35); }
+    /* Overshoot settle */
+    48%   { transform: scale(1.12); }
+    51%   { transform: scale(1); }
+    100%  { transform: scale(1); }
+  }
+  /* ── Camera flash: soft glow + subtle rays ── */
+  .cam-flash {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+  }
+  /* Soft radial glow core */
+  .cam-flash::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,240,0.5) 40%, rgba(255,255,255,0) 75%);
+    animation: camFlashCore 7.5s linear infinite;
+  }
+  /* Outer rays — 6 soft thin rays, low opacity */
+  .cam-flash-rays {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    transform: translate(-50%, -50%) rotate(0deg);
+    pointer-events: none;
+  }
+  .cam-flash-rays::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      rgba(255,255,255,0.55) 0deg   6deg,
+      rgba(255,255,255,0)    6deg  54deg,
+      rgba(255,255,255,0.55) 54deg  60deg,
+      rgba(255,255,255,0)    60deg 114deg,
+      rgba(255,255,255,0.55) 114deg 120deg,
+      rgba(255,255,255,0)    120deg 174deg,
+      rgba(255,255,255,0.55) 174deg 180deg,
+      rgba(255,255,255,0)    180deg 234deg,
+      rgba(255,255,255,0.55) 234deg 240deg,
+      rgba(255,255,255,0)    240deg 294deg,
+      rgba(255,255,255,0.55) 294deg 300deg,
+      rgba(255,255,255,0)    300deg 360deg
+    );
+    animation: camFlashRays 7.5s linear infinite;
+  }
+  @keyframes camFlashCore {
+    0%    { width: 0;    height: 0;    opacity: 0; }
+    43%   { width: 0;    height: 0;    opacity: 0; }
+    44%   { width: 16px; height: 16px; opacity: 1; }
+    45%   { width: 28px; height: 28px; opacity: 0.85; }
+    48%   { width: 36px; height: 36px; opacity: 0.3; }
+    51%   { width: 40px; height: 40px; opacity: 0; }
+    100%  { width: 0;    height: 0;    opacity: 0; }
+  }
+  @keyframes camFlashRays {
+    0%    { width: 0;    height: 0;    opacity: 0; }
+    43%   { width: 0;    height: 0;    opacity: 0; }
+    45%   { width: 48px; height: 48px; opacity: 0.6; }
+    48%   { width: 60px; height: 60px; opacity: 0.3; }
+    51%   { width: 64px; height: 64px; opacity: 0; }
+    100%  { width: 0;    height: 0;    opacity: 0; }
+  }
+  /* Mobile flash burst (JS-controlled) — same soft style */
+  .m-cam-flash-burst {
+    border-radius: 50%;
+    background: conic-gradient(
+      rgba(255,255,255,0.5) 0deg   6deg,
+      rgba(255,255,255,0)   6deg  54deg,
+      rgba(255,255,255,0.5) 54deg  60deg,
+      rgba(255,255,255,0)   60deg 114deg,
+      rgba(255,255,255,0.5) 114deg 120deg,
+      rgba(255,255,255,0)   120deg 174deg,
+      rgba(255,255,255,0.5) 174deg 180deg,
+      rgba(255,255,255,0)   180deg 234deg,
+      rgba(255,255,255,0.5) 234deg 240deg,
+      rgba(255,255,255,0)   240deg 294deg,
+      rgba(255,255,255,0.5) 294deg 300deg,
+      rgba(255,255,255,0)   300deg 360deg
+    );
+  }
+  @keyframes desktopPlane {
+    0%   { left: 66.6%; opacity: 0; }
+    66%  { left: 66.6%; opacity: 0; }
+    68%  { left: 67.5%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    97%  { left: 99%;   opacity: 1; }
+    100% { left: 100%;  opacity: 0; }
   }
 
-  const tickerEl = document.getElementById('viewer-count');
-  if (tickerEl) {
-    // Initial random value
-    tickerEl.textContent = String(randomBetween(8, 24));
+  /* ═══ TABLET ANIMATIONS ═══ */
+  @keyframes tabletCart {
+    0%   { top: 25%; left: 25%; opacity: 0; }
+    4%   { top: 25%; left: 26%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    31%  { top: 25%; left: 73%; opacity: 1; }
+    33%  { top: 25%; left: 75%; opacity: 0; }
+    100% { top: 25%; left: 75%; opacity: 0; }
+  }
+  @keyframes tabletCam {
+    0%   { top: 25%; left: 75%; opacity: 0; }
+    33%  { top: 25%; left: 75%; opacity: 0; }
+    35%  { top: 27%; left: 73%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    64%  { top: 73%; left: 27%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    66%  { top: 75%; left: 25%; opacity: 0; }
+    100% { top: 75%; left: 25%; opacity: 0; }
+  }
+  @keyframes tabletPlane {
+    0%   { top: 75%; left: 25%; opacity: 0; }
+    66%  { top: 75%; left: 25%; opacity: 0; }
+    68%  { top: 75%; left: 27%; opacity: 1; filter: drop-shadow(0 0 6px rgba(22,163,74,0.5)); }
+    97%  { top: 75%; left: 73%; opacity: 1; }
+    100% { top: 75%; left: 75%; opacity: 0; }
+  }
+</style>
 
-    // Update every 45–90 seconds with slight variation
-    function updateTicker() {
-      const current = parseInt(tickerEl!.textContent || '12', 10);
-      // Drift ±3 from current, clamped to [5, 30]
-      const drift = randomBetween(-3, 3);
-      const next  = Math.max(5, Math.min(30, current + drift));
-      tickerEl!.textContent = String(next);
+<script>
+  /* ─── Mobile S-Curve emoji animation via JS getPointAtLength ─── */
+  function initMobileAnim() {
+    const CYCLE = 7500; // ms — must match CSS animation duration
 
-      // Schedule next update
-      setTimeout(updateTicker, randomBetween(45_000, 90_000));
+    const wrap  = document.getElementById('mobileAnimWrap');
+    const svg   = document.getElementById('mSvg') as SVGSVGElement | null;
+    const path  = document.getElementById('mSvgPath') as SVGPathElement | null;
+    const cart  = document.getElementById('mEmojiCart') as HTMLElement | null;
+    const cam   = document.getElementById('mEmojiCam')  as HTMLElement | null;
+    const plane = document.getElementById('mEmojiPlane') as HTMLElement | null;
+    const flash = document.getElementById('mCamFlash')  as HTMLElement | null;
+
+    if (!wrap || !svg || !path || !cart || !cam || !plane || !flash) return;
+
+    // Only run on mobile (< md = 768px)
+    const mq = window.matchMedia('(max-width: 767px)');
+    if (!mq.matches) return;
+
+    // Make wrap visible by removing overflow:hidden from its grid parent
+    const gridParent = wrap.parentElement;
+    if (gridParent) gridParent.style.overflow = 'visible';
+
+    let totalLen: number;
+    try {
+      totalLen = path.getTotalLength();
+    } catch(e) {
+      return; // SVG not ready
     }
-    setTimeout(updateTicker, randomBetween(45_000, 90_000));
+    if (!totalLen) return;
+
+    let startTime: number | null = null;
+    let rafId: number;
+
+    // Smooth easing helpers
+    function easeInOut(t: number): number {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+    function clamp(v: number, lo: number, hi: number): number {
+      return Math.max(lo, Math.min(hi, v));
+    }
+    function rangeFade(t: number, inStart: number, inEnd: number, outStart: number, outEnd: number): number {
+      if (t < inStart || t > outEnd) return 0;
+      if (t < inEnd)  return clamp((t - inStart)  / (inEnd  - inStart),  0, 1);
+      if (t > outStart) return clamp(1 - (t - outStart) / (outEnd - outStart), 0, 1);
+      return 1;
+    }
+
+    // Convert SVG path point → wrap-relative pixels
+    function pathPxAt(lengthFrac: number): { x: number; y: number } {
+      const ptSvg = path!.getPointAtLength(clamp(lengthFrac, 0, 1) * totalLen);
+      const ctm = svg!.getScreenCTM();
+      if (!ctm) return { x: 0, y: 0 };
+      const screenX = ctm.a * ptSvg.x + ctm.c * ptSvg.y + ctm.e;
+      const screenY = ctm.b * ptSvg.x + ctm.d * ptSvg.y + ctm.f;
+      const wrapRect = wrap!.getBoundingClientRect();
+      return { x: screenX - wrapRect.left, y: screenY - wrapRect.top };
+    }
+
+    function placeEmoji(el: HTMLElement, pos: { x: number; y: number }, scale = 1) {
+      el.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%) scale(${scale})`;
+    }
+
+    function frame(ts: number) {
+      if (!startTime) startTime = ts;
+      const t = ((ts - startTime) % CYCLE) / CYCLE; // 0 → 1
+
+      /* ── CART: 0%→33%, path progress 0→0.33 ── */
+      const cartOpacity = rangeFade(t, 0.02, 0.05, 0.28, 0.33);
+      if (cartOpacity > 0) {
+        const pathFrac = t <= 0.33 ? (t / 0.33) * 0.33 : 0.33;
+        placeEmoji(cart!, pathPxAt(pathFrac));
+      }
+      cart!.style.opacity = String(cartOpacity);
+
+      /* ── CAMERA: 33%→66%, cartoon squash→pop→settle ── */
+      const camOpacity = rangeFade(t, 0.33, 0.37, 0.62, 0.66);
+      if (camOpacity > 0) {
+        const seg = clamp((t - 0.33) / 0.33, 0, 1); // 0→1 within its segment
+        const pathFrac = 0.33 + seg * 0.33;
+        // Squash-pop scale: 1 → shrink → POP → settle
+        let sc = 1;
+        const localT = (t - 0.33) / 0.33; // 0→1 in cam segment
+        if (localT >= 0.15 && localT < 0.27)      sc = 1 - 0.3 * easeInOut((localT - 0.15) / 0.12);  // shrink
+        else if (localT >= 0.27 && localT < 0.36) sc = 0.7 + 0.8 * easeInOut((localT - 0.27) / 0.09); // POP
+        else if (localT >= 0.36 && localT < 0.45) sc = 1.5 - 0.15 * easeInOut((localT - 0.36) / 0.09); // overshoot settle
+        else if (localT >= 0.45 && localT < 0.52) sc = 1.35 - 0.35 * easeInOut((localT - 0.45) / 0.07); // settle to 1
+        placeEmoji(cam!, pathPxAt(pathFrac), sc);
+      }
+      cam!.style.opacity = String(camOpacity);
+
+      /* Flash burst: fires at localT ≈ 0.36 (the POP peak) — cartoon starburst */
+      const flashLocalT = (t - 0.33) / 0.33;
+      let flashScale = 0;
+      let flashOpacity = 0;
+      if (flashLocalT >= 0.27 && flashLocalT < 0.50) {
+        const fp = clamp((flashLocalT - 0.27) / 0.23, 0, 1);
+        // Fast pop then fade
+        flashScale   = fp < 0.22 ? fp / 0.22 : 1 + (fp - 0.22) * 0.6; // 0→1→1.6
+        flashOpacity = fp < 0.22 ? 1 : 1 - (fp - 0.22) / 0.78;
+      }
+      flash!.style.transform = `translate(-50%, -50%) scale(${flashScale}) rotate(${(t * 360).toFixed(0)}deg)`;
+      flash!.style.opacity   = String(camOpacity > 0 ? flashOpacity : 0);
+
+      /* ── PLANE: 66%→100%, path progress 0.66→1 ── */
+      const planeOpacity = rangeFade(t, 0.66, 0.70, 0.94, 0.99);
+      if (planeOpacity > 0) {
+        const seg = clamp((t - 0.66) / 0.34, 0, 1);
+        placeEmoji(plane!, pathPxAt(0.66 + seg * 0.34));
+      }
+      plane!.style.opacity = String(planeOpacity);
+
+      rafId = requestAnimationFrame(frame);
+    }
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  // Run after layout is complete
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileAnim);
+  } else {
+    // Small delay to let the grid lay out and SVG paint
+    requestAnimationFrame(() => requestAnimationFrame(initMobileAnim));
   }
 </script>

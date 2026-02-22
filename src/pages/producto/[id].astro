@@ -148,6 +148,29 @@ const productJsonLd = {
               ))}
             </ul>
           </div>
+
+          <!-- Real QC Photos Section -->
+          <div class="mt-4">
+            <p class="text-[10px] font-bold text-[#F5F5F5] uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span class="text-xl">📸</span> Así revisamos tu par antes de enviarlo →
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+              {[1, 2, 3, 4].map((num) => (
+                <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm aspect-square relative flex flex-col items-center justify-center p-4 text-center overflow-hidden">
+                  <svg class="w-6 h-6 text-[#2A2A2A] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <p class="text-[9px] text-[#555555] uppercase tracking-widest font-semibold">
+                    {num === 1 ? 'Foto en caja' : num === 2 ? 'Etiqueta QC' : num === 3 ? 'Detalles HD' : 'Par embalado'}
+                  </p>
+                  <!-- 
+                    TODO (AMG): Reemplazar por imágenes reales usando la etiqueta img. 
+                    Ejemplo: <img src={`/images/qc-real-${num}.jpg`} class="absolute inset-0 w-full h-full object-cover" />
+                  -->
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <!-- ── RIGHT: Product details ── -->
@@ -226,16 +249,15 @@ const productJsonLd = {
             </div>
           </div>
 
-          <!-- Stars — honest zero review state -->
-          <div class="flex items-center gap-2">
-            <div class="flex gap-0.5">
-              {[1,2,3,4,5].map(() => (
-                <svg class="w-3.5 h-3.5 text-[#2A2A2A]" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-              ))}
-            </div>
-            <span class="text-[10px] text-[#888888]">Aún no hay reseñas — Sé el primero</span>
+          <!-- Honest scarcity / Availability -->
+          <div class="flex items-center gap-2 bg-[#111111] border border-[#2A2A2A] rounded-sm py-2 px-3 inline-flex">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#16A34A] opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-[#16A34A]"></span>
+            </span>
+            <p class="text-[10.5px] font-semibold text-[#888888] uppercase tracking-wider">
+              Disponibilidad sujeta a fábrica — Gestión individual
+            </p>
           </div>
 
           <div class="border-t border-[#2A2A2A]"></div>
@@ -260,7 +282,7 @@ const productJsonLd = {
           </div>
 
           <!-- Size Selector -->
-          <div class="space-y-3">
+          <div class="space-y-3" id="size-section">
             <div class="flex justify-between items-center">
               <p class="text-[10px] font-bold text-[#888888] uppercase tracking-widest">Seleccionar Talla (EU)</p>
               <button
@@ -270,19 +292,69 @@ const productJsonLd = {
                 Guía de tallas
               </button>
             </div>
+            
             <div class="grid grid-cols-5 gap-2">
-              {product.tallas.map((talla: string) => (
-                <button
-                  data-size={talla}
-                  class="s-selector py-3 rounded-sm text-xs font-semibold border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#F5F5F5] hover:text-[#F5F5F5] transition-all duration-200"
-                >
-                  {talla}
-                </button>
-              ))}
+              {product.tallas.map((talla: string) => {
+                const cmMap: Record<string, string> = {
+                  '36': '22.5cm', '37.5': '23.5cm', '38': '24cm', '39': '24.5cm',
+                  '40': '25cm', '41': '26cm', '42': '26.5cm', '42.5': '27cm',
+                  '43': '27.5cm', '44': '28cm', '44.5': '28.5cm', '45': '29cm',
+                  '46': '30cm', '47.5': '31cm'
+                };
+                const cm = cmMap[talla] || '';
+                return (
+                  <button
+                    data-size={talla}
+                    class="s-selector py-2 flex flex-col items-center justify-center rounded-sm border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#F5F5F5] hover:text-[#F5F5F5] transition-all duration-200"
+                  >
+                    <span class="text-xs font-semibold">{talla}</span>
+                    <span class="text-[9px] opacity-70 mt-0.5">{cm || '-'}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <!-- Error message (hidden by default) -->
+            <div id="size-error-msg" class="hidden bg-red-900/20 border border-red-500/50 text-red-400 text-xs p-3 rounded-sm">
+              ⚠️ Selecciona tu talla para continuar
             </div>
 
             <!-- Size quiz widget -->
             <SizeQuiz />
+
+            <p class="text-[10px] text-[#888888] leading-relaxed mt-2 bg-[#1A1A1A] p-2 rounded-sm border border-[#2A2A2A]">
+              ⚠️ <strong class="text-[#F5F5F5]">Importante:</strong> Las tallas corresponden exactamente a las medidas oficiales de Nike/Jordan. Si normalmente usas 42 EU, pide el 42.
+            </p>
+          </div>
+
+          <!-- Trust blocks moved above purchase buttons -->
+          <TrustPaymentBlock />
+
+          <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-4 space-y-3">
+            {[
+              { icon: '🛡️', label: 'Pago procesado 100% por MercadoPago' },
+              { icon: '📸', label: 'Recibirás QC visual antes del envío' },
+              { icon: '⚖️', label: 'Seguro de reposición aduanero incluido' },
+            ].map(t => (
+              <div class="flex items-center gap-3">
+                <span class="text-base">{t.icon}</span>
+                <p class="text-xs text-[#888888]">{t.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-4">
+            <details class="group">
+              <summary class="flex justify-between items-center font-bold text-xs text-[#F5F5F5] uppercase tracking-wider cursor-pointer list-none">
+                <span class="flex items-center gap-2">⚖️ ¿Y si aduana retiene el paquete?</span>
+                <span class="transition group-open:rotate-180">
+                  <svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="20"><path d="M6 9l6 6 6-6"></path></svg>
+                </span>
+              </summary>
+              <p class="text-[#888888] text-xs mt-3 leading-relaxed">
+                <strong class="text-[#16A34A]">Cubierto.</strong> Te mandamos otro sin costo ni trámites de tu parte. El seguro de reposición cubre el 100% del envío.
+              </p>
+            </details>
           </div>
 
           <!-- Add to Cart / Buy Now -->
@@ -316,23 +388,6 @@ const productJsonLd = {
             </svg>
             ¿Tienes dudas? Pregúntanos antes de comprar →
           </a>
-
-          <!-- Payment protection block -->
-          <TrustPaymentBlock />
-
-          <!-- Trust signals -->
-          <div class="bg-[#111111] border border-[#2A2A2A] rounded-sm p-4 space-y-3">
-            {[
-              { icon: '🛡️', label: 'Pago procesado 100% por MercadoPago' },
-              { icon: '📸', label: 'Recibirás QC visual antes del envío' },
-              { icon: '⚖️', label: 'Seguro de reposición aduanero incluido' },
-            ].map(t => (
-              <div class="flex items-center gap-3">
-                <span class="text-base">{t.icon}</span>
-                <p class="text-xs text-[#888888]">{t.label}</p>
-              </div>
-            ))}
-          </div>
 
           <!-- Tags -->
           {product.tags.length > 0 && (
@@ -466,9 +521,9 @@ const productJsonLd = {
     btn.addEventListener('click', () => {
       selectedSize = (btn as HTMLElement).dataset.size || null;
       sButtons.forEach(b => {
-        b.className = 's-selector py-3 rounded-sm text-xs font-semibold border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#F5F5F5] hover:text-[#F5F5F5] transition-all duration-200';
+        b.className = 's-selector py-2 flex flex-col items-center justify-center rounded-sm border border-[#2A2A2A] bg-transparent text-[#888888] hover:border-[#F5F5F5] hover:text-[#F5F5F5] transition-all duration-200';
       });
-      btn.className = 's-selector py-3 rounded-sm text-xs font-semibold border-2 border-[#16A34A] bg-[#16A34A] text-black transition-all duration-200';
+      btn.className = 's-selector py-2 flex flex-col items-center justify-center rounded-sm border-2 border-[#16A34A] bg-[#16A34A] text-black transition-all duration-200';
       if (stickySize && selectedSize) stickySize.textContent = selectedSize;
     });
   });
@@ -477,10 +532,18 @@ const productJsonLd = {
   if (stickyBar && addCartBtn) {
     const observer = new IntersectionObserver(
       ([entry]) => {
+        const wpBtn = document.getElementById('whatsapp-float');
         if (!entry.isIntersecting) {
           stickyBar.style.transform = 'translateY(0)';
+          if (wpBtn && window.innerWidth < 1024) {
+            wpBtn.style.transform = 'translateY(-70px)';
+            wpBtn.style.transition = 'transform 0.3s ease-out';
+          }
         } else {
           stickyBar.style.transform = 'translateY(100%)';
+          if (wpBtn) {
+            wpBtn.style.transform = 'translateY(0)';
+          }
         }
       },
       { threshold: 0 }
@@ -509,7 +572,17 @@ const productJsonLd = {
   // Purchase handler
   function handlePurchase(redirect: boolean = false) {
     if (!selectedSize) {
-      alert('Por favor selecciona tu talla antes de continuar.');
+      const sizeError = document.getElementById('size-error-msg');
+      const sizeSection = document.getElementById('size-section');
+      if (sizeError && sizeSection) {
+        sizeError.classList.remove('hidden');
+        sizeError.classList.add('animate-[shake_0.5s_ease-in-out]');
+        sizeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          sizeError.classList.add('hidden');
+          sizeError.classList.remove('animate-[shake_0.5s_ease-in-out]');
+        }, 3000);
+      }
       return;
     }
     const priceToPay = prices[selectedQuality];
@@ -535,5 +608,6 @@ const productJsonLd = {
   document.getElementById('add-to-cart-action')?.addEventListener('click', () => handlePurchase(false));
   document.getElementById('buy-now-action')?.addEventListener('click', () => handlePurchase(true));
   document.getElementById('sticky-add-to-cart')?.addEventListener('click', () => handlePurchase(false));
+
 </script>
 </Layout>

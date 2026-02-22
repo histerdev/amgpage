@@ -212,10 +212,12 @@ select {
   transition: all 200ms ease;
 }
 
-.amg-card:hover {
-  border-color: var(--color-green);
-  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.12);
-  transform: translateY(-4px);
+@media (hover: hover) and (pointer: fine) {
+  .amg-card:hover {
+    border-color: var(--color-green);
+    box-shadow: 0 12px 32px rgba(34, 197, 94, 0.12);
+    transform: translateY(-4px);
+  }
 }
 
 /* ── Buttons ── */

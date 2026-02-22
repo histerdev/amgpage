@@ -6,7 +6,11 @@ export const prerender = false;
 const searchParams = new URL(Astro.request.url).searchParams;
 const paymentId       = searchParams.get('payment_id');
 const externalReference = searchParams.get('external_reference');
-const status          = searchParams.get('status') || 'approved';
+// SECURITY FIX: Whitelist allowed status values to prevent phishing via URL manipulation
+// e.g. ?status=HACKED would otherwise display "HACKED" as the payment status
+const rawStatus = searchParams.get('status') || 'approved';
+const ALLOWED_STATUSES = new Set(['approved', 'pending', 'rejected', 'in_process', 'cancelled']);
+const status = ALLOWED_STATUSES.has(rawStatus) ? rawStatus : 'approved';
 const whatsappNumber  = import.meta.env.PUBLIC_WHATSAPP_NUMBER || '56912345678';
 const whatsappMsg     = encodeURIComponent(`Hola AMG, quiero seguir mi pedido ${externalReference || ''}`);
 ---
@@ -158,6 +162,14 @@ const whatsappMsg     = encodeURIComponent(`Hola AMG, quiero seguir mi pedido ${
 </style>
 
 <script>
+  import { cartItems } from '../store/cartStore';
+
+  // Limpiar el carrito solo cuando el pago es exitoso
+  if (typeof window !== 'undefined') {
+    cartItems.set([]);
+    localStorage.removeItem('amg-cart');
+  }
+
   let seconds = 10;
   const countdownEl = document.getElementById('countdown');
   const interval = setInterval(() => {

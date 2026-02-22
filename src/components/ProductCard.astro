@@ -6,9 +6,10 @@ interface Props {
   image: string | string[];
   tags: string[];
   tallas?: string[];
+  eager?: boolean; // pass true for first ~8 cards (LCP)
 }
 
-const { id, name, prices, image, tags = [] } = Astro.props;
+const { id, name, prices, image, tags = [], eager = false } = Astro.props;
 const productUrl = `/producto/${id}`;
 const mainImage = Array.isArray(image) ? image[0] : image;
 
@@ -35,10 +36,10 @@ const hasPK = prices.PK && prices.PK > 0;
     </div>
   )}
 
-  <!-- Tags (top left) -->
+  <!-- Tags (top left) — removed backdrop-blur-sm (GPU-heavy on mobile) -->
   <div class="absolute top-3 left-3 z-20 flex flex-wrap gap-1 max-w-[65%]">
     {tags.slice(0, 2).map((t) => (
-      <span class="bg-[#0A0A0A]/80 backdrop-blur-sm text-[#888888] text-[9px] font-semibold uppercase px-2 py-0.5 rounded-sm tracking-wider">
+      <span class="bg-[#0A0A0A]/80 text-[#888888] text-[9px] font-semibold uppercase px-2 py-0.5 rounded-sm tracking-wider">
         {t}
       </span>
     ))}
@@ -46,7 +47,7 @@ const hasPK = prices.PK && prices.PK > 0;
 
   <!-- ❤ Wishlist heart button -->
   <button
-    class="wishlist-heart-btn absolute bottom-[calc(100%-48px)] right-3 z-30 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-[#2A2A2A] flex items-center justify-center transition-all duration-200 hover:scale-110 hover:border-red-400/60"
+    class="wishlist-heart-btn absolute bottom-[calc(100%-48px)] right-3 z-30 w-8 h-8 rounded-full bg-black/60 border border-[#2A2A2A] flex items-center justify-center transition-all duration-200 hover:scale-110 hover:border-red-400/60"
     data-product-id={id}
     data-product-name={name}
     data-product-image={mainImage}
@@ -72,7 +73,9 @@ const hasPK = prices.PK && prices.PK > 0;
       src={mainImage}
       alt={`${name} — AMG Sneakers Chile`}
       class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.04] z-10"
-      loading="lazy"
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+      decoding="async"
       width={640}
       height={640}
     />
@@ -80,9 +83,9 @@ const hasPK = prices.PK && prices.PK > 0;
 
   <!-- Details -->
   <div class="p-5 flex flex-col flex-grow border-t border-[#2A2A2A]">
-    <!-- Availability -->
+    <!-- Availability — static dot on mobile (no pulse animation for 70+ elements) -->
     <div class="flex items-center gap-1.5 mb-2">
-      <span class="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse flex-shrink-0"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-[#16A34A] flex-shrink-0 md:animate-pulse"></span>
       <span class="text-[9px] font-semibold text-[#888888] uppercase tracking-widest">Disponible</span>
     </div>
 
@@ -114,84 +117,3 @@ const hasPK = prices.PK && prices.PK > 0;
     </div>
   </div>
 </article>
-
-<script>
-  import { wishlist, toggleWishlist, isWishlisted } from '../store/wishlistStore';
-
-  function syncAllHearts() {
-    document.querySelectorAll<HTMLElement>('.wishlist-heart-btn').forEach(btn => {
-      const id = btn.dataset.productId!;
-      const saved = isWishlisted(id);
-      btn.querySelector('.heart-outline')?.classList.toggle('hidden', saved);
-      btn.querySelector('.heart-filled')?.classList.toggle('hidden', !saved);
-    });
-  }
-
-  // Initial sync
-  syncAllHearts();
-
-  // Re-sync when wishlist changes
-  wishlist.subscribe(() => syncAllHearts());
-  window.addEventListener('wishlist-change', () => syncAllHearts());
-
-  // Bind clicks — use event delegation on document since cards may be re-rendered
-  document.addEventListener('click', async (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLElement>('.wishlist-heart-btn');
-    if (!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const id    = btn.dataset.productId!;
-    const name  = btn.dataset.productName!;
-    const image = btn.dataset.productImage!;
-    const pricePK = Number(btn.dataset.pricePk);
-    const priceG5 = Number(btn.dataset.priceG5);
-
-    // Optimistic toggle animation
-    const outline = btn.querySelector('.heart-outline') as SVGElement;
-    const filled  = btn.querySelector('.heart-filled') as SVGElement;
-    const currentlySaved = !outline.classList.contains('hidden') === false;
-
-    const wasSaved = isWishlisted(id);
-
-    // Animate
-    btn.style.transform = 'scale(1.25)';
-    setTimeout(() => { btn.style.transform = ''; }, 200);
-
-    const nowSaved = await toggleWishlist({ id, name, image, pricePK, priceG5, savedAt: Date.now() });
-
-    outline?.classList.toggle('hidden', nowSaved);
-    filled?.classList.toggle('hidden', !nowSaved);
-
-    // Show micro-toast
-    showWishlistToast(nowSaved, name);
-
-    window.dispatchEvent(new CustomEvent('wishlist-change', { detail: { id, saved: nowSaved } }));
-  });
-
-  function showWishlistToast(saved: boolean, name: string) {
-    const existing = document.getElementById('wl-toast');
-    existing?.remove();
-
-    const toast = document.createElement('div');
-    toast.id = 'wl-toast';
-    toast.className = 'fixed bottom-[80px] left-4 z-[200] flex items-center gap-2.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-sm px-4 py-3 shadow-2xl max-w-[280px]';
-    toast.style.cssText = 'opacity:0; transform:translateX(-16px); transition: opacity 0.3s ease, transform 0.3s ease;';
-
-    const shortName = name.length > 28 ? name.slice(0, 28) + '…' : name;
-    toast.innerHTML = saved
-      ? `<svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div><p class="text-[11px] text-[#F5F5F5] font-semibold">${shortName}</p><a href="/guardados" class="text-[10px] text-[#16A34A] hover:underline">Ver guardados →</a></div>`
-      : `<svg class="w-4 h-4 text-[#888888] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><p class="text-[11px] text-[#888888]">Quitado de guardados</p>`;
-
-    document.body.appendChild(toast);
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateX(0)';
-    }));
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(-16px)';
-      setTimeout(() => toast.remove(), 350);
-    }, 3500);
-  }
-</script>

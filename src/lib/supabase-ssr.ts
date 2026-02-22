@@ -32,7 +32,10 @@ export function createSupabaseServerClient(
               ...options,
               httpOnly: true,
               secure: import.meta.env.PROD,
-              sameSite: "lax",
+              // SECURITY FIX: 'strict' prevents auth cookies from being sent on ANY
+              // cross-origin navigation, eliminating all remaining CSRF attack vectors.
+              // Users following external links will get a clean /login redirect.
+              sameSite: "strict",
               path: "/",
             }),
           );

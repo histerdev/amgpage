@@ -13,6 +13,17 @@ const mpClient = new MercadoPagoConfig({
 
 const MP_WEBHOOK_SECRET = import.meta.env.MP_WEBHOOK_SECRET;
 
+// SECURITY FIX: Fail loudly at startup if webhook secret is missing.
+// Without this, validateMercadoPagoSignature silently rejects ALL webhook events,
+// causing every payment to stay in "Pendiente" status indefinitely.
+if (!MP_WEBHOOK_SECRET) {
+  throw new Error(
+    "[CRITICAL] MP_WEBHOOK_SECRET environment variable is not set. " +
+    "All MercadoPago webhook events will be rejected and payments will never be confirmed. " +
+    "Set this variable in your .env file and in Vercel environment settings."
+  );
+}
+
 // ✅ Admin client para el webhook (no hay sesión de usuario)
 const supabaseAdmin = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL!,
@@ -112,7 +123,7 @@ function validateMercadoPagoSignature(
 
     // SECURITY FIX: timingSafeEqual throws if buffers differ in byte length.
     // Return false immediately on length mismatch to avoid crash-path bypass.
-    const sigBuf  = Buffer.from(signature);
+    const sigBuf = Buffer.from(signature);
     const hashBuf = Buffer.from(hash);
     if (sigBuf.length !== hashBuf.length) return false;
 
